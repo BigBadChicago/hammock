@@ -11,20 +11,24 @@ using Hammock.Model;
 using Hammock.Web.Attributes;
 using Hammock.Web.Query;
 
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
+
 namespace Hammock.Web
 {
     public abstract partial class WebQuery
     {
         private static readonly object _sync = new object();
         
-        public IWebQueryInfo Info { get; protected set; }
-        public string UserAgent { get; protected internal set; }
-        public IDictionary<string, string> Headers { get; protected set; }
-        public WebParameterCollection Parameters { get; protected set; }
-        protected internal WebEntity Entity { get; set; }
+        public virtual IWebQueryInfo Info { get; protected set; }
+        public virtual string UserAgent { get; protected internal set; }
+        public virtual IDictionary<string, string> Headers { get; protected set; }
+        public virtual WebParameterCollection Parameters { get; protected set; }
+        protected virtual internal WebEntity Entity { get; set; }
 
         private WebResponse _webResponse;
-        public WebResponse WebResponse
+        public virtual WebResponse WebResponse
         {
             get
             {
@@ -42,20 +46,20 @@ namespace Hammock.Web
             }
         }
 
-        public WebMethod Method { get; set; }
-        public string Proxy { get; set; }
-        public bool MockWebQueryClient { get; set; }
-        public string AuthorizationHeader { get; protected set; }
+        public virtual WebMethod Method { get; set; }
+        public virtual string Proxy { get; set; }
+        public virtual bool MockWebQueryClient { get; set; }
+        public virtual string AuthorizationHeader { get; protected set; }
 
-        public IEnumerable<IMockable> MockGraph { get; set; }
-        public bool UseCompression { get; set; }
-        public bool UseTransparentProxy { get; set; }
-        public TimeSpan? RequestTimeout { get; set; }
+        public virtual IEnumerable<IMockable> MockGraph { get; set; }
+        public DecompressionMethods DecompressionMethods { get; set; }
+        public virtual bool UseTransparentProxy { get; set; }
+        public virtual TimeSpan? RequestTimeout { get; set; }
 
-        public WebQueryResult Result { get; private set; }
+        public virtual WebQueryResult Result { get; private set; }
 
-        public bool KeepAlive { get; set; }
-        public string SourceUrl { get; set; }
+        public virtual bool KeepAlive { get; set; }
+        public virtual string SourceUrl { get; set; }
 
         protected WebQuery(IWebQueryInfo info)
         {
@@ -210,13 +214,24 @@ namespace Hammock.Web
 #endif
             }
 
-            if (UseCompression)
+            if (DecompressionMethods != DecompressionMethods.None)
             {
 #if !SILVERLIGHT
-                request.AutomaticDecompression = DecompressionMethods.GZip;
+                request.AutomaticDecompression = DecompressionMethods;
 #else
-    // todo: will need decompression on response
-                request.Accept = "gzip,deflate";
+                // TODO: Implement decompression on HttpWebResponse
+                switch(DecompressionMethods)
+                {
+                    case DecompressionMethods.GZip:
+                        request.Accept = "gzip";
+                        break;
+                    case DecompressionMethods.Deflate:
+                        request.Accept = "deflate";
+                        break;
+                    case DecompressionMethods.GZip | DecompressionMethods.Deflate:
+                        request.Accept = "gzip,deflate";
+                        break;
+                }
 #endif
             }
 #if !SILVERLIGHT
