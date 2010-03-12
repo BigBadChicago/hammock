@@ -1,0 +1,60 @@
+using Hammock.OAuth;
+using Hammock.Web.Attributes;
+
+namespace Hammock.Web.Query.OAuth
+{
+    /// <summary>
+    /// Mandatory and some optional oAuth parameters travelling with the request.
+    /// <seealso cref="http://www.hueniverse.com/hueniverse/2008/10/beginners-gui-1.html"/>
+    /// <seealso cref="http://tools.ietf.org/html/draft-dehora-farrell-oauth-accesstoken-creds-00#section-4"/>
+    /// </summary>
+    public class OAuthWebQueryInfo : IWebQueryInfo
+    {
+        [Parameter("oauth_consumer_key")]
+        public string ConsumerKey { get; set; }
+
+        [Parameter("oauth_token")]
+        public string Token { get; set; }
+
+        [Parameter("oauth_nonce")]
+        public string Nonce { get; set; }
+
+        [Parameter("oauth_timestamp")]
+        public string Timestamp { get; set; }
+
+        [Parameter("oauth_signature_method")]
+        public string SignatureMethod { get; set; }
+
+        [Parameter("oauth_signature")]
+        public string Signature { get; set; }
+
+        [Parameter("oauth_version")]
+        public string Version { get; set; }
+
+        // Optional parameters 
+
+        [Parameter("oauth_callback")]
+        public string Callback { get; set; }
+
+        [Parameter("oauth_verifier")]
+        public string Verifier { get; set; }
+
+        [Parameter("x_auth_mode")]
+        public string ClientMode { get; set; }
+
+        [Parameter("x_auth_username")]
+        public string ClientUsername { get; set; }
+
+        [Parameter("x_auth_password")]
+        public string ClientPassword { get; set; }
+
+        [UserAgent]
+        public string UserAgent { get; set; }
+
+        public WebMethod WebMethod { get; set; }
+        public OAuthParameterHandling ParameterHandling { get; set; }
+
+        internal string ConsumerSecret { get; set; }
+        internal string TokenSecret { get; set; }
+    }
+}

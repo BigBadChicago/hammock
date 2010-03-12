@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock", "Hammock\Hammock.csproj", "{6679078A-C585-4CB6-96E9-908DBDAA2716}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Tests", "Hammock.Tests\Hammock.Tests.csproj", "{60085D62-A073-49CB-B026-B4D4C15ECF61}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{6770840B-AE74-4B79-B884-36DF77ACE3FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoNames", "GeoNames\GeoNames.csproj", "{487C32B0-51DC-489B-824C-C87109766385}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoNames.Tests", "GeoNames.Tests\GeoNames.Tests.csproj", "{16B0A740-F69B-4B20-9C82-ADA933D2B41F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Silverlight", "Hammock.Silverlight\Hammock.Silverlight.csproj", "{E0461346-CB62-489E-9893-CFEA249F8380}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Compact", "Hammock.Compact\Hammock.Compact.csproj", "{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6679078A-C585-4CB6-96E9-908DBDAA2716}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6679078A-C585-4CB6-96E9-908DBDAA2716}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6679078A-C585-4CB6-96E9-908DBDAA2716}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6679078A-C585-4CB6-96E9-908DBDAA2716}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60085D62-A073-49CB-B026-B4D4C15ECF61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60085D62-A073-49CB-B026-B4D4C15ECF61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60085D62-A073-49CB-B026-B4D4C15ECF61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60085D62-A073-49CB-B026-B4D4C15ECF61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{487C32B0-51DC-489B-824C-C87109766385}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{487C32B0-51DC-489B-824C-C87109766385}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{487C32B0-51DC-489B-824C-C87109766385}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{487C32B0-51DC-489B-824C-C87109766385}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16B0A740-F69B-4B20-9C82-ADA933D2B41F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16B0A740-F69B-4B20-9C82-ADA933D2B41F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16B0A740-F69B-4B20-9C82-ADA933D2B41F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16B0A740-F69B-4B20-9C82-ADA933D2B41F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0461346-CB62-489E-9893-CFEA249F8380}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0461346-CB62-489E-9893-CFEA249F8380}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0461346-CB62-489E-9893-CFEA249F8380}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0461346-CB62-489E-9893-CFEA249F8380}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{487C32B0-51DC-489B-824C-C87109766385} = {6770840B-AE74-4B79-B884-36DF77ACE3FB}
+		{16B0A740-F69B-4B20-9C82-ADA933D2B41F} = {6770840B-AE74-4B79-B884-36DF77ACE3FB}
+	EndGlobalSection
+EndGlobal

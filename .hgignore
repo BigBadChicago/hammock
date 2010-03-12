@@ -1,0 +1,11 @@
+# regexp syntax.
+syntax: glob
+*.pdb
+*.suo
+*.user
+
+syntax: regexp
+/obj/
+/bin/
+/Bin/
+/_ReSharper.Hammock/

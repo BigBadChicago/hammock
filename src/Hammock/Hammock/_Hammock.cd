@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Hammock.RestClient">
+    <Position X="6" Y="2.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAQBAAAAAAAJIAAABEAgAAAAAAAAFAAAAA=</HashCode>
+      <FileName>RestClient.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Hammock.RestRequest">
+    <Position X="3.75" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAABAIAAAAAAAgAAAAgAAAAAAAAEAAAAAA=</HashCode>
+      <FileName>RestRequest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Hammock.RestResponse">
+    <Position X="9.5" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAgBAAAAAAAAAAAAIAAAAAAAAIAAQAAAAAAA=</HashCode>
+      <FileName>RestResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Hammock.Serialization.HammockDataContractJsonSerializer" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAChACAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Serialization\HammockDataContractJsonSerializer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Hammock.Serialization.HammockDataContractSerializer" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAAAChACAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Serialization\HammockDataContractSerializer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Hammock.Serialization.HammockJavaScriptSerializer" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACBACAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Serialization\HammockJavaScriptSerializer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Hammock.Serialization.HammockJsonDotNetSerializer" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACBACAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Serialization\HammockJsonDotNetSerializer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Hammock.Serialization.HammockXmlSerializer" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAAAChACAAAAAAQAABAAAA=</HashCode>
+      <FileName>Serialization\HammockXmlSerializer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Hammock.IRestClient">
+    <Position X="6" Y="1" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRestClient.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Hammock.Serialization.ISerializer">
+    <Position X="3.75" Y="6.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAQAAAAACA=</HashCode>
+      <FileName>Serialization\ISerializer.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Hammock.Serialization.IDeserializer">
+    <Position X="3.75" Y="8.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Serialization\IDeserializer.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,383 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hammock.Compact</RootNamespace>
+    <AssemblyName>Hammock.Compact</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
+    <OSVersion>4.20</OSVersion>
+    <DeployDirSuffix>Hammock.Compact</DeployDirSuffix>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <NativePlatformName>Pocket PC 2003</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PocketPC,Smartphone,NETCF</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json.Compact, Version=3.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Newtonsoft.Json.Compact.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Hammock\Caching\CacheFactory.cs">
+      <Link>Caching\CacheFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Caching\IClientCache.cs">
+      <Link>Caching\IClientCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Caching\SimpleCache.cs">
+      <Link>Caching\SimpleCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\CollectionExtensions.cs">
+      <Link>Extensions\CollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\FileExtensions.cs">
+      <Link>Extensions\FileExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\FormatExtensions.cs">
+      <Link>Extensions\FormatExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\JsonExtensions.cs">
+      <Link>Extensions\JsonExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\MathExtensions.cs">
+      <Link>Extensions\MathExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\OAuthExtensions.cs">
+      <Link>Extensions\OAuthExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\ObjectExtensions.cs">
+      <Link>Extensions\ObjectExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\ReflectionExtensions.cs">
+      <Link>Extensions\ReflectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\RegexExtensions.cs">
+      <Link>Extensions\RegexExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\SecurityExtensions.cs">
+      <Link>Extensions\SecurityExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\SerializationExtensions.cs">
+      <Link>Extensions\SerializationExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\SpecificationExtensions.cs">
+      <Link>Extensions\SpecificationExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\StringExtensions.cs">
+      <Link>Extensions\StringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\TimeExtensions.cs">
+      <Link>Extensions\TimeExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\WebExtensions.cs">
+      <Link>Extensions\WebExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Extensions\XmlExtensions.cs">
+      <Link>Extensions\XmlExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\IRestClient.cs">
+      <Link>IRestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Model\IMockable.cs">
+      <Link>Model\IMockable.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Model\OAuthToken.cs">
+      <Link>Model\OAuthToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Model\PropertyChangedBase.cs">
+      <Link>Model\PropertyChangedBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\OAuth\OAuthParameterHandling.cs">
+      <Link>OAuth\OAuthParameterHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\OAuth\OAuthSignatureMethod.cs">
+      <Link>OAuth\OAuthSignatureMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\OAuth\OAuthTools.cs">
+      <Link>OAuth\OAuthTools.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\RestBase.cs">
+      <Link>RestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\RestCallback.cs">
+      <Link>RestCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\RestClient.cs">
+      <Link>RestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\RestRequest.cs">
+      <Link>RestRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\RestResponse.cs">
+      <Link>RestResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Serialization\HammockJsonDotNetSerializer.cs">
+      <Link>Serialization\HammockJsonDotNetSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Serialization\HammockXmlSerializer.cs">
+      <Link>Serialization\HammockXmlSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Serialization\IDeserializer.cs">
+      <Link>Serialization\IDeserializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Serialization\ISerializer.cs">
+      <Link>Serialization\ISerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Serialization\Utf8Serializer.cs">
+      <Link>Serialization\Utf8Serializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Specifications\AndSpecification.cs">
+      <Link>Specifications\AndSpecification.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Specifications\CompositeSpecificationBase.cs">
+      <Link>Specifications\CompositeSpecificationBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Specifications\HammockSpecification.cs">
+      <Link>Specifications\HammockSpecification.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Specifications\ISpecification.cs">
+      <Link>Specifications\ISpecification.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Specifications\NotSpecification.cs">
+      <Link>Specifications\NotSpecification.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Specifications\OrSpecification.cs">
+      <Link>Specifications\OrSpecification.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Tasks\IRateLimitingRule.cs">
+      <Link>Tasks\IRateLimitingRule.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Tasks\ITimedTask.cs">
+      <Link>Tasks\ITimedTask.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Tasks\RateLimitingRule.cs">
+      <Link>Tasks\RateLimitingRule.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Tasks\RateLimitingType.cs">
+      <Link>Tasks\RateLimitingType.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Tasks\TimedTask.cs">
+      <Link>Tasks\TimedTask.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Tasks\TimedTaskCollection.cs">
+      <Link>Tasks\TimedTaskCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\BooleanToIntegerAttribute.cs">
+      <Link>Web\Attributes\BooleanToIntegerAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\DateTimeFormatAttribute.cs">
+      <Link>Web\Attributes\DateTimeFormatAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\HeaderAttribute.cs">
+      <Link>Web\Attributes\HeaderAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\NamedAttribute.cs">
+      <Link>Web\Attributes\NamedAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\ParameterAttribute.cs">
+      <Link>Web\Attributes\ParameterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\RequiredAttribute.cs">
+      <Link>Web\Attributes\RequiredAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\SpecificationAttribute.cs">
+      <Link>Web\Attributes\SpecificationAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\UserAgentAttribute.cs">
+      <Link>Web\Attributes\UserAgentAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Attributes\WebEntityAttribute.cs">
+      <Link>Web\Attributes\WebEntityAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\BasicAuthWebQuery.cs">
+      <Link>Web\BasicAuthWebQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\GetOrDelete.cs">
+      <Link>Web\GetOrDelete.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\HttpPostParameter.cs">
+      <Link>Web\HttpPostParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\HttpPostParameterType.cs">
+      <Link>Web\HttpPostParameterType.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\IWebQueryClient.cs">
+      <Link>Web\IWebQueryClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\IWebQueryInfo.cs">
+      <Link>Web\IWebQueryInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\IWebResponse.cs">
+      <Link>Web\Mocks\IWebResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\WebQueryClientMock.cs">
+      <Link>Web\Mocks\WebQueryClientMock.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\WebRequestMock.cs">
+      <Link>Web\Mocks\WebRequestMock.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\WebResponseMock.cs">
+      <Link>Web\Mocks\WebResponseMock.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\OAuth\OAuthWebQuery.cs">
+      <Link>Web\OAuth\OAuthWebQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\OAuth\OAuthWebQueryInfo.cs">
+      <Link>Web\OAuth\OAuthWebQueryInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\OAuth\OAuthWorkflow.Base.cs">
+      <Link>Web\OAuth\OAuthWorkflow.Base.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\OAuth\OAuthWorkflow.Methods.cs">
+      <Link>Web\OAuth\OAuthWorkflow.Methods.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\OAuth\OAuthWorkflow.Urls.cs">
+      <Link>Web\OAuth\OAuthWorkflow.Urls.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Pair.cs">
+      <Link>Web\Pair.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\PostOrPut.cs">
+      <Link>Web\PostOrPut.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Triplet.cs">
+      <Link>Web\Triplet.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebCallback.cs">
+      <Link>Web\WebCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebCredentials.cs">
+      <Link>Web\WebCredentials.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebEntity.cs">
+      <Link>Web\WebEntity.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebFormat.cs">
+      <Link>Web\WebFormat.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebMethod.cs">
+      <Link>Web\WebMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebParameter.cs">
+      <Link>Web\WebParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebParameterCollection.cs">
+      <Link>Web\WebParameterCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebQuery.Async.cs">
+      <Link>Web\WebQuery.Async.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebQuery.cs">
+      <Link>Web\WebQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebQueryRequestEventArgs.cs">
+      <Link>Web\WebQueryRequestEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebQueryResponseEventArgs.cs">
+      <Link>Web\WebQueryResponseEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebQueryResult.cs">
+      <Link>Web\WebQueryResult.cs</Link>
+    </Compile>
+    <Compile Include="Authentication\BasicAuthCredentials.cs" />
+    <Compile Include="Authentication\IWebCredentials.cs" />
+    <Compile Include="Authentication\OAuthCredentials.cs" />
+    <Compile Include="Authentication\OAuthType.cs" />
+    <Compile Include="Mono\CryptoTools.cs" />
+    <Compile Include="Mono\DownloadDataCompletedEventArgs.cs" />
+    <Compile Include="Mono\DownloadDataCompletedEventHandler.cs" />
+    <Compile Include="Mono\DownloadProgressChangedEventArgs.cs" />
+    <Compile Include="Mono\DownloadProgressChangedEventHandler.cs" />
+    <Compile Include="Mono\DownloadStringCompletedEventArgs.cs" />
+    <Compile Include="Mono\DownloadStringCompletedEventHandler.cs" />
+    <Compile Include="Mono\HmacAlgorithm.cs" />
+    <Compile Include="Mono\HmacSha1.cs" />
+    <Compile Include="Mono\HttpRequestHeader.cs" />
+    <Compile Include="Mono\HttpResponseHeader.cs" />
+    <Compile Include="Mono\HttpUtility.cs" />
+    <Compile Include="Mono\KeyedHashAlgorithm.cs" />
+    <Compile Include="Mono\OpenReadCompletedEventArgs.cs" />
+    <Compile Include="Mono\OpenReadCompletedEventHandler.cs" />
+    <Compile Include="Mono\OpenWriteCompletedEventArgs.cs" />
+    <Compile Include="Mono\OpenWriteCompletedEventHandler.cs" />
+    <Compile Include="Mono\ProgressChangedEventArgs.cs" />
+    <Compile Include="Mono\ThreadInterruptedException.cs" />
+    <Compile Include="Mono\UploadDataCompletedEventArgs.cs" />
+    <Compile Include="Mono\UploadDataCompletedEventHandler.cs" />
+    <Compile Include="Mono\UploadFileCompletedEventArgs.cs" />
+    <Compile Include="Mono\UploadFileCompletedEventHandler.cs" />
+    <Compile Include="Mono\UploadProgressChangedEventArgs.cs" />
+    <Compile Include="Mono\UploadProgressChangedEventHandler.cs" />
+    <Compile Include="Mono\UploadStringCompletedEventArgs.cs" />
+    <Compile Include="Mono\UploadStringCompletedEventHandler.cs" />
+    <Compile Include="Mono\UploadValuesCompletedEventArgs.cs" />
+    <Compile Include="Mono\UploadValuesCompletedEventHandler.cs" />
+    <Compile Include="Mono\WebClient.Async.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Mono\WebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Mono\WebHeaderCollection.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query\HammockWebQueryInfo.cs" />
+    <Compile Include="Validation\ValidationException.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
