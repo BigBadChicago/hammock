@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Model;
@@ -19,19 +20,22 @@ namespace Hammock
 #endif
     public abstract class RestBase : PropertyChangedBase 
     {
-        protected internal NameValueCollection Headers { get; set; }
-        protected internal WebParameterCollection Parameters { get; set; }
-        public string VersionPath { get; set; }
-        public string UserAgent { get; set; }
-        public WebMethod? Method { get; set; }
-        public IWebCredentials Credentials { get; set; }
-        
-        public ISerializer Serializer { get; set; }
-        public IDeserializer Deserializer { get; set; }
+        protected virtual internal NameValueCollection Headers { get; set; }
+        protected virtual internal WebParameterCollection Parameters { get; set; }
+
+        public virtual string Proxy { get; set; }
+        public virtual string VersionPath { get; set; }
+        public virtual string UserAgent { get; set; }
+        public virtual WebMethod? Method { get; set; }
+        public virtual IWebCredentials Credentials { get; set; }
+
+        public virtual ISerializer Serializer { get; set; }
+        public virtual IDeserializer Deserializer { get; set; }
         
         public virtual ICache Cache { get; set; }
         public virtual CacheOptions CacheOptions { get; set; }
         public virtual Func<string> CacheKeyFunction { get; set; }
+        public DecompressionMethods DecompressionMethods { get; set; }
 
         public void AddHeader(string name, string value)
         {

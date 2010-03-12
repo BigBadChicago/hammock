@@ -123,6 +123,25 @@ namespace Hammock
             return request.CacheKeyFunction ?? CacheKeyFunction;
         }
 
+        private string GetProxy(RestBase request)
+        {
+            return request.Proxy ?? Proxy;
+        }
+
+        private string GetUserAgent(RestBase request)
+        {
+            var userAgent = request.UserAgent.IsNullOrBlank()
+                                ? UserAgent
+                                : request.UserAgent;
+            return userAgent;
+        }
+
+        private IWebCredentials GetWebCredentials(RestBase request)
+        {
+            var credentials = request.Credentials ?? Credentials;
+            return credentials;
+        }
+
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
             var uri = request.BuildEndpoint(this);
@@ -211,12 +230,9 @@ namespace Hammock
 
         private void SetQueryMeta(RestRequest request, WebQuery query)
         {
-            // compression
-            // proxy
+            // compression (multi-format)
             // mocks
             // timeout
-            // cache
-
             query.Parameters.AddRange(Parameters);
             query.Parameters.AddRange(request.Parameters);
             query.Headers.AddRange(Headers);
@@ -225,6 +241,7 @@ namespace Hammock
             // [DC]: These properties are trumped by request over client
             query.UserAgent = GetUserAgent(request);
             query.Method = GetWebMethod(request);
+            query.Proxy = GetProxy(request);
             
             SerializeEntityBody(query, request);
         }
@@ -239,21 +256,7 @@ namespace Hammock
 
             return method;
         }
-
-        private string GetUserAgent(RestBase request)
-        {
-            var userAgent = request.UserAgent.IsNullOrBlank()
-                                ? UserAgent
-                                : request.UserAgent;
-            return userAgent;
-        }
-
-        private IWebCredentials GetWebCredentials(RestBase request)
-        {
-            var credentials = request.Credentials ?? Credentials;
-            return credentials;
-        }
-
+        
         private void SerializeEntityBody(WebQuery query, RestRequest request)
         {
             var serializer = request.Serializer ?? Serializer;

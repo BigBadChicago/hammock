@@ -328,6 +328,7 @@
       <Link>Web\WebQueryResult.cs</Link>
     </Compile>
     <Compile Include="Caching\IsolatedStorageCache.cs" />
+    <Compile Include="Compat\DecompressionMethods.cs" />
     <Compile Include="Compat\NameValueCollection.cs" />
     <Compile Include="Compat\Trace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
