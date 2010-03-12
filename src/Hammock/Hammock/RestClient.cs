@@ -51,7 +51,6 @@ namespace Hammock
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
 
-            // timeout
             // retries
             // exceptions
             // multi-part
@@ -142,6 +141,22 @@ namespace Hammock
             return credentials;
         }
 
+        private TimeSpan? GetTimeout(RestBase request)
+        {
+            return request.Timeout ?? Timeout;
+        }
+
+        private WebMethod GetWebMethod(RestBase request)
+        {
+            var method = !request.Method.HasValue
+                             ? !Method.HasValue
+                                   ? WebMethod.Get
+                                   : Method.Value
+                             : request.Method.Value;
+
+            return method;
+        }
+
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
             var uri = request.BuildEndpoint(this);
@@ -230,9 +245,8 @@ namespace Hammock
 
         private void SetQueryMeta(RestRequest request, WebQuery query)
         {
-            // compression (multi-format)
             // mocks
-            // timeout
+
             query.Parameters.AddRange(Parameters);
             query.Parameters.AddRange(request.Parameters);
             query.Headers.AddRange(Headers);
@@ -242,21 +256,11 @@ namespace Hammock
             query.UserAgent = GetUserAgent(request);
             query.Method = GetWebMethod(request);
             query.Proxy = GetProxy(request);
+            query.RequestTimeout = GetTimeout(request);
             
             SerializeEntityBody(query, request);
         }
 
-        private WebMethod GetWebMethod(RestBase request)
-        {
-            var method = !request.Method.HasValue
-                             ? !Method.HasValue
-                                   ? WebMethod.Get
-                                   : Method.Value
-                             : request.Method.Value;
-
-            return method;
-        }
-        
         private void SerializeEntityBody(WebQuery query, RestRequest request)
         {
             var serializer = request.Serializer ?? Serializer;

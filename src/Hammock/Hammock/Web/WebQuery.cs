@@ -26,7 +26,17 @@ namespace Hammock.Web
         public virtual IDictionary<string, string> Headers { get; protected set; }
         public virtual WebParameterCollection Parameters { get; protected set; }
         protected virtual internal WebEntity Entity { get; set; }
-
+        public virtual WebMethod Method { get; set; }
+        public virtual string Proxy { get; set; }
+        public virtual bool MockWebQueryClient { get; set; }
+        public virtual string AuthorizationHeader { get; protected set; }
+        public virtual IEnumerable<IMockable> MockGraph { get; set; }
+        public DecompressionMethods DecompressionMethods { get; set; }
+        public virtual bool UseTransparentProxy { get; set; }
+        public virtual TimeSpan? RequestTimeout { get; set; }
+        public virtual WebQueryResult Result { get; private set; }
+        public virtual bool KeepAlive { get; set; }
+        public virtual string SourceUrl { get; set; }
         private WebResponse _webResponse;
         public virtual WebResponse WebResponse
         {
@@ -45,21 +55,6 @@ namespace Hammock.Web
                 }
             }
         }
-
-        public virtual WebMethod Method { get; set; }
-        public virtual string Proxy { get; set; }
-        public virtual bool MockWebQueryClient { get; set; }
-        public virtual string AuthorizationHeader { get; protected set; }
-
-        public virtual IEnumerable<IMockable> MockGraph { get; set; }
-        public DecompressionMethods DecompressionMethods { get; set; }
-        public virtual bool UseTransparentProxy { get; set; }
-        public virtual TimeSpan? RequestTimeout { get; set; }
-
-        public virtual WebQueryResult Result { get; private set; }
-
-        public virtual bool KeepAlive { get; set; }
-        public virtual string SourceUrl { get; set; }
 
         protected WebQuery(IWebQueryInfo info)
         {
@@ -114,7 +109,7 @@ namespace Hammock.Web
         }
 
 #if !SILVERLIGHT
-        protected void SetWebProxy(WebRequest request)
+        protected virtual void SetWebProxy(WebRequest request)
         {
 #if !Smartphone
             var proxyUriBuilder = new UriBuilder(Proxy);
@@ -197,7 +192,7 @@ namespace Hammock.Web
             return request;
         }
 
-        protected void SetRequestMeta(HttpWebRequest request)
+        protected virtual void SetRequestMeta(HttpWebRequest request)
         {
 #if !SILVERLIGHT
             if (!Proxy.IsNullOrBlank())
@@ -219,6 +214,7 @@ namespace Hammock.Web
 #if !SILVERLIGHT
                 request.AutomaticDecompression = DecompressionMethods;
 #else
+                // TODO: Implement decompression on HttpWebResponse
                 // TODO: Implement decompression on HttpWebResponse
                 switch(DecompressionMethods)
                 {
@@ -250,7 +246,7 @@ namespace Hammock.Web
 #endif
         }
 
-        protected void AppendHeaders(WebRequest request)
+        protected virtual void AppendHeaders(WebRequest request)
         {
             if (!(request is HttpWebRequest))
             {
@@ -281,20 +277,21 @@ namespace Hammock.Web
 
 #if !Silverlight
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
-            = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase) {
-                                                                                                           { "Accept",            (r, v) => r.Accept = v },
-                                                                                                           { "Connection",        (r, v) => r.Connection = v },           
-                                                                                                           { "Content-Length",    (r, v) => r.ContentLength = Convert.ToInt64(v) },
-                                                                                                           { "Content-Type",      (r, v) => r.ContentType = v },
-                                                                                                           { "Expect",            (r, v) => r.Expect = v },
-                                                                                                           { "Date",              (r, v) => { /* Set by system */ }},
-                                                                                                           { "Host",              (r, v) => { /* Set by system */ }},
-                                                                                                           { "If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v) },
-                                                                                                           { "Range",             (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
-                                                                                                           { "Referer",           (r, v) => r.Referer = v },
-                                                                                                           { "Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; } },
-                                                                                                           { "User-Agent",        (r, v) => r.UserAgent = v }             
-                                                                                                       };
+            = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase)
+                  {
+                      {"Accept", (r, v) => r.Accept = v},
+                      {"Connection", (r, v) => r.Connection = v},
+                      {"Content-Length", (r, v) => r.ContentLength = Convert.ToInt64(v)},
+                      {"Content-Type", (r, v) => r.ContentType = v},
+                      {"Expect", (r, v) => r.Expect = v},
+                      {"Date", (r, v) => { /* Set by system */ }},
+                      {"Host", (r, v) => { /* Set by system */ }},
+                      {"If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v)},
+                      {"Range", (r, v) => { throw new NotSupportedException( /* r.AddRange() */); }},
+                      {"Referer", (r, v) => r.Referer = v},
+                      {"Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; }},
+                      {"User-Agent", (r, v) => r.UserAgent = v}
+                  };
 #else
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
             = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase) {
@@ -316,13 +313,8 @@ namespace Hammock.Web
         protected virtual string AppendParameters(string url)
         {
             var parameters = 0;
-            foreach (var parameter in Parameters)
+            foreach (var parameter in Parameters.Where(parameter => !(parameter is HttpPostParameter) || Method == WebMethod.Post))
             {
-                if (parameter is HttpPostParameter && Method != WebMethod.Post)
-                {
-                    continue;
-                }
-
                 // GET parameters in URL
                 url = url.Then(parameters > 0 || url.Contains("?") ? "&" : "?");
                 url = url.Then("{0}={1}".FormatWith(parameter.Name, parameter.Value.UrlEncode()));
@@ -542,18 +534,9 @@ namespace Hammock.Web
             }
             return result;
         }
-#endif
-
-        public virtual void OnQueryResponse(WebQueryResponseEventArgs args)
-        {
-            if (QueryResponse != null)
-            {
-                QueryResponse(this, args);
-            }
-        }
+#endif  
 
         public virtual event EventHandler<WebQueryRequestEventArgs> QueryRequest;
-
         public virtual void OnQueryRequest(WebQueryRequestEventArgs args)
         {
             if (QueryRequest != null)
@@ -563,6 +546,13 @@ namespace Hammock.Web
         }
 
         public virtual event EventHandler<WebQueryResponseEventArgs> QueryResponse;
+        public virtual void OnQueryResponse(WebQueryResponseEventArgs args)
+        {
+            if (QueryResponse != null)
+            {
+                QueryResponse(this, args);
+            }
+        }
 
 #if !SILVERLIGHT
         public virtual void ExecuteStreamGet(string url, TimeSpan duration, int resultCount)

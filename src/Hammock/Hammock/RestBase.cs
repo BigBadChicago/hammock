@@ -24,6 +24,7 @@ namespace Hammock
         protected virtual internal WebParameterCollection Parameters { get; set; }
 
         public virtual string Proxy { get; set; }
+        public virtual TimeSpan? Timeout { get; set; }
         public virtual string VersionPath { get; set; }
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
