@@ -1,4 +1,6 @@
+using System;
 using Hammock.Authentication;
+using Hammock.Caching;
 using Hammock.Model;
 using Hammock.Serialization;
 using Hammock.Web;
@@ -26,6 +28,10 @@ namespace Hammock
         
         public ISerializer Serializer { get; set; }
         public IDeserializer Deserializer { get; set; }
+        
+        public virtual ICache Cache { get; set; }
+        public virtual CacheOptions CacheOptions { get; set; }
+        public virtual Func<string> CacheKeyFunction { get; set; }
 
         public void AddHeader(string name, string value)
         {

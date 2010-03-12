@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net;
 using Hammock.Authentication;
+using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Query;
 using Hammock.Web;
-using Hammock.Web.Query;
 using Hammock.Web.Query.Basic;
 
 #if SILVERLIGHT
@@ -51,18 +51,77 @@ namespace Hammock
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
 
-            // cache
             // timeout
             // retries
             // exceptions
             // multi-part
 
             SetQueryMeta(request, query);
-            WebException exception;
-            query.Request(uri.ToString(), out exception);
+
+            var url = uri.ToString();
+
+            if(!RequestWithCache(request, query, url))
+            {
+                WebException exception;
+                query.Request(url, out exception);
+            }
+
             return query;
         }
+
+        private bool RequestWithCache(RestBase request, WebQuery query, string url)
+        {
+            var cache = GetCache(request);
+            if (Cache == null)
+            {
+                return false;
+            }
+
+            var options = GetCacheOptions(request);
+            if (options == null)
+            {
+                return false;
+            }
+
+            // [DC]: This is currently prefixed to the full URL
+            var function = GetCacheKeyFunction(request);
+            var key = function != null ? function.Invoke() : "";
+
+            WebException exception;
+            switch (options.Mode)
+            {
+                case CacheMode.NoExpiration:
+                    query.Request(url, key, cache, out exception);
+                    break;
+                case CacheMode.AbsoluteExpiration:
+                    var expiry = options.Duration.FromNow();
+                    query.Request(url, key, cache, expiry, out exception);
+                    break;
+                case CacheMode.SlidingExpiration:
+                    query.Request(url, key, cache, options.Duration, out exception);
+                    break;
+                default:
+                    throw new NotSupportedException("Unknown CacheMode");
+            }
+
+            return true;
+        }
 #endif
+
+        private ICache GetCache(RestBase request)
+        {
+            return request.Cache ?? Cache;
+        }
+
+        private CacheOptions GetCacheOptions(RestBase request)
+        {
+            return request.CacheOptions ?? CacheOptions;
+        }
+
+        private Func<string> GetCacheKeyFunction(RestBase request)
+        {
+            return request.CacheKeyFunction ?? CacheKeyFunction;
+        }
 
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
@@ -111,6 +170,7 @@ namespace Hammock
                 StatusDescription = result.ResponseHttpStatusDescription,
                 Content = result.Response,
                 ContentType = result.ResponseType,
+                ContentLength = result.ResponseLength,
                 ResponseUri = result.ResponseUri
             };
 
@@ -127,7 +187,7 @@ namespace Hammock
                            StatusDescription = result.ResponseHttpStatusDescription,
                            Content = result.Response,
                            ContentType = result.ResponseType,
-                           ResponseUri = result.ResponseUri
+                           ResponseUri = result.ResponseUri,
                        };
         }
 
@@ -165,7 +225,7 @@ namespace Hammock
             // [DC]: These properties are trumped by request over client
             query.UserAgent = GetUserAgent(request);
             query.Method = GetWebMethod(request);
-
+            
             SerializeEntityBody(query, request);
         }
 

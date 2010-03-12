@@ -32,7 +32,7 @@ namespace GeoNames
                 countryCode = countryCode.ToUpperInvariant();
 
                 var request = new RestRequest();
-                request.AddHeader("User-Agent", "GeoNames.NET");
+                request.AddHeader("User-Agent", "Hammock");
                 request.AddParameter("formatted", "false");
                 request.AddParameter("style", "full");
                 request.AddParameter("country", countryCode);

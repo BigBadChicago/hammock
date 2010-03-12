@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,8 +9,9 @@ using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Model;
 using Hammock.Web.Attributes;
+using Hammock.Web.Query;
 
-namespace Hammock.Web.Query
+namespace Hammock.Web
 {
     public abstract partial class WebQuery
     {
@@ -72,16 +74,39 @@ namespace Hammock.Web.Query
         private void InitializeResult()
         {
             Result = new WebQueryResult();
-            QueryRequest += (s, e) =>
-                                {
-                                    Result.RequestDate = DateTime.UtcNow;
-                                    Result.RequestUri = new Uri(e.Request);
-                                };
-            QueryResponse += (s, e) =>
-                                 {
-                                     Result.ResponseDate = DateTime.UtcNow;
-                                     Result.Response = e.Response;
-                                 };
+            QueryRequest += (s, e) => SetRequestResults(e);
+            QueryResponse += (s, e) => SetResponseResults(e);
+        }
+
+        private void SetResponseResults(WebQueryResponseEventArgs e)
+        {
+            Result.ResponseDate = DateTime.UtcNow;
+            Result.Response = e.Response;
+            Result.RequestHttpMethod = Method.ToUpper();
+
+            var httpWebResponse = WebResponse != null && WebResponse is HttpWebResponse
+                                      ? (HttpWebResponse) WebResponse
+                                      : null;
+
+            if(httpWebResponse == null)
+            {
+                return;
+            }
+
+            var statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
+            var statusDescription = httpWebResponse.StatusDescription;
+
+            Result.ResponseHttpStatusCode = statusCode;
+            Result.ResponseHttpStatusDescription = statusDescription;
+            Result.ResponseType = httpWebResponse.ContentType;
+            Result.ResponseLength = httpWebResponse.ContentLength;
+            Result.ResponseUri = httpWebResponse.ResponseUri;
+        }
+
+        private void SetRequestResults(WebQueryRequestEventArgs e)
+        {
+            Result.RequestDate = DateTime.UtcNow;
+            Result.RequestUri = new Uri(e.Request);
         }
 
 #if !SILVERLIGHT
@@ -130,7 +155,7 @@ namespace Hammock.Web.Query
             content = Encoding.ASCII.GetBytes(parameters);
             request.ContentLength = content.Length;
 #else
-            //content = Encoding.UTF8.GetBytes(url);
+    //content = Encoding.UTF8.GetBytes(url);
             content = Encoding.UTF8.GetBytes(parameters);
 #endif
             return request;
@@ -190,7 +215,7 @@ namespace Hammock.Web.Query
 #if !SILVERLIGHT
                 request.AutomaticDecompression = DecompressionMethods.GZip;
 #else
-                // todo: will need decompression on response
+    // todo: will need decompression on response
                 request.Accept = "gzip,deflate";
 #endif
             }
@@ -242,19 +267,19 @@ namespace Hammock.Web.Query
 #if !Silverlight
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
             = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase) {
-                      { "Accept",            (r, v) => r.Accept = v },
-                      { "Connection",        (r, v) => r.Connection = v },           
-                      { "Content-Length",    (r, v) => r.ContentLength = Convert.ToInt64(v) },
-                      { "Content-Type",      (r, v) => r.ContentType = v },
-                      { "Expect",            (r, v) => r.Expect = v },
-                      { "Date",              (r, v) => { /* Set by system */ }},
-                      { "Host",              (r, v) => { /* Set by system */ }},
-                      { "If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v) },
-                      { "Range",             (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
-                      { "Referer",           (r, v) => r.Referer = v },
-                      { "Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; } },
-                      { "User-Agent",        (r, v) => r.UserAgent = v }             
-                  };
+                                                                                                           { "Accept",            (r, v) => r.Accept = v },
+                                                                                                           { "Connection",        (r, v) => r.Connection = v },           
+                                                                                                           { "Content-Length",    (r, v) => r.ContentLength = Convert.ToInt64(v) },
+                                                                                                           { "Content-Type",      (r, v) => r.ContentType = v },
+                                                                                                           { "Expect",            (r, v) => r.Expect = v },
+                                                                                                           { "Date",              (r, v) => { /* Set by system */ }},
+                                                                                                           { "Host",              (r, v) => { /* Set by system */ }},
+                                                                                                           { "If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v) },
+                                                                                                           { "Range",             (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
+                                                                                                           { "Referer",           (r, v) => r.Referer = v },
+                                                                                                           { "Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; } },
+                                                                                                           { "User-Agent",        (r, v) => r.UserAgent = v }             
+                                                                                                       };
 #else
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
             = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase) {
@@ -377,6 +402,9 @@ namespace Hammock.Web.Query
             var fetch = cache.Get<string>(CreateCacheKey(key, url));
             if (fetch != null)
             {
+                // [DC]: In order to build results, an event must still raise
+                var responseArgs = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(responseArgs);
                 return fetch;
             }
 
@@ -388,12 +416,15 @@ namespace Hammock.Web.Query
                                                                        string url,
                                                                        string key,
                                                                        DateTime expiry,
-                                                                       Func<ICache, string, DateTime, string>
-                                                                           cacheScheme)
+                                                                       Func<ICache, string, DateTime, string> cacheScheme)
         {
             var fetch = cache.Get<string>(CreateCacheKey(key, url));
             if (fetch != null)
             {
+                // [DC]: In order to build results, an event must still raise
+                var responseArgs = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(responseArgs);
+
                 return fetch;
             }
 
@@ -411,6 +442,9 @@ namespace Hammock.Web.Query
             var fetch = cache.Get<string>(CreateCacheKey(key, url));
             if (fetch != null)
             {
+                // [DC]: In order to build results, an event must still raise
+                var responseArgs = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(responseArgs);
                 return fetch;
             }
 
@@ -726,6 +760,7 @@ namespace Hammock.Web.Query
             try
             {
                 var response = request.GetResponse();
+                WebResponse = response;
 
                 using (var stream = response.GetResponseStream())
                 {
@@ -736,9 +771,7 @@ namespace Hammock.Web.Query
                         var responseArgs = new WebQueryResponseEventArgs(result);
                         OnQueryResponse(responseArgs);
 
-                        WebResponse = response;
                         exception = null;
-
                         return result;
                     }
                 }
@@ -854,7 +887,7 @@ namespace Hammock.Web.Query
                     stream.Write(content, 0, content.Length);
                     stream.Close();
 
-                    // Avoid disposing until no longer needed to build results
+                    // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
                     WebResponse = response;
 
@@ -1160,7 +1193,7 @@ namespace Hammock.Web.Query
         }
 
         private string ExecutePostOrPut(PostOrPut method, ICache cache, string url, string key,
-                                                          TimeSpan slidingExpiration, out WebException exception)
+                                        TimeSpan slidingExpiration, out WebException exception)
         {
             var result = ExecutePostOrPut(method, url, out exception);
             if (exception == null)

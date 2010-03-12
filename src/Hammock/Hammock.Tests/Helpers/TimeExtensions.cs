@@ -1,6 +1,6 @@
 using System;
 
-namespace Hammock.Extensions
+namespace Hammock.Tests.Helpers
 {
     internal static class TimeExtensions
     {

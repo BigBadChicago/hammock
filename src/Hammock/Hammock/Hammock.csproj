@@ -121,8 +121,7 @@
     <Compile Include="Web\Attributes\WebEntityAttribute.cs" />
     <Compile Include="Caching\AspNetCache.cs" />
     <Compile Include="Caching\CacheFactory.cs" />
-    <Compile Include="Caching\IClientCache.cs" />
-    <Compile Include="Caching\IWebCache.cs" />
+    <Compile Include="Caching\ICache.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Extensions\RegexExtensions.cs" />
     <Compile Include="Extensions\SerializationExtensions.cs" />
@@ -161,6 +160,9 @@
   <ItemGroup>
     <Compile Include="Authentication\OAuthCredentials.cs" />
     <Compile Include="Authentication\OAuthType.cs" />
+    <Compile Include="Caching\CacheMode.cs" />
+    <Compile Include="Caching\CacheOptions.cs" />
+    <Compile Include="Caching\IDependencyCache.cs" />
     <Compile Include="Caching\SimpleCache.cs" />
     <Compile Include="RestBase.cs" />
     <Compile Include="RestCallback.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />
     <Compile Include="Web\WebQuery.Async.cs" />
+    <None Include="Caching\_Caching.cd" />
     <None Include="key.snk" />
     <None Include="_Hammock.cd" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Web;
 

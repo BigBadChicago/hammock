@@ -5,12 +5,9 @@ using System.Web.Caching;
 
 namespace Hammock.Caching
 {
-    /// <summary>
-    /// The ASP.NET Cache system implemented behind <see cref="IWebCache" />
-    /// </summary>
-    internal class AspNetCache : IWebCache
+    public class AspNetCache : IDependencyCache
     {
-        #region IWebCache Members
+        #region IDependencyCache Members
 
         public int Count
         {

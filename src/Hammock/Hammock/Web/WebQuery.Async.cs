@@ -5,134 +5,135 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using Hammock.Caching;
+using Hammock.Web.Query;
 
-namespace Hammock.Web.Query
+namespace Hammock.Web
 {
-	public partial class WebQuery
-	{
-	    protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url)
-	    {
-	        WebResponse = null;
+    public partial class WebQuery
+    {
+        protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url)
+        {
+            WebResponse = null;
 
-	        var request = BuildGetOrDeleteWebRequest(method, url);
+            var request = BuildGetOrDeleteWebRequest(method, url);
             var state = new Pair<WebRequest, object>
                             {
                                 First = request,
                                 Second = null
                             };
 
-	        var args = new WebQueryRequestEventArgs(url);
-	        OnQueryRequest(args);
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
 
-	        return request.BeginGetResponse(GetAsyncResponseCallback, state);
-	    }
+            return request.BeginGetResponse(GetAsyncResponseCallback, state);
+        }
 
-	    private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+        private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
                                                      string key, 
                                                      string url, 
                                                      WebRequest request)
-	    {
-	        var fetch = cache.Get<string>(key);
+        {
+            var fetch = cache.Get<string>(key);
 
-	        if (fetch != null)
-	        {
-	            var args = new WebQueryResponseEventArgs(fetch);
-	            OnQueryResponse(args);
+            if (fetch != null)
+            {
+                var args = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(args);
 
-	            return null;
-	        }
-	        else
-	        {
-	            var state = new Pair<ICache, string>
-	                            {
-	                                First = cache,
-	                                Second = key
-	                            };
+                return null;
+            }
+            else
+            {
+                var state = new Pair<ICache, string>
+                                {
+                                    First = cache,
+                                    Second = key
+                                };
 
-	            var args = new WebQueryRequestEventArgs(url);
-	            OnQueryRequest(args);
+                var args = new WebQueryRequestEventArgs(url);
+                OnQueryRequest(args);
 
-	            return request.BeginGetRequestStream(GetAsyncResponseCallback, state);
-	        }
-	    }
+                return request.BeginGetRequestStream(GetAsyncResponseCallback, state);
+            }
+        }
 
-	    private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+        private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
                                                      string key, 
                                                      string url, 
                                                      DateTime absoluteExpiration, 
                                                      WebRequest request)
-	    {
-	        var fetch = cache.Get<string>(key);
+        {
+            var fetch = cache.Get<string>(key);
 
-	        if (fetch != null)
-	        {
-	            var args = new WebQueryResponseEventArgs(fetch);
-	            OnQueryResponse(args);
+            if (fetch != null)
+            {
+                var args = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(args);
 
                 return null;
-	        }
-	        else
-	        {
-	            var state = new Pair<ICache, Pair<string, DateTime>>
-	                            {
-	                                First = cache,
-	                                Second = new Pair<string, DateTime>
-	                                             {
-	                                                 First = key,
-	                                                 Second = absoluteExpiration
-	                                             }
-	                            };
+            }
+            else
+            {
+                var state = new Pair<ICache, Pair<string, DateTime>>
+                                {
+                                    First = cache,
+                                    Second = new Pair<string, DateTime>
+                                                 {
+                                                     First = key,
+                                                     Second = absoluteExpiration
+                                                 }
+                                };
 
-	            var args = new WebQueryRequestEventArgs(url);
-	            OnQueryRequest(args);
+                var args = new WebQueryRequestEventArgs(url);
+                OnQueryRequest(args);
 
                 return request.BeginGetRequestStream(GetAsyncResponseCallback, state);
-	        }
-	    }
+            }
+        }
 
-	    private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
-	                                                 string key, 
-	                                                 string url,
-	                                                 TimeSpan slidingExpiration, 
-	                                                 WebRequest request)
-	    {
-	        var fetch = cache.Get<string>(key);
+        private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+                                                     string key, 
+                                                     string url,
+                                                     TimeSpan slidingExpiration, 
+                                                     WebRequest request)
+        {
+            var fetch = cache.Get<string>(key);
 
-	        if (fetch != null)
-	        {
-	            var args = new WebQueryResponseEventArgs(fetch);
-	            OnQueryResponse(args);
+            if (fetch != null)
+            {
+                var args = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(args);
 
-	            return null;
-	        }
-	        else
-	        {
-	            var state = new Pair<ICache, Pair<string, TimeSpan>>
-	                            {
-	                                First = cache,
-	                                Second = new Pair<string, TimeSpan>
-	                                             {
-	                                                 First = key,
-	                                                 Second = slidingExpiration
-	                                             }
-	                            };
+                return null;
+            }
+            else
+            {
+                var state = new Pair<ICache, Pair<string, TimeSpan>>
+                                {
+                                    First = cache,
+                                    Second = new Pair<string, TimeSpan>
+                                                 {
+                                                     First = key,
+                                                     Second = slidingExpiration
+                                                 }
+                                };
 
-	            var args = new WebQueryRequestEventArgs(url);
-	            OnQueryRequest(args);
+                var args = new WebQueryRequestEventArgs(url);
+                OnQueryRequest(args);
 
-	            return request.BeginGetResponse(GetAsyncResponseCallback, state);
-	        }
-	    }
+                return request.BeginGetResponse(GetAsyncResponseCallback, state);
+            }
+        }
 
         protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
                                                                string url, 
                                                                string prefixKey, 
                                                                ICache cache)
-	    {
-	        WebResponse = null;
+        {
+            WebResponse = null;
 
-	        var request = BuildGetOrDeleteWebRequest(method, url);
-	        var key = CreateCacheKey(prefixKey, url);
+            var request = BuildGetOrDeleteWebRequest(method, url);
+            var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, request);
 
@@ -141,18 +142,18 @@ namespace Hammock.Web.Query
 	            ExecuteGetAsyncAndCache(cache, key, url, request)
 	            );
             */
-	    }
+        }
 
         protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, 
                                                                string url, 
                                                                string prefixKey, 
                                                                ICache cache, 
                                                                DateTime absoluteExpiration)
-	    {
-	        WebResponse = null;
+        {
+            WebResponse = null;
 
             var request = BuildGetOrDeleteWebRequest(method, url);
-	        var key = CreateCacheKey(prefixKey, url);
+            var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, absoluteExpiration, request);
 
@@ -161,18 +162,18 @@ namespace Hammock.Web.Query
 	            ExecuteGetAsyncAndCacheWithExpiry(cache, key, url, absoluteExpiration, request)
 	            );
             */
-	    }
+        }
 
-	    protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
+        protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
                                                                string url, 
                                                                string prefixKey,
                                                                ICache cache,
                                                                TimeSpan slidingExpiration)
-	    {
-	        WebResponse = null;
+        {
+            WebResponse = null;
 
-	        var request = BuildGetOrDeleteWebRequest(method, url);
-	        var key = CreateCacheKey(prefixKey, url);
+            var request = BuildGetOrDeleteWebRequest(method, url);
+            var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request);
 
@@ -181,7 +182,7 @@ namespace Hammock.Web.Query
 	            ExecuteGetAsyncAndCacheWithExpiry(cache, key, url, slidingExpiration, request)
 	            );
             */
-	    }
+        }
         
         private static void GetAsyncResponseTimeout(object state, bool timedOut)
         {
@@ -368,329 +369,329 @@ namespace Hammock.Web.Query
             }
         }
 
-	    protected virtual void PostAsyncRequestCallback(IAsyncResult asyncResult)
-	    {
-	        WebRequest request;
-	        byte[] content;
-	        Triplet<ICache, object, string> store;
+        protected virtual void PostAsyncRequestCallback(IAsyncResult asyncResult)
+        {
+            WebRequest request;
+            byte[] content;
+            Triplet<ICache, object, string> store;
 
-	        var state = asyncResult.AsyncState as Pair<WebRequest, byte[]>;
-	        if (state == null)
-	        {
-	            // No expiration specified
-	            if (asyncResult is Pair<WebRequest, Triplet<byte[], ICache, string>>)
-	            {
-	                var cacheScheme = (Pair<WebRequest, Triplet<byte[], ICache, string>>) asyncResult;
-	                var cache = cacheScheme.Second.Second;
+            var state = asyncResult.AsyncState as Pair<WebRequest, byte[]>;
+            if (state == null)
+            {
+                // No expiration specified
+                if (asyncResult is Pair<WebRequest, Triplet<byte[], ICache, string>>)
+                {
+                    var cacheScheme = (Pair<WebRequest, Triplet<byte[], ICache, string>>) asyncResult;
+                    var cache = cacheScheme.Second.Second;
 
-	                var url = cacheScheme.First.RequestUri.ToString();
-	                var prefix = cacheScheme.Second.Third;
-	                var key = CreateCacheKey(prefix, url);
+                    var url = cacheScheme.First.RequestUri.ToString();
+                    var prefix = cacheScheme.Second.Third;
+                    var key = CreateCacheKey(prefix, url);
 
-	                var fetch = cache.Get<string>(key);
-	                if (fetch != null)
-	                {
-	                    var args = new WebQueryResponseEventArgs(fetch);
-	                    OnQueryResponse(args);
-	                    return;
-	                }
+                    var fetch = cache.Get<string>(key);
+                    if (fetch != null)
+                    {
+                        var args = new WebQueryResponseEventArgs(fetch);
+                        OnQueryResponse(args);
+                        return;
+                    }
 
-	                request = cacheScheme.First;
-	                content = cacheScheme.Second.First;
-	                store = new Triplet<ICache, object, string>
-	                            {
-	                                First = cache,
-	                                Second = null,
-	                                Third = prefix
-	                            };
-	            }
-	            else
-	                // Absolute expiration specified
-	                if (asyncResult is Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>)
-	                {
-	                    var cacheScheme = (Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>) asyncResult;
-	                    var url = cacheScheme.First.RequestUri.ToString();
-	                    var cache = cacheScheme.Second.Second.First;
-	                    var expiry = cacheScheme.Second.Second.Second;
+                    request = cacheScheme.First;
+                    content = cacheScheme.Second.First;
+                    store = new Triplet<ICache, object, string>
+                                {
+                                    First = cache,
+                                    Second = null,
+                                    Third = prefix
+                                };
+                }
+                else
+                    // Absolute expiration specified
+                    if (asyncResult is Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>)
+                    {
+                        var cacheScheme = (Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>) asyncResult;
+                        var url = cacheScheme.First.RequestUri.ToString();
+                        var cache = cacheScheme.Second.Second.First;
+                        var expiry = cacheScheme.Second.Second.Second;
 
-	                    var prefix = cacheScheme.Second.Second.Third;
-	                    var key = CreateCacheKey(prefix, url);
+                        var prefix = cacheScheme.Second.Second.Third;
+                        var key = CreateCacheKey(prefix, url);
 
-	                    var fetch = cache.Get<string>(key);
-	                    if (fetch != null)
-	                    {
-	                        var args = new WebQueryResponseEventArgs(fetch);
-	                        OnQueryResponse(args);
-	                        return;
-	                    }
+                        var fetch = cache.Get<string>(key);
+                        if (fetch != null)
+                        {
+                            var args = new WebQueryResponseEventArgs(fetch);
+                            OnQueryResponse(args);
+                            return;
+                        }
 
-	                    request = cacheScheme.First;
-	                    content = cacheScheme.Second.First;
-	                    store = new Triplet<ICache, object, string>
-	                                {
-	                                    First = cache,
-	                                    Second = expiry,
-	                                    Third = prefix
-	                                };
-	                }
-	                else
-	                    // Sliding expiration specified
-	                    if (asyncResult is Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>)
-	                    {
-	                        var cacheScheme = (Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>) asyncResult;
-	                        var url = cacheScheme.First.RequestUri.ToString();
-	                        var cache = cacheScheme.Second.Second.First;
-	                        var expiry = cacheScheme.Second.Second.Second;
+                        request = cacheScheme.First;
+                        content = cacheScheme.Second.First;
+                        store = new Triplet<ICache, object, string>
+                                    {
+                                        First = cache,
+                                        Second = expiry,
+                                        Third = prefix
+                                    };
+                    }
+                    else
+                        // Sliding expiration specified
+                        if (asyncResult is Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>)
+                        {
+                            var cacheScheme = (Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>) asyncResult;
+                            var url = cacheScheme.First.RequestUri.ToString();
+                            var cache = cacheScheme.Second.Second.First;
+                            var expiry = cacheScheme.Second.Second.Second;
 
-	                        var prefix = cacheScheme.Second.Second.Third;
-	                        var key = CreateCacheKey(prefix, url);
+                            var prefix = cacheScheme.Second.Second.Third;
+                            var key = CreateCacheKey(prefix, url);
 
-	                        var fetch = cache.Get<string>(key);
-	                        if (fetch != null)
-	                        {
-	                            var args = new WebQueryResponseEventArgs(fetch);
-	                            OnQueryResponse(args);
-	                            return;
-	                        }
+                            var fetch = cache.Get<string>(key);
+                            if (fetch != null)
+                            {
+                                var args = new WebQueryResponseEventArgs(fetch);
+                                OnQueryResponse(args);
+                                return;
+                            }
 
-	                        request = cacheScheme.First;
-	                        content = cacheScheme.Second.First;
-	                        store = new Triplet<ICache, object, string>
-	                                    {
-	                                        First = cache,
-	                                        Second = expiry,
-	                                        Third = prefix
-	                                    };
-	                    }
-	                    else
-	                    {
-	                        // Unrecognized state signature
-	                        throw new ArgumentNullException("asyncResult",
-	                                                        "The asynchronous post failed to return its state");
-	                    }
-	        }
-	        else
-	        {
-	            request = state.First;
-	            content = state.Second;
-	            store = null;
-	        }
+                            request = cacheScheme.First;
+                            content = cacheScheme.Second.First;
+                            store = new Triplet<ICache, object, string>
+                                        {
+                                            First = cache,
+                                            Second = expiry,
+                                            Third = prefix
+                                        };
+                        }
+                        else
+                        {
+                            // Unrecognized state signature
+                            throw new ArgumentNullException("asyncResult",
+                                                            "The asynchronous post failed to return its state");
+                        }
+            }
+            else
+            {
+                request = state.First;
+                content = state.Second;
+                store = null;
+            }
 
-	        // no cached response
-	        using (var stream = request.EndGetRequestStream(asyncResult))
-	        {
-	            if (content != null)
-	            {
-	                stream.Write(content, 0, content.Length);
-	            }
-	            stream.Close();
+            // no cached response
+            using (var stream = request.EndGetRequestStream(asyncResult))
+            {
+                if (content != null)
+                {
+                    stream.Write(content, 0, content.Length);
+                }
+                stream.Close();
 
-	            request.BeginGetResponse(PostAsyncResponseCallback,
-	                                     new Pair<WebRequest, Triplet<ICache, object, string>>
-	                                         {First = request, Second = store});
-	        }
-	    }
+                request.BeginGetResponse(PostAsyncResponseCallback,
+                                         new Pair<WebRequest, Triplet<ICache, object, string>>
+                                             {First = request, Second = store});
+            }
+        }
 
-	    protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
-	    {
-	        var state = asyncResult.AsyncState as Pair<WebRequest, Triplet<ICache, object, string>>;
-	        if (state == null)
-	        {
-	            throw new ArgumentNullException("asyncResult", 
+        protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
+        {
+            var state = asyncResult.AsyncState as Pair<WebRequest, Triplet<ICache, object, string>>;
+            if (state == null)
+            {
+                throw new ArgumentNullException("asyncResult", 
                                                 "The asynchronous post failed to return its state");
-	        }
+            }
 
-	        var request = state.First;
-	        if (request == null)
-	        {
-	            throw new ArgumentNullException("asyncResult", 
+            var request = state.First;
+            if (request == null)
+            {
+                throw new ArgumentNullException("asyncResult", 
                                                 "The asynchronous post failed to return a request");
-	        }
+            }
 
-	        try
-	        {
-	            // Avoid disposing until no longer needed to build results
-	            var response = request.EndGetResponse(asyncResult);
-	            WebResponse = response;
+            try
+            {
+                // Avoid disposing until no longer needed to build results
+                var response = request.EndGetResponse(asyncResult);
+                WebResponse = response;
 
-	            using (var reader = new StreamReader(response.GetResponseStream()))
-	            {
-	                var result = reader.ReadToEnd();
-	                if (state.Second != null)
-	                {
-	                    var cache = state.Second.First;
-	                    var expiry = state.Second.Second;
-	                    var url = request.RequestUri.ToString();
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    var result = reader.ReadToEnd();
+                    if (state.Second != null)
+                    {
+                        var cache = state.Second.First;
+                        var expiry = state.Second.Second;
+                        var url = request.RequestUri.ToString();
 
-	                    var prefix = state.Second.Third;
-	                    var key = CreateCacheKey(prefix, url);
+                        var prefix = state.Second.Third;
+                        var key = CreateCacheKey(prefix, url);
 
-	                    if (expiry is DateTime)
-	                    {
-	                        // absolute
-	                        cache.Insert(key, result, (DateTime) expiry);
-	                    }
+                        if (expiry is DateTime)
+                        {
+                            // absolute
+                            cache.Insert(key, result, (DateTime) expiry);
+                        }
 
-	                    if (expiry is TimeSpan)
-	                    {
-	                        // sliding
-	                        cache.Insert(key, result, (TimeSpan) expiry);
-	                    }
-	                }
+                        if (expiry is TimeSpan)
+                        {
+                            // sliding
+                            cache.Insert(key, result, (TimeSpan) expiry);
+                        }
+                    }
 
-	                var args = new WebQueryResponseEventArgs(result);
-	                OnQueryResponse(args);
-	            }
-	        }
-	        catch (WebException ex)
-	        {
-	            HandleWebException(ex);
-	        }
-	    }
+                    var args = new WebQueryResponseEventArgs(result);
+                    OnQueryResponse(args);
+                }
+            }
+            catch (WebException ex)
+            {
+                HandleWebException(ex);
+            }
+        }
 
-	    protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url)
-	    {
-	        WebResponse = null;
+        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url)
+        {
+            WebResponse = null;
 
-	        byte[] content;
-	        var request = BuildPostOrPutWebRequest(method, url, out content);
+            byte[] content;
+            var request = BuildPostOrPutWebRequest(method, url, out content);
 
-	        var state = new Pair<WebRequest, byte[]> {First = request, Second = content};
+            var state = new Pair<WebRequest, byte[]> {First = request, Second = content};
 
-	        var args = new WebQueryRequestEventArgs(url);
-	        OnQueryRequest(args);
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
 
-	        return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-	    }
+            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+        }
 
-	    protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
                                                              string url,
-	                                                         IEnumerable<HttpPostParameter> parameters)
-	    {
-	        WebResponse = null;
+                                                             IEnumerable<HttpPostParameter> parameters)
+        {
+            WebResponse = null;
 
-	        byte[] content;
+            byte[] content;
 
-	        var request = BuildMultiPartFormRequest(method, url, parameters, out content);
-	        var state = new Pair<WebRequest, byte[]> {First = request, Second = content};
-	        var args = new WebQueryRequestEventArgs(url);
+            var request = BuildMultiPartFormRequest(method, url, parameters, out content);
+            var state = new Pair<WebRequest, byte[]> {First = request, Second = content};
+            var args = new WebQueryRequestEventArgs(url);
 
-	        OnQueryRequest(args);
+            OnQueryRequest(args);
 
-	        return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-	    }
+            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+        }
 
-	    protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
                                                              string url, 
                                                              string prefixKey,
-	                                                         ICache cache)
-	    {
-	        WebResponse = null;
+                                                             ICache cache)
+        {
+            WebResponse = null;
 
-	        byte[] content;
-	        var request = BuildPostOrPutWebRequest(method, url, out content);
+            byte[] content;
+            var request = BuildPostOrPutWebRequest(method, url, out content);
 
-	        var state = new Pair<WebRequest, Triplet<byte[], ICache, string>>
-	                        {
-	                            First = request,
-	                            Second = new Triplet<byte[], ICache, string>
-	                                         {
-	                                             First = content,
-	                                             Second = cache,
-	                                             Third = prefixKey
-	                                         }
-	                        };
+            var state = new Pair<WebRequest, Triplet<byte[], ICache, string>>
+                            {
+                                First = request,
+                                Second = new Triplet<byte[], ICache, string>
+                                             {
+                                                 First = content,
+                                                 Second = cache,
+                                                 Third = prefixKey
+                                             }
+                            };
 
-	        var args = new WebQueryRequestEventArgs(url);
-	        OnQueryRequest(args);
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
 
-	        return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-	    }
+            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+        }
 
-	    protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
                                                              string url, 
                                                              string prefixKey, 
                                                              ICache cache, 
                                                              DateTime absoluteExpiration)
-	    {
-	        WebResponse = null;
+        {
+            WebResponse = null;
 
-	        byte[] content;
-	        var request = BuildPostOrPutWebRequest(method, url, out content);
+            byte[] content;
+            var request = BuildPostOrPutWebRequest(method, url, out content);
 
-	        var state = new Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>
-	                        {
-	                            First = request,
-	                            Second = new Pair<byte[], Triplet<ICache, DateTime, string>>
-	                                         {
-	                                             First = content,
-	                                             Second = new Triplet<ICache, DateTime, string>
-	                                                          {
-	                                                              First = cache,
-	                                                              Second = absoluteExpiration,
-	                                                              Third = prefixKey
-	                                                          }
-	                                         }
-	                        };
+            var state = new Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>
+                            {
+                                First = request,
+                                Second = new Pair<byte[], Triplet<ICache, DateTime, string>>
+                                             {
+                                                 First = content,
+                                                 Second = new Triplet<ICache, DateTime, string>
+                                                              {
+                                                                  First = cache,
+                                                                  Second = absoluteExpiration,
+                                                                  Third = prefixKey
+                                                              }
+                                             }
+                            };
 
-	        var args = new WebQueryRequestEventArgs(url);
-	        OnQueryRequest(args);
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
 
-	        return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-	    }
+            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+        }
 
-	    protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
                                                              string url, 
                                                              string prefixKey,
-	                                                         ICache cache, 
+                                                             ICache cache, 
                                                              TimeSpan slidingExpiration)
-	    {
-	        WebResponse = null;
+        {
+            WebResponse = null;
 
-	        byte[] content;
-	        var request = BuildPostOrPutWebRequest(method, url, out content);
+            byte[] content;
+            var request = BuildPostOrPutWebRequest(method, url, out content);
 
-	        var state = new Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>
-	                        {
-	                            First = request,
-	                            Second = new Pair<byte[], Triplet<ICache, TimeSpan, string>>
-	                                         {
-	                                             First = content,
-	                                             Second = new Triplet<ICache, TimeSpan, string>
-	                                                          {
-	                                                              First = cache,
-	                                                              Second = slidingExpiration,
-	                                                              Third = prefixKey
-	                                                          }
-	                                         }
-	                        };
+            var state = new Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>
+                            {
+                                First = request,
+                                Second = new Pair<byte[], Triplet<ICache, TimeSpan, string>>
+                                             {
+                                                 First = content,
+                                                 Second = new Triplet<ICache, TimeSpan, string>
+                                                              {
+                                                                  First = cache,
+                                                                  Second = slidingExpiration,
+                                                                  Third = prefixKey
+                                                              }
+                                             }
+                            };
 
-	        var args = new WebQueryRequestEventArgs(url);
-	        OnQueryRequest(args);
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
 
-	        return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-	    }
+            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+        }
 
-	    public virtual IAsyncResult ExecuteStreamGetAsync(string url, 
+        public virtual IAsyncResult ExecuteStreamGetAsync(string url, 
                                                           TimeSpan duration, 
                                                           int resultCount)
-	    {
-	        WebResponse = null;
+        {
+            WebResponse = null;
 
-	        var request = BuildGetOrDeleteWebRequest(GetOrDelete.Get, url);
+            var request = BuildGetOrDeleteWebRequest(GetOrDelete.Get, url);
 
-	        var state = new Pair<WebRequest, Pair<TimeSpan, int>>
-	                        {
-	                            First = request,
-	                            Second = new Pair<TimeSpan, int>
-	                                         {
-	                                             First = duration,
-	                                             Second = resultCount
-	                                         }
-	                        };
+            var state = new Pair<WebRequest, Pair<TimeSpan, int>>
+                            {
+                                First = request,
+                                Second = new Pair<TimeSpan, int>
+                                             {
+                                                 First = duration,
+                                                 Second = resultCount
+                                             }
+                            };
 
-	        return request.BeginGetResponse(GetAsyncStreamCallback, state);
+            return request.BeginGetResponse(GetAsyncStreamCallback, state);
         }
 	    
-	}
+    }
 }

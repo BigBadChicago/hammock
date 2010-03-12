@@ -78,8 +78,14 @@
     <Compile Include="..\Hammock\Caching\CacheFactory.cs">
       <Link>Caching\CacheFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Caching\IClientCache.cs">
-      <Link>Caching\IClientCache.cs</Link>
+    <Compile Include="..\Hammock\Caching\CacheMode.cs">
+      <Link>Caching\CacheMode.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Caching\CacheOptions.cs">
+      <Link>Caching\CacheOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Caching\ICache.cs">
+      <Link>Caching\ICache.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Caching\SimpleCache.cs">
       <Link>Caching\SimpleCache.cs</Link>
