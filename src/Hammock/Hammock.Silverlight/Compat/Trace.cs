@@ -14,7 +14,7 @@ namespace Hammock.Silverlight.Compat
         static Trace()
         {
             _file = IsolatedStorageFile.GetUserStoreForApplication();
-            _fileStream = _file.OpenFile("TweetSharp.trace",
+            _fileStream = _file.OpenFile("Hammock.trace",
                                          FileMode.OpenOrCreate, 
                                          FileAccess.ReadWrite, 
                                          FileShare.ReadWrite);

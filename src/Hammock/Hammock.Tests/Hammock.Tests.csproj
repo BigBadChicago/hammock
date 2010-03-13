@@ -90,7 +90,7 @@
     <None Include="app.config" />
     <None Include="app.config.example" />
     <None Include="key.snk" />
-    <Compile Include="Attributes\Validation\ValidationAttributeTests.cs" />
+    <Compile Include="Attributes\Validation\BooleanToIntegerTests.cs" />
     <Compile Include="RestClientTests.Mocks.cs" />
     <Compile Include="RestClientTests.Caching.cs" />
   </ItemGroup>

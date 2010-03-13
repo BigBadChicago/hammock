@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Specialized;
 using System.Configuration;
 using System.Net;
 using Hammock.Authentication;
@@ -114,6 +114,30 @@ namespace Hammock.Tests
         }
 
         [Test]
+        public void Can_make_basic_auth_request_with_duplicate_headers_synchronously()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Credentials = BasicAuthForTwitter,
+                Path = "/statuses/home_timeline.json"
+            };
+
+            // Headers don't have to have unique names
+            client.AddHeader("Always", "on every client");
+            request.AddHeader("Always", "on this request");
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+        }
+
+        [Test]
         public void Can_make_basic_auth_request_get_with_url_parameters_synchronously()
         {
             var client = new RestClient
@@ -130,6 +154,31 @@ namespace Hammock.Tests
             };
 
             client.AddParameter("client", "true");
+            request.AddParameter("request", "true");
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+        }
+
+        [Test]
+        public void Can_make_basic_auth_request_get_with_duplicate_url_parameters_synchronously()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Credentials = BasicAuthForTwitter,
+                Path = "/statuses/home_timeline.json"
+            };
+
+            // Since parameters should be unique, request should trump client
+            client.AddParameter("client", "true");
+            request.AddParameter("client", "false");
             request.AddParameter("request", "true");
 
             var response = client.Request(request);
@@ -167,14 +216,18 @@ namespace Hammock.Tests
         public void Can_make_basic_auth_request_post_with_json_entity_synchronously()
         {
             var settings = GetSerializerSettings();
-            
             var message = new PostmarkMessage
-            {
-                From = _postmarkFromAddress,
-                To = _postmarkToAddress,
-                Subject = "Test passed!",
-                TextBody = "Hello from the Hammock unit tests!"
-            };
+                              {
+                                  From = _postmarkFromAddress,
+                                  To = _postmarkToAddress,
+                                  Subject = "Test passed!",
+                                  TextBody = "Hello from the Hammock unit tests!",
+                                  Headers = new NameValueCollection
+                                                {
+                                                    {"Email-Header", "Shows up on an email"},
+                                                    {"Email-Header", "Shows up on an email, too"}
+                                                }
+                              };
 
             var serializer = new HammockJsonDotNetSerializer(settings);
 
@@ -189,7 +242,7 @@ namespace Hammock.Tests
             client.AddHeader("Content-Type", "application/json; charset=utf-8");
             client.AddHeader("X-Postmark-Server-Token", _postmarkServerToken);
             client.AddHeader("User-Agent", "Hammock");
-
+            
             var request = new RestRequest
                               {
                                   Path = "email",

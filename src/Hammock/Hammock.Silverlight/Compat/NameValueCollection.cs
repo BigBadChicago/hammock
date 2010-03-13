@@ -32,11 +32,11 @@ namespace Hammock.Silverlight.Compat
             Add(new KeyValuePair<string, string>(name, value));
         }
 
-        public IEnumerable AllKeys
+        public IEnumerable<string> AllKeys
         {
             get
             {
-                return this.Select(pair => pair.Key).Cast<object>();
+                return this.Select(pair => pair.Key);
             }
         }
     }

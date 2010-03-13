@@ -26,7 +26,7 @@ namespace Hammock.Web
 
         public virtual IWebQueryInfo Info { get; protected set; }
         public virtual string UserAgent { get; protected internal set; }
-        public virtual IDictionary<string, string> Headers { get; protected set; }
+        public virtual WebHeaderCollection Headers { get; protected set; }
         public virtual WebParameterCollection Parameters { get; protected set; }
         protected internal virtual WebEntity Entity { get; set; }
         public virtual WebMethod Method { get; set; }
@@ -74,8 +74,8 @@ namespace Hammock.Web
         {
             if(info == null)
             {
-                Headers = new Dictionary<string, string>(0);
-                Parameters = new WebParameterCollection();
+                Headers = new WebHeaderCollection(0);
+                Parameters = new WebParameterCollection(0);
                 return;
             }
 
@@ -123,8 +123,16 @@ namespace Hammock.Web
             var statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
             var statusDescription = httpWebResponse.StatusDescription;
 
-            Trace.WriteLine("RESPONSE: " + statusCode + " " + statusDescription);
+#if TRACE
+            Trace.WriteLine(String.Concat("RESPONSE: ", statusCode, " ", statusDescription));
+            Trace.WriteLine("HEADERS:");
+            foreach (var trace in httpWebResponse.Headers.AllKeys.Select(
+                key => String.Concat("\t", key, ": ", httpWebResponse.Headers[key])))
+            {
+                Trace.WriteLine(trace);
+            }
             Trace.WriteLine("BODY: " + e.Response);
+#endif
 
             Result.ResponseHttpStatusCode = statusCode;
             Result.ResponseHttpStatusDescription = statusDescription;
@@ -173,8 +181,10 @@ namespace Hammock.Web
         protected virtual WebRequest BuildPostOrPutFormWebRequest(PostOrPut method, string url, out byte[] content)
         {
             var parameters = AppendParameters(url).Replace(url + "?", "");
+#if TRACE
             Trace.WriteLine(method.ToUpper() + ": " + url);
             Trace.WriteLine("BODY: " + parameters);
+#endif
 
             var request = (HttpWebRequest) WebRequest.Create(url);
             AuthenticateRequest(request);
@@ -195,7 +205,6 @@ namespace Hammock.Web
         private WebRequest BuildPostOrPutEntityWebRequest(PostOrPut method, string url, out byte[] content)
         {
             url = AppendParameters(url);
-            Trace.WriteLine(method.ToUpper() + ": " + url);
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             AuthenticateRequest(request);
@@ -205,7 +214,10 @@ namespace Hammock.Web
             SetRequestMeta(request);
 
             var entity = Entity.Content.ToString();
+#if TRACE
             Trace.WriteLine("BODY: " + entity);
+            Trace.WriteLine(method.ToUpper() + ": " + url);
+#endif
 
             content = Entity.ContentEncoding.GetBytes(entity);
 #if !Silverlight
@@ -219,7 +231,9 @@ namespace Hammock.Web
         protected virtual WebRequest BuildGetOrDeleteWebRequest(GetOrDelete method, string url)
         {
             url = AppendParameters(url);
+#if TRACE
             Trace.WriteLine(method.ToUpper() + ": " + url);
+#endif
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
@@ -231,6 +245,8 @@ namespace Hammock.Web
 
         protected virtual void SetRequestMeta(HttpWebRequest request)
         {
+            AppendHeaders(request);
+
 #if !SILVERLIGHT
             if (ServicePoint != null)
             {
@@ -289,8 +305,7 @@ namespace Hammock.Web
                 request.Timeout = (int)RequestTimeout.Value.TotalMilliseconds;
             }
 #endif
-            AppendHeaders(request);
-
+            
 #if !SILVERLIGHT
             if (KeepAlive)
             {
@@ -306,7 +321,25 @@ namespace Hammock.Web
                 return;
             }
 
-            foreach (var header in Headers)
+            // [DC]: Combine all duplicate headers into CSV
+            var headers = new Dictionary<string, string>(0);
+            foreach(var header in Headers)
+            {
+                string value;
+                if(headers.ContainsKey(header.Name))
+                {
+                    value = String.Concat(headers[header.Name], ",", header.Value);
+                    headers.Remove(header.Name);
+                }
+                else
+                {
+                    value = header.Value;
+                }
+
+                headers.Add(header.Name, value);
+            }
+
+            foreach (var header in headers)
             {
                 if (_restrictedHeaderActions.ContainsKey(header.Key))
                 {
@@ -317,6 +350,15 @@ namespace Hammock.Web
                     AddHeader(header, request);
                 }
             }
+
+#if TRACE
+            Trace.WriteLine("HEADERS:");
+            foreach (var trace in request.Headers.AllKeys.Select(
+                key => String.Concat("\t", key, ": ", request.Headers[key])))
+            {
+                Trace.WriteLine(trace);
+            }
+#endif
         }
 
         private static void AddHeader(KeyValuePair<string, string> header, WebRequest request)
@@ -378,14 +420,17 @@ namespace Hammock.Web
         }
 
         // [DC] Headers don't need to be unique, this should change
-        protected virtual IDictionary<string, string> ParseInfoHeaders(IEnumerable<PropertyInfo> properties,
-                                                                       IDictionary<string, string> transforms)
+        protected virtual WebHeaderCollection ParseInfoHeaders(IEnumerable<PropertyInfo> properties,
+                                                               IDictionary<string, string> transforms)
         {
             var headers = new Dictionary<string, string>();
             
             Info.ParseNamedAttributes<HeaderAttribute>(properties, transforms, headers);
-            
-            return headers;
+
+            var collection = new WebHeaderCollection();
+            headers.ForEach(p => collection.Add(new WebHeader(p.Key, p.Value)));
+
+            return collection;
         }
 
         protected virtual WebParameterCollection ParseInfoParameters(IEnumerable<PropertyInfo> properties,
@@ -899,8 +944,6 @@ namespace Hammock.Web
                                                                    IEnumerable<HttpPostParameter> parameters,
                                                                    out byte[] bytes)
         {
-            Trace.WriteLine(method.ToUpper() + ": " + url);
-
             var boundary = Guid.NewGuid().ToString();
             var request = (HttpWebRequest) WebRequest.Create(url);
             AuthenticateRequest(request);
@@ -915,7 +958,11 @@ namespace Hammock.Web
             // [DC]: This will need to be refactored for large uploads
             var contents = BuildMultiPartFormRequestParameters(boundary, parameters);
             var payload = contents.ToString();
+
+#if TRACE
+            Trace.WriteLine(method.ToUpper() + ": " + url);
             Trace.WriteLine("BODY: " + payload);
+#endif
 
 #if !Smartphone
             bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(payload);

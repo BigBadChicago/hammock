@@ -158,7 +158,7 @@ namespace Hammock.Web.Query.OAuth
             return url;
         }
 
-        private static string GetPostParametersValue(ICollection<WebParameter> postParameters, bool escapeParameters)
+        private static string GetPostParametersValue(ICollection<WebPair> postParameters, bool escapeParameters)
         {
             var body = "";
             var parameters = 0;

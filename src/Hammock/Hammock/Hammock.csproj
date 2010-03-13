@@ -177,6 +177,10 @@
     <Compile Include="Tasks\RateLimitingType.cs" />
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />
+    <Compile Include="Web\WebHeader.cs" />
+    <Compile Include="Web\WebHeaderCollection.cs" />
+    <Compile Include="Web\WebPair.cs" />
+    <Compile Include="Web\WebPairCollection.cs" />
     <Compile Include="Web\WebQuery.Async.cs" />
     <None Include="Attributes\Specialized\_Specialized.cd" />
     <None Include="Authentication\OAuth\_OAuth.cd" />

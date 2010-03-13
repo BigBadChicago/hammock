@@ -1,4 +1,5 @@
-﻿using Hammock.Attributes.Specialized;
+﻿using System;
+using Hammock.Attributes.Specialized;
 using Hammock.Attributes.Validation;
 using Hammock.Web.Query;
 using NUnit.Framework;
@@ -6,7 +7,7 @@ using NUnit.Framework;
 namespace Hammock.Tests.Attributes.Validation
 {
     [TestFixture]
-    public class ValidationAttributeTests
+    public class BooleanToIntegerTests
     {
         public class BooleanToIntegerInfo : IWebQueryInfo
         {
@@ -30,6 +31,36 @@ namespace Hammock.Tests.Attributes.Validation
                               {
                                   Path = "fast"
                               };
+
+            var response = client.Request(request);
+        }
+    }
+
+    [TestFixture]
+    public class DateTimeFormatTests
+    {
+        public class DateTimeFormatInfo : IWebQueryInfo
+        {
+            [BooleanToInteger]
+            [Header("Result")]
+            public DateTime IAmADate { get; set; }
+        }
+
+        [Test]
+        public void Can_use_date_time_validation_to_transform_header_value()
+        {
+            var info = new DateTimeFormatInfo {IAmADate = DateTime.Now };
+
+            var client = new RestClient
+            {
+                Authority = "http://nowhere.com",
+                Info = info
+            };
+
+            var request = new RestRequest
+            {
+                Path = "fast"
+            };
 
             var response = client.Request(request);
         }

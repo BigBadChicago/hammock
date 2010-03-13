@@ -1,20 +1,18 @@
-#if !Smartphone
+﻿using System;
 using System.Diagnostics;
-#endif
-using System;
+
 namespace Hammock.Web
 {
 #if !Smartphone
     [DebuggerDisplay("{Name}:{Value}")]
 #endif
-#if !SILVERLIGHT
+#if !Silverlight
     [Serializable]
 #endif
-    public class WebParameter : WebPair
+    public class WebHeader : WebPair
     {
-        public WebParameter(string name, string value) : base(name, value)
+        public WebHeader(string name, string value) : base(name, value)
         {
-
         }
     }
 }

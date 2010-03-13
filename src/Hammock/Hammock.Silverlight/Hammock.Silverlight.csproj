@@ -302,8 +302,20 @@
     <Compile Include="..\Hammock\Web\WebFormat.cs">
       <Link>Web\WebFormat.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Web\WebHeader.cs">
+      <Link>Web\WebHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebHeaderCollection.cs">
+      <Link>Web\WebHeaderCollection.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Web\WebMethod.cs">
       <Link>Web\WebMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebPair.cs">
+      <Link>Web\WebPair.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\WebPairCollection.cs">
+      <Link>Web\WebPairCollection.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Web\WebParameter.cs">
       <Link>Web\WebParameter.cs</Link>

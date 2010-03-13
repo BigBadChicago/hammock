@@ -367,30 +367,30 @@ namespace Hammock.Authentication.OAuth
             }
         }
 
-        private void AddAuthParameters(ICollection<WebParameter> parameters, string timestamp, string nonce)
+        private void AddAuthParameters(ICollection<WebPair> parameters, string timestamp, string nonce)
         {
             var authParameters = new WebParameterCollection
                                      {
-                                         new WebParameter("oauth_consumer_key", ConsumerKey),
-                                         new WebParameter("oauth_nonce", nonce),
-                                         new WebParameter("oauth_signature_method", SignatureMethod.ToRequestValue()),
-                                         new WebParameter("oauth_timestamp", timestamp),
-                                         new WebParameter("oauth_version", OAUTH_VERSION)
+                                         new WebPair("oauth_consumer_key", ConsumerKey),
+                                         new WebPair("oauth_nonce", nonce),
+                                         new WebPair("oauth_signature_method", SignatureMethod.ToRequestValue()),
+                                         new WebPair("oauth_timestamp", timestamp),
+                                         new WebPair("oauth_version", OAUTH_VERSION)
                                      };
 
             if (!Token.IsNullOrBlank())
             {
-                authParameters.Add(new WebParameter("oauth_token", Token));
+                authParameters.Add(new WebPair("oauth_token", Token));
             }
 
             if (!CallbackUrl.IsNullOrBlank())
             {
-                authParameters.Add(new WebParameter("oauth_callback", CallbackUrl));
+                authParameters.Add(new WebPair("oauth_callback", CallbackUrl));
             }
 
             if (!Verifier.IsNullOrBlank())
             {
-                authParameters.Add(new WebParameter("oauth_verifier", Verifier));
+                authParameters.Add(new WebPair("oauth_verifier", Verifier));
             }
 
             foreach (var authParameter in authParameters)
@@ -399,18 +399,18 @@ namespace Hammock.Authentication.OAuth
             }
         }
 
-        private void AddClientAuthParameters(ICollection<WebParameter> parameters, string timestamp, string nonce)
+        private void AddClientAuthParameters(ICollection<WebPair> parameters, string timestamp, string nonce)
         {
             var authParameters = new WebParameterCollection
                                      {
-                                         new WebParameter("x_auth_username", ClientUsername),
-                                         new WebParameter("x_auth_password", ClientPassword),
-                                         new WebParameter("x_auth_mode", "client_auth"),
-                                         new WebParameter("oauth_consumer_key", ConsumerKey),
-                                         new WebParameter("oauth_signature_method", SignatureMethod.ToRequestValue()),
-                                         new WebParameter("oauth_timestamp", timestamp),
-                                         new WebParameter("oauth_nonce", nonce),
-                                         new WebParameter("oauth_version", OAUTH_VERSION)
+                                         new WebPair("x_auth_username", ClientUsername),
+                                         new WebPair("x_auth_password", ClientPassword),
+                                         new WebPair("x_auth_mode", "client_auth"),
+                                         new WebPair("oauth_consumer_key", ConsumerKey),
+                                         new WebPair("oauth_signature_method", SignatureMethod.ToRequestValue()),
+                                         new WebPair("oauth_timestamp", timestamp),
+                                         new WebPair("oauth_nonce", nonce),
+                                         new WebPair("oauth_version", OAUTH_VERSION)
                                      };
 
             foreach (var authParameter in authParameters)

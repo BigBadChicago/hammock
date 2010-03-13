@@ -200,7 +200,7 @@ namespace Hammock
         private RestResponse<T> BuildResponseFromResult<T>(RestBase request, WebQuery query)
         {
             var result = query.Result;
-            var response = BuildBaseResponse(result) as RestResponse<T>;
+            var response = BuildBaseResponse<T>(result);
 
             DeserializeEntityBody(result, request, response);
 
@@ -218,6 +218,21 @@ namespace Hammock
                            ContentLength = result.ResponseLength,
                            ResponseUri = result.ResponseUri,
                        };
+
+            return response;
+        }
+
+        private static RestResponse<T> BuildBaseResponse<T>(WebQueryResult result)
+        {
+            var response = new RestResponse<T>
+            {
+                StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode,
+                StatusDescription = result.ResponseHttpStatusDescription,
+                Content = result.Response,
+                ContentType = result.ResponseType,
+                ContentLength = result.ResponseLength,
+                ResponseUri = result.ResponseUri,
+            };
 
             return response;
         }
@@ -244,8 +259,19 @@ namespace Hammock
         {
             // mocks
 
+            // [DC]: Trump duplicates by request over client value
             query.Parameters.AddRange(Parameters);
-            query.Parameters.AddRange(request.Parameters);
+            foreach(var parameter in request.Parameters)
+            {
+                if(query.Parameters[parameter.Name] != null)
+                {
+                    query.Parameters[parameter.Name].Value = parameter.Value;
+                }
+                else
+                {
+                    query.Parameters.Add(parameter);
+                }
+            }
             query.Headers.AddRange(Headers);
             query.Headers.AddRange(request.Headers);
 
