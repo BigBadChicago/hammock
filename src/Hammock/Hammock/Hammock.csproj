@@ -81,12 +81,12 @@
     <Compile Include="Extensions\FormatExtensions.cs" />
     <Compile Include="Extensions\JsonExtensions.cs" />
     <Compile Include="Extensions\OAuthExtensions.cs" />
-    <Compile Include="Model\IMockable.cs" />
-    <Compile Include="Model\OAuthToken.cs" />
+    <Compile Include="Web\Mocks\IMockable.cs" />
+    <Compile Include="Authentication\OAuth\OAuthToken.cs" />
     <Compile Include="Model\PropertyChangedBase.cs" />
-    <Compile Include="OAuth\OAuthParameterHandling.cs" />
-    <Compile Include="OAuth\OAuthSignatureMethod.cs" />
-    <Compile Include="OAuth\OAuthTools.cs" />
+    <Compile Include="Authentication\OAuth\OAuthParameterHandling.cs" />
+    <Compile Include="Authentication\OAuth\OAuthSignatureMethod.cs" />
+    <Compile Include="Authentication\OAuth\OAuthTools.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\MathExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
@@ -97,7 +97,6 @@
     <Compile Include="Extensions\WebExtensions.cs" />
     <Compile Include="Extensions\XmlExtensions.cs" />
     <Compile Include="IRestClient.cs" />
-    <Compile Include="Query\HammockWebQueryInfo.cs" />
     <Compile Include="RestClient.cs" />
     <Compile Include="RestRequest.cs" />
     <Compile Include="RestResponse.cs" />
@@ -110,15 +109,13 @@
     <Compile Include="Specifications\OrSpecification.cs" />
     <Compile Include="Specifications\HammockSpecification.cs" />
     <Compile Include="Validation\ValidationException.cs" />
-    <Compile Include="Web\Attributes\BooleanToIntegerAttribute.cs" />
-    <Compile Include="Web\Attributes\DateTimeFormatAttribute.cs" />
-    <Compile Include="Web\Attributes\HeaderAttribute.cs" />
-    <Compile Include="Web\Attributes\NamedAttribute.cs" />
-    <Compile Include="Web\Attributes\ParameterAttribute.cs" />
-    <Compile Include="Web\Attributes\RequiredAttribute.cs" />
-    <Compile Include="Web\Attributes\SpecificationAttribute.cs" />
-    <Compile Include="Web\Attributes\UserAgentAttribute.cs" />
-    <Compile Include="Web\Attributes\WebEntityAttribute.cs" />
+    <Compile Include="Attributes\Specialized\HeaderAttribute.cs" />
+    <Compile Include="Attributes\INamedAttribute.cs" />
+    <Compile Include="Attributes\Specialized\ParameterAttribute.cs" />
+    <Compile Include="Attributes\Validation\RequiredAttribute.cs" />
+    <Compile Include="Attributes\Validation\SpecificationAttribute.cs" />
+    <Compile Include="Attributes\Specialized\UserAgentAttribute.cs" />
+    <Compile Include="Attributes\Specialized\EntityAttribute.cs" />
     <Compile Include="Caching\AspNetCache.cs" />
     <Compile Include="Caching\CacheFactory.cs" />
     <Compile Include="Caching\ICache.cs" />
@@ -137,18 +134,16 @@
     <Compile Include="Web\BasicAuthWebQuery.cs" />
     <Compile Include="Web\GetOrDelete.cs" />
     <Compile Include="Web\IWebQueryInfo.cs" />
-    <Compile Include="Web\OAuth\OAuthWorkflow.Base.cs" />
-    <Compile Include="Web\OAuth\OAuthWorkflow.Methods.cs" />
-    <Compile Include="Web\OAuth\OAuthWorkflow.Urls.cs" />
-    <Compile Include="Web\OAuth\OAuthWebQuery.cs" />
-    <Compile Include="Web\OAuth\OAuthWebQueryInfo.cs" />
+    <Compile Include="Authentication\OAuth\OAuthWorkflow.cs" />
+    <Compile Include="Authentication\OAuth\OAuthWebQuery.cs" />
+    <Compile Include="Authentication\OAuth\OAuthWebQueryInfo.cs" />
     <Compile Include="Web\PostOrPut.cs" />
     <Compile Include="Web\WebCredentials.cs" />
     <Compile Include="Web\WebEntity.cs" />
     <Compile Include="Web\WebQuery.cs" />
     <Compile Include="Web\Triplet.cs" />
     <Compile Include="Web\WebCallback.cs" />
-    <Compile Include="Authentication\BasicAuthCredentials.cs" />
+    <Compile Include="Authentication\Basic\BasicAuthCredentials.cs" />
     <Compile Include="Web\WebFormat.cs" />
     <Compile Include="Web\WebMethod.cs" />
     <Compile Include="Web\WebParameter.cs" />
@@ -158,8 +153,12 @@
     <Compile Include="Web\WebQueryResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authentication\OAuthCredentials.cs" />
-    <Compile Include="Authentication\OAuthType.cs" />
+    <Compile Include="Attributes\Validation\BooleanToIntegerAttribute.cs" />
+    <Compile Include="Attributes\Validation\DateTimeFormatAttribute.cs" />
+    <Compile Include="Attributes\IValidatingAttribute.cs" />
+    <Compile Include="Attributes\Validation\ValidationAttribute.cs" />
+    <Compile Include="Authentication\OAuth\OAuthCredentials.cs" />
+    <Compile Include="Authentication\OAuth\OAuthType.cs" />
     <Compile Include="Caching\CacheMode.cs" />
     <Compile Include="Caching\CacheOptions.cs" />
     <Compile Include="Caching\IDependencyCache.cs" />
@@ -179,9 +178,17 @@
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />
     <Compile Include="Web\WebQuery.Async.cs" />
+    <None Include="Attributes\Specialized\_Specialized.cd" />
+    <None Include="Authentication\OAuth\_OAuth.cd" />
+    <None Include="Authentication\_Authentication.cd" />
     <None Include="Caching\_Caching.cd" />
     <None Include="key.snk" />
+    <None Include="Model\_Model.cd" />
+    <None Include="Web\_Web.cd" />
     <None Include="_Hammock.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="OAuth\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

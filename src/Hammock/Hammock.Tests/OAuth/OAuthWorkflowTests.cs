@@ -2,9 +2,9 @@
 using System.Configuration;
 using System.Diagnostics;
 using System.Net;
+using Hammock.Authentication.OAuth;
 using Hammock.OAuth;
 using Hammock.Web;
-using Hammock.Web.OAuth;
 using Hammock.Web.Query.OAuth;
 using NUnit.Framework;
 

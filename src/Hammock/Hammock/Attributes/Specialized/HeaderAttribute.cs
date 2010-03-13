@@ -1,11 +1,14 @@
 using System;
 
-namespace Hammock.Web.Attributes
+namespace Hammock.Attributes.Specialized
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    internal class ParameterAttribute : Attribute, INamedAttribute
+    public class HeaderAttribute : Attribute, INamedAttribute
     {
-        public ParameterAttribute(string name)
+        public HeaderAttribute(string name)
         {
             Name = name;
         }

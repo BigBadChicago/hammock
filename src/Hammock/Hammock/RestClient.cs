@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
-using Hammock.Query;
 using Hammock.Web;
-using Hammock.Web.Query.Basic;
-
+using Hammock.Web.Query;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
 #else
@@ -22,13 +21,10 @@ namespace Hammock
     {
         public virtual string Authority { get; set; }
 
-        protected internal HammockQueryInfo Info { get; private set; }
-
         public RestClient()
         {
             Headers = new NameValueCollection(0);
             Parameters = new WebParameterCollection();
-            Info = new HammockQueryInfo();
         }
 
 #if !Silverlight
@@ -141,6 +137,12 @@ namespace Hammock
             return credentials;
         }
 
+        private IWebQueryInfo GetInfo(RestBase request)
+        {
+            var info = request.Info ?? Info;
+            return info;
+        }
+
         private TimeSpan? GetTimeout(RestBase request)
         {
             return request.Timeout ?? Timeout;
@@ -198,15 +200,7 @@ namespace Hammock
         private RestResponse<T> BuildResponseFromResult<T>(RestBase request, WebQuery query)
         {
             var result = query.Result;
-            var response = new RestResponse<T>
-            {
-                StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode,
-                StatusDescription = result.ResponseHttpStatusDescription,
-                Content = result.Response,
-                ContentType = result.ResponseType,
-                ContentLength = result.ResponseLength,
-                ResponseUri = result.ResponseUri
-            };
+            var response = BuildBaseResponse(result) as RestResponse<T>;
 
             DeserializeEntityBody(result, request, response);
 
@@ -215,14 +209,19 @@ namespace Hammock
 
         private static RestResponse BuildBaseResponse(WebQueryResult result)
         {
-            return new RestResponse
+            var response = new RestResponse
                        {
                            StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode,
                            StatusDescription = result.ResponseHttpStatusDescription,
                            Content = result.Response,
                            ContentType = result.ResponseType,
+                           ContentLength = result.ResponseLength,
                            ResponseUri = result.ResponseUri,
                        };
+
+            Trace.WriteLine(String.Concat((int)response.StatusCode, " ", response.StatusDescription));
+
+            return response;
         }
 
         private void DeserializeEntityBody(WebQueryResult result, RestRequest request, RestResponse response)
@@ -285,6 +284,7 @@ namespace Hammock
         {
             var method = GetWebMethod(request);
             var credentials = GetWebCredentials(request);
+            var info = GetInfo(request);
             
             // [DC]: UserAgent is set via Info
             // [DC]: Request credentials trump client credentials

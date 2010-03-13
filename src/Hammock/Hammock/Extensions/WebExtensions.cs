@@ -1,37 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using Hammock.Authentication;
-using Hammock.Web;
-using Hammock.Web.Attributes;
+using Hammock.Attributes;
+using Hammock.Attributes.Validation;
 using Hammock.Web.Query;
 
 namespace Hammock.Extensions
 {
     internal static class WebExtensions
     {
-        public static Uri Uri(this string url)
-        {
-            return new Uri(url);
-        }
-
-        public static WebParameterCollection ParseParameters(this IWebQueryInfo info)
-        {
-            var parameters = new Dictionary<string, string>();
-            var properties = info.GetType().GetProperties();
-
-            info.ParseAttributes<ParameterAttribute>(properties, parameters);
-
-            var collection = new WebParameterCollection();
-            parameters.ForEach(p => collection.Add(new WebParameter(p.Key, p.Value)));
-
-            return collection;
-        }
-
-        public static void ParseAttributes<T>(this IWebQueryInfo info,
-                                              IEnumerable<PropertyInfo> properties,
-                                              IDictionary<string, string> collection)
+        public static void ParseNamedAttributes<T>(this IWebQueryInfo info,
+                                                   IEnumerable<PropertyInfo> properties,
+                                                   IDictionary<string, string> transforms,
+                                                   IDictionary<string, string> collection) 
             where T : Attribute, INamedAttribute
         {
             foreach (var property in properties)
@@ -40,29 +21,16 @@ namespace Hammock.Extensions
 
                 foreach (var attribute in attributes)
                 {
-                    var value = property.GetValue(info, null);
+                    var value = transforms.ContainsKey(property.Name)
+                                    ? transforms[property.Name]
+                                    : property.GetValue(info, null);
 
                     if (value == null)
                     {
                         continue;
                     }
 
-                    if (property.HasCustomAttribute<BooleanToIntegerAttribute>(true))
-                    {
-                        value = ((bool)value) ? "1" : "0";
-                    }
-
-                    var dateFormatAttribute = property
-                        .GetCustomAttributes<DateTimeFormatAttribute>(true)
-                        .SingleOrDefault();
-
-                    if (dateFormatAttribute != null)
-                    {
-                        value = ((DateTime)value).ToString(dateFormatAttribute.Format);
-                    }
-
                     var header = value.ToString();
-
                     if (!header.IsNullOrBlank())
                     {
                         collection.Add(attribute.Name, header);
@@ -71,15 +39,43 @@ namespace Hammock.Extensions
             }
         }
 
-        public static string ToAuthorizationHeader(this BasicAuthCredentials credentials)
-        {
-            return ToAuthorizationHeader(credentials.Username, credentials.Password);
-        }
-
-        public static string ToAuthorizationHeader(string username, string password)
+        public static string ToBasicAuthorizationHeader(string username, string password)
         {
             var token = "{0}:{1}".FormatWith(username, password).GetBytes().ToBase64String();
             return "Basic {0}".FormatWith(token);
+        }
+
+        public static void ParseValidationAttributes(this IWebQueryInfo info,
+                                                     IEnumerable<PropertyInfo> properties,
+                                                     IDictionary<string, string> collection) 
+        {
+            foreach (var property in properties)
+            {
+                var attributes = property.GetCustomAttributes<ValidationAttribute>(true);
+
+                foreach (var attribute in attributes)
+                {
+                    // Support multiple transforms
+                    var value = collection.ContainsKey(property.Name)
+                                    ? collection[property.Name]
+                                    : property.GetValue(info, null);
+                    
+                    var transformed = attribute.TransformValue(property, value);
+                    if (transformed.IsNullOrBlank())
+                    {
+                        continue;
+                    }
+
+                    if(collection.ContainsKey(property.Name))
+                    {
+                        collection[property.Name] = transformed;
+                    }
+                    else
+                    {
+                        collection.Add(property.Name, transformed);
+                    }
+                }
+            }
         }
     }
 }

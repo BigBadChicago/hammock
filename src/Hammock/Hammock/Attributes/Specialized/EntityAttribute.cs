@@ -1,12 +1,15 @@
 using System;
 using System.Text;
 
-namespace Hammock.Web.Attributes
+namespace Hammock.Attributes.Specialized
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    internal class WebEntityAttribute : Attribute
+    public class EntityAttribute : Attribute
     {
-        public WebEntityAttribute()
+        public EntityAttribute()
         {
             ContentType = "text/xml";
             ContentEncoding = Encoding.UTF8;

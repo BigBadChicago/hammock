@@ -1,4 +1,4 @@
-namespace Hammock.Web.Attributes
+namespace Hammock.Attributes
 {
     internal interface INamedAttribute
     {

@@ -2,9 +2,8 @@ using System;
 using Hammock.Extensions;
 using Hammock.Web;
 using Hammock.Web.Query;
-using Hammock.Web.Query.Basic;
 
-namespace Hammock.Authentication
+namespace Hammock.Authentication.Basic
 {
 #if !SILVERLIGHT
     [Serializable]
@@ -20,8 +19,8 @@ namespace Hammock.Authentication
                                     WebMethod method)
         {
             return HasAuth
-                ? new BasicAuthWebQuery(info, Username, Password)
-                : new BasicAuthWebQuery(info);
+                       ? new BasicAuthWebQuery(info, Username, Password)
+                       : new BasicAuthWebQuery(info);
         }
 
         public bool HasAuth

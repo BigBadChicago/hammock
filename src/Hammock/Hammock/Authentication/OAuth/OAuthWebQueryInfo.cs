@@ -1,13 +1,10 @@
-using Hammock.OAuth;
-using Hammock.Web.Attributes;
+using Hammock.Attributes;
+using Hammock.Attributes.Specialized;
+using Hammock.Web;
+using Hammock.Web.Query;
 
-namespace Hammock.Web.Query.OAuth
+namespace Hammock.Authentication.OAuth
 {
-    /// <summary>
-    /// Mandatory and some optional oAuth parameters travelling with the request.
-    /// <seealso cref="http://www.hueniverse.com/hueniverse/2008/10/beginners-gui-1.html"/>
-    /// <seealso cref="http://tools.ietf.org/html/draft-dehora-farrell-oauth-accesstoken-creds-00#section-4"/>
-    /// </summary>
     public class OAuthWebQueryInfo : IWebQueryInfo
     {
         [Parameter("oauth_consumer_key")]
@@ -31,8 +28,6 @@ namespace Hammock.Web.Query.OAuth
         [Parameter("oauth_version")]
         public string Version { get; set; }
 
-        // Optional parameters 
-
         [Parameter("oauth_callback")]
         public string Callback { get; set; }
 
@@ -52,9 +47,11 @@ namespace Hammock.Web.Query.OAuth
         public string UserAgent { get; set; }
 
         public WebMethod WebMethod { get; set; }
+        
         public OAuthParameterHandling ParameterHandling { get; set; }
-
+        
         internal string ConsumerSecret { get; set; }
+        
         internal string TokenSecret { get; set; }
     }
 }

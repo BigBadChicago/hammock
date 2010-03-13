@@ -6,8 +6,7 @@ namespace Hammock.Extensions
 {
     internal static class SpecificationExtensions
     {
-        public static bool Satisfies<T>(this object instance)
-            where T : ISpecification
+        public static bool Satisfies<T>(this object instance) where T : ISpecification
         {
             var marker = Activator.CreateInstance<T>();
             var type = typeof (ISpecification<>).MakeGenericType(instance.GetType());

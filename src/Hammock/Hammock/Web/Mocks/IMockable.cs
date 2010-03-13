@@ -1,4 +1,4 @@
-namespace Hammock.Model
+namespace Hammock.Web.Mocks
 {
     public interface IMockable
     {

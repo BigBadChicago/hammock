@@ -11,6 +11,8 @@ using Hammock.Silverlight.Compat;
 #else
 using System;
 using System.Collections.Specialized;
+using Hammock.Web.Query;
+
 #endif
 
 namespace Hammock
@@ -39,6 +41,7 @@ namespace Hammock
         public virtual CacheOptions CacheOptions { get; set; }
         public virtual Func<string> CacheKeyFunction { get; set; }
         public DecompressionMethods DecompressionMethods { get; set; }
+        public virtual IWebQueryInfo Info { get; set; }
 
         public void AddHeader(string name, string value)
         {

@@ -14,6 +14,8 @@
     <SilverlightApplication>false</SilverlightApplication>
     <ValidateXaml>true</ValidateXaml>
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,17 +65,68 @@
     <Reference Include="System.Xml.Linq, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Hammock\Authentication\BasicAuthCredentials.cs">
-      <Link>Authentication\BasicAuthCredentials.cs</Link>
+    <Compile Include="..\Hammock\Attributes\INamedAttribute.cs">
+      <Link>Attributes\INamedAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Authentication\IWebCredentials.cs">
-      <Link>Authentication\IWebCredentials.cs</Link>
+    <Compile Include="..\Hammock\Attributes\IValidatingAttribute.cs">
+      <Link>Attributes\IValidatingAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Authentication\OAuthCredentials.cs">
-      <Link>Authentication\OAuthCredentials.cs</Link>
+    <Compile Include="..\Hammock\Attributes\Specialized\EntityAttribute.cs">
+      <Link>Attributes\Specialized\EntityAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Authentication\OAuthType.cs">
-      <Link>Authentication\OAuthType.cs</Link>
+    <Compile Include="..\Hammock\Attributes\Specialized\HeaderAttribute.cs">
+      <Link>Attributes\Specialized\HeaderAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Specialized\ParameterAttribute.cs">
+      <Link>Attributes\Specialized\ParameterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Specialized\UserAgentAttribute.cs">
+      <Link>Attributes\Specialized\UserAgentAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Validation\BooleanToIntegerAttribute.cs">
+      <Link>Attributes\Validation\BooleanToIntegerAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Validation\DateTimeFormatAttribute.cs">
+      <Link>Attributes\Validation\DateTimeFormatAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Validation\RequiredAttribute.cs">
+      <Link>Attributes\Validation\RequiredAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Validation\SpecificationAttribute.cs">
+      <Link>Attributes\Validation\SpecificationAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Attributes\Validation\ValidationAttribute.cs">
+      <Link>Attributes\Validation\ValidationAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\Basic\BasicAuthCredentials.cs">
+      <Link>Authentication\Basic\BasicAuthCredentials.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthCredentials.cs">
+      <Link>Authentication\OAuth\OAuthCredentials.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthParameterHandling.cs">
+      <Link>Authentication\OAuth\OAuthParameterHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthSignatureMethod.cs">
+      <Link>Authentication\OAuth\OAuthSignatureMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthToken.cs">
+      <Link>Authentication\OAuth\OAuthToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthTools.cs">
+      <Link>Authentication\OAuth\OAuthTools.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthType.cs">
+      <Link>Authentication\OAuth\OAuthType.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthWebQuery.cs">
+      <Link>Authentication\OAuth\OAuthWebQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthWebQueryInfo.cs">
+      <Link>Authentication\OAuth\OAuthWebQueryInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Authentication\OAuth\OAuthWorkflow.cs">
+      <Link>Authentication\OAuth\OAuthWorkflow.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Caching\CacheFactory.cs">
       <Link>Caching\CacheFactory.cs</Link>
@@ -135,26 +188,8 @@
     <Compile Include="..\Hammock\IRestClient.cs">
       <Link>IRestClient.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Model\IMockable.cs">
-      <Link>Model\IMockable.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Model\OAuthToken.cs">
-      <Link>Model\OAuthToken.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Model\PropertyChangedBase.cs">
       <Link>Model\PropertyChangedBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\OAuth\OAuthParameterHandling.cs">
-      <Link>OAuth\OAuthParameterHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\OAuth\OAuthSignatureMethod.cs">
-      <Link>OAuth\OAuthSignatureMethod.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\OAuth\OAuthTools.cs">
-      <Link>OAuth\OAuthTools.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Query\HammockWebQueryInfo.cs">
-      <Link>Query\HammockWebQueryInfo.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\RestBase.cs">
       <Link>RestBase.cs</Link>
@@ -222,33 +257,6 @@
     <Compile Include="..\Hammock\Validation\ValidationException.cs">
       <Link>Validation\ValidationException.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\BooleanToIntegerAttribute.cs">
-      <Link>Web\Attributes\BooleanToIntegerAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\DateTimeFormatAttribute.cs">
-      <Link>Web\Attributes\DateTimeFormatAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\HeaderAttribute.cs">
-      <Link>Web\Attributes\HeaderAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\NamedAttribute.cs">
-      <Link>Web\Attributes\NamedAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\ParameterAttribute.cs">
-      <Link>Web\Attributes\ParameterAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\RequiredAttribute.cs">
-      <Link>Web\Attributes\RequiredAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\SpecificationAttribute.cs">
-      <Link>Web\Attributes\SpecificationAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\UserAgentAttribute.cs">
-      <Link>Web\Attributes\UserAgentAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Attributes\WebEntityAttribute.cs">
-      <Link>Web\Attributes\WebEntityAttribute.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Web\BasicAuthWebQuery.cs">
       <Link>Web\BasicAuthWebQuery.cs</Link>
     </Compile>
@@ -266,21 +274,6 @@
     </Compile>
     <Compile Include="..\Hammock\Web\IWebQueryInfo.cs">
       <Link>Web\IWebQueryInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\OAuth\OAuthWebQuery.cs">
-      <Link>Web\OAuth\OAuthWebQuery.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\OAuth\OAuthWebQueryInfo.cs">
-      <Link>Web\OAuth\OAuthWebQueryInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\OAuth\OAuthWorkflow.Base.cs">
-      <Link>Web\OAuth\OAuthWorkflow.Base.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\OAuth\OAuthWorkflow.Methods.cs">
-      <Link>Web\OAuth\OAuthWorkflow.Methods.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\OAuth\OAuthWorkflow.Urls.cs">
-      <Link>Web\OAuth\OAuthWorkflow.Urls.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Web\Pair.cs">
       <Link>Web\Pair.cs</Link>
@@ -332,6 +325,9 @@
     <Compile Include="Compat\NameValueCollection.cs" />
     <Compile Include="Compat\Trace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="key.snk" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Web\Mocks\" />

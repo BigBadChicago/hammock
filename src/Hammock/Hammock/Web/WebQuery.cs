@@ -4,11 +4,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
+using Hammock.Attributes.Specialized;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Model;
-using Hammock.Web.Attributes;
+using Hammock.Validation;
+using Hammock.Web.Mocks;
 using Hammock.Web.Query;
 
 #if SILVERLIGHT
@@ -69,10 +72,30 @@ namespace Hammock.Web
 
         private void SetQueryMeta(IWebQueryInfo info)
         {
+            if(info == null)
+            {
+                Headers = new Dictionary<string, string>(0);
+                Parameters = new WebParameterCollection();
+                return;
+            }
+
             Info = info;
-            Headers = BuildRequestHeaders();
-            Parameters = BuildRequestParameters();
-            ParseUserAgent();
+            IEnumerable<PropertyInfo> properties;
+            IDictionary<string, string> transforms;
+
+            ParseTransforms(out properties, out transforms);
+            Headers = ParseInfoHeaders(properties, transforms);
+            Parameters = ParseInfoParameters(properties, transforms);
+            ParseUserAgent(properties);
+            ParseWebEntity(properties);
+        }
+
+        private void ParseTransforms(out IEnumerable<PropertyInfo> properties, 
+                                     out IDictionary<string, string> transforms)
+        {
+            properties = Info.GetType().GetProperties();
+            transforms = new Dictionary<string, string>(0);
+            Info.ParseValidationAttributes(properties, transforms);
         }
 
         private void InitializeResult()
@@ -123,7 +146,7 @@ namespace Hammock.Web
 
             if (!proxyUriBuilder.UserName.IsNullOrBlank())
             {
-                request.Headers["Proxy-Authorization"] = WebExtensions.ToAuthorizationHeader(proxyUriBuilder.UserName,
+                request.Headers["Proxy-Authorization"] = WebExtensions.ToBasicAuthorizationHeader(proxyUriBuilder.UserName,
                                                                                              proxyUriBuilder.Password);
             }
 #else
@@ -213,7 +236,6 @@ namespace Hammock.Web
                 request.ServicePoint.MaxIdleTime = ServicePoint.MaxIdleTime;
             }
 #endif
-            
 
 #if !SILVERLIGHT
             if (!Proxy.IsNullOrBlank())
@@ -221,6 +243,7 @@ namespace Hammock.Web
                 SetWebProxy(request);
             }
 #endif
+
             if (!UserAgent.IsNullOrBlank())
             {
 #if !SILVERLIGHT
@@ -345,21 +368,23 @@ namespace Hammock.Web
             return url;
         }
 
-        private IDictionary<string, string> BuildRequestHeaders()
+        // [DC] Headers don't need to be unique, this should change
+        protected virtual IDictionary<string, string> ParseInfoHeaders(IEnumerable<PropertyInfo> properties,
+                                                                       IDictionary<string, string> transforms)
         {
             var headers = new Dictionary<string, string>();
-            var properties = Info.GetType().GetProperties();
-
-            Info.ParseAttributes<HeaderAttribute>(properties, headers);
+            
+            Info.ParseNamedAttributes<HeaderAttribute>(properties, transforms, headers);
+            
             return headers;
         }
 
-        protected WebParameterCollection BuildRequestParameters()
+        protected virtual WebParameterCollection ParseInfoParameters(IEnumerable<PropertyInfo> properties,
+                                                                     IDictionary<string, string> transforms)
         {
             var parameters = new Dictionary<string, string>();
-            var properties = Info.GetType().GetProperties();
-
-            Info.ParseAttributes<ParameterAttribute>(properties, parameters);
+            
+            Info.ParseNamedAttributes<ParameterAttribute>(properties, transforms, parameters);
 
             var collection = new WebParameterCollection();
             parameters.ForEach(p => collection.Add(new WebParameter(p.Key, p.Value)));
@@ -367,9 +392,16 @@ namespace Hammock.Web
             return collection;
         }
 
-        private void ParseUserAgent()
+        protected virtual WebParameterCollection ParseInfoParameters()
         {
-            var properties = Info.GetType().GetProperties();
+            IEnumerable<PropertyInfo> properties;
+            IDictionary<string, string> transforms;
+            ParseTransforms(out properties, out transforms);
+            return ParseInfoParameters(properties, transforms);
+        }
+
+        private void ParseUserAgent(IEnumerable<PropertyInfo> properties)
+        {
             var count = 0;
             foreach (var property in properties)
             {
@@ -392,6 +424,50 @@ namespace Hammock.Web
 
                 var value = property.GetValue(Info, null);
                 UserAgent = value != null ? value.ToString() : null;
+            }
+        }
+
+        private void ParseWebEntity(IEnumerable<PropertyInfo> properties)
+        {
+            if (Entity != null)
+            {
+                // Already set by client or request
+                return;
+            }
+
+            var count = 0;
+            foreach (var property in properties)
+            {
+                var attributes = property.GetCustomAttributes<EntityAttribute>(true);
+                count += attributes.Count();
+                if (count > 1)
+                {
+                    throw new ValidationException("Cannot declare more than one entity per query");
+                }
+
+                if (count < 1)
+                {
+                    continue;
+                }
+
+                if (Entity != null)
+                {
+                    // Already set in this pass
+                    continue;
+                }
+
+                var value = property.GetValue(Info, null);
+
+                var content = value != null ? value.ToString() : null;
+                var contentEncoding = attributes.Single().ContentEncoding;
+                var contentType = attributes.Single().ContentType;
+
+                Entity = new WebEntity
+                {
+                    Content = content,
+                    ContentEncoding = contentEncoding,
+                    ContentType = contentType
+                };
             }
         }
 
@@ -1245,7 +1321,7 @@ namespace Hammock.Web
             request.PreAuthenticate = true;
             if(!username.IsNullOrBlank() && !password.IsNullOrBlank())
             {
-                request.Headers["Authorization"] = WebExtensions.ToAuthorizationHeader(username, password);    
+                request.Headers["Authorization"] = WebExtensions.ToBasicAuthorizationHeader(username, password);    
             }
 
             WebResponse response = null;

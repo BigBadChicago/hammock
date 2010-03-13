@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Hammock.Authentication.OAuth;
 using Hammock.Extensions;
 using Hammock.OAuth;
-using Hammock.Web.OAuth;
-
 #if !Silverlight
 using System.Web;
 #endif
@@ -237,23 +236,29 @@ namespace Hammock.Web.Query.OAuth
 #if !SILVERLIGHT
         public override string Request(string url, IEnumerable<HttpPostParameter> parameters, out WebException exception)
         {
-            RecalculateSignature(url);
+            RecalculateProtectedResourceSignature(url);
             return base.Request(url, parameters, out exception);
         }
 
         public override string Request(string url, out WebException exception)
         {
-            RecalculateSignature(url); 
+            RecalculateProtectedResourceSignature(url); 
             return base.Request(url, out exception);
         }
 #endif
 
-        private void RecalculateSignature(string url)
+        private void RecalculateProtectedResourceSignature(string url)
         {
             var info = (OAuthWebQueryInfo) Info;
-            if (string.IsNullOrEmpty(info.Token) || string.IsNullOrEmpty(info.TokenSecret))
+            if (info.Token.IsNullOrBlank() || info.TokenSecret.IsNullOrBlank())
             {
                 // No signature values to work with
+                return;
+            }
+
+            if(info.ClientUsername.IsNullOrBlank() || info.ClientPassword.IsNullOrBlank())
+            {
+                // Not a protected resouce request
                 return;
             }
 
@@ -273,7 +278,7 @@ namespace Hammock.Web.Query.OAuth
 
             var parameters = new WebParameterCollection();
             Info = oauth.BuildProtectedResourceInfo(Method, parameters, url);
-            Parameters = BuildRequestParameters();
+            Parameters = ParseInfoParameters();
         }
     }
 }

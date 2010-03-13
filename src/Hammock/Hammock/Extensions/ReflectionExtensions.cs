@@ -19,6 +19,13 @@ namespace Hammock.Extensions
             return attributes.Length > 0;
         }
 
+        public static object GetValue(this object instance, string property)
+        {
+            var info = instance.GetType().GetProperty(property);
+            var value = info.GetValue(instance, null);
+            return value;
+        }
+
         public static void SetValue(this object instance, string property, object value)
         {
             var info = instance.GetType().GetProperty(property);

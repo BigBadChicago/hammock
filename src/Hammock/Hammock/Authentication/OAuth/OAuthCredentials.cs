@@ -1,32 +1,34 @@
 ﻿using System;
 using Hammock.OAuth;
 using Hammock.Web;
-using Hammock.Web.OAuth;
 using Hammock.Web.Query;
 using Hammock.Web.Query.OAuth;
 
-namespace Hammock.Authentication
+namespace Hammock.Authentication.OAuth
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class OAuthCredentials : IWebCredentials
     {
-        public string ConsumerKey { get; set; }
-        public string ConsumerSecret { get; set; }
-        public OAuthParameterHandling ParameterHandling { get; set; }
-        public OAuthSignatureMethod SignatureMethod { get; set; }
-        public OAuthType Type { get; set; }
+        public virtual string ConsumerKey { get; set; }
+        public virtual string ConsumerSecret { get; set; }
+        public virtual OAuthParameterHandling ParameterHandling { get; set; }
+        public virtual OAuthSignatureMethod SignatureMethod { get; set; }
+        public virtual OAuthType Type { get; set; }
 
-        public string Token { get; set; }
-        public string TokenSecret { get; set; }
-        public string Verifier { get; set; }
-        public string ClientUsername { get; set; }
-        public string ClientPassword { get; set; }
+        public virtual string Token { get; set; }
+        public virtual string TokenSecret { get; set; }
+        public virtual string Verifier { get; set; }
+        public virtual string ClientUsername { get; set; }
+        public virtual string ClientPassword { get; set; }
 
-        public string RequestTokenUrl { get; set; }
-        public string AccessTokenUrl { get; set; }
-        public string AuthorizationUrl { get; set; }
-        public string CallbackUrl { get; set; }
+        public virtual string RequestTokenUrl { get; set; }
+        public virtual string AccessTokenUrl { get; set; }
+        public virtual string AuthorizationUrl { get; set; }
+        public virtual string CallbackUrl { get; set; }
 
-        public WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method)
+        public virtual WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method)
         {
             OAuthWebQueryInfo oauth;
 
@@ -69,3 +71,5 @@ namespace Hammock.Authentication
         }
     }
 }
+
+

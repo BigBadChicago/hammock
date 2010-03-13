@@ -1,8 +1,9 @@
 using System;
 using System.Net;
 using Hammock.Extensions;
+using Hammock.Web.Query;
 
-namespace Hammock.Web.Query.Basic
+namespace Hammock.Web
 {
     /// <summary>
     /// A web query engine for making requests that use basic HTTP authorization.
@@ -22,6 +23,7 @@ namespace Hammock.Web.Query.Basic
         public BasicAuthWebQuery(IWebQueryInfo info) :
             base(info)
         {
+
         }
 
         public bool HasAuth
@@ -41,7 +43,7 @@ namespace Hammock.Web.Query.Basic
                 return;
             }
 
-            var credentials = WebExtensions.ToAuthorizationHeader(_username, _password);
+            var credentials = WebExtensions.ToBasicAuthorizationHeader(_username, _password);
             AuthorizationHeader = header;
 
 #if !SILVERLIGHT

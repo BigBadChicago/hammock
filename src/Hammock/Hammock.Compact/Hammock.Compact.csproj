@@ -18,6 +18,8 @@
     <NativePlatformName>Pocket PC 2003</NativePlatformName>
     <FormFactorID>
     </FormFactorID>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -381,8 +383,10 @@
     </Compile>
     <Compile Include="Mono\WebHeaderCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\HammockWebQueryInfo.cs" />
     <Compile Include="Validation\ValidationException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="key.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>

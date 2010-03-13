@@ -1,18 +1,50 @@
 using System;
 using System.Collections.Generic;
+using System.Web;
 using Hammock.Extensions;
 using Hammock.OAuth;
+using Hammock.Web;
 using Hammock.Web.Query.OAuth;
 
-#if !Silverlight
-using System.Web;
-#endif
-
-namespace Hammock.Web.OAuth
+namespace Hammock.Authentication.OAuth
 {
+    /// <summary>
+    /// A class to encapsulate OAuth authentication flow.
+    /// <seealso cref="http://oauth.net/core/1.0#anchor9"/>
+    /// </summary>
     public partial class OAuthWorkflow
     {
         public string OAUTH_VERSION = "1.0";
+        public string ConsumerKey { get; set; }
+        public string ConsumerSecret { get; set; }
+        public string Token { get; set; }
+        public string TokenSecret { get; set; }
+        public string CallbackUrl { get; set; }
+        public string Verifier { get; set; }
+
+        public OAuthSignatureMethod SignatureMethod { get; set; }
+        public OAuthParameterHandling ParameterHandling { get; set; }
+
+        public string ClientUsername { get; set; }
+        public string ClientPassword { get; set; }
+
+        /// <summary>
+        /// The request token url.
+        /// </summary>
+        /// <seealso cref="http://oauth.net/core/1.0#request_urls"/>
+        public string RequestTokenUrl { get; set; }
+
+        /// <summary>
+        /// The access token url.
+        /// </summary>
+        /// <seealso cref="http://oauth.net/core/1.0#request_urls"/>
+        public string AccessTokenUrl { get; set; }
+
+        /// <summary>
+        /// THe user authorization url.
+        /// </summary>
+        /// <seealso cref="http://oauth.net/core/1.0#request_urls"/>
+        public string AuthorizationUrl { get; set; }
 
         /// <summary>
         /// Generates a <see cref="OAuthWebQueryInfo"/> instance to pass to an

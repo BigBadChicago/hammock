@@ -2,6 +2,8 @@
 using System.Configuration;
 using System.Net;
 using Hammock.Authentication;
+using Hammock.Authentication.Basic;
+using Hammock.Authentication.OAuth;
 using Hammock.OAuth;
 using Hammock.Serialization;
 using Hammock.Tests.Converters;
@@ -86,7 +88,6 @@ namespace Hammock.Tests
             var response = client.Request(request);
 
             Assert.IsNotNull(response);
-            Console.WriteLine(response);
         }
 
         [Test]
