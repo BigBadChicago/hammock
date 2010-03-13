@@ -20,9 +20,11 @@ namespace Hammock
 #endif
     public abstract class RestBase : PropertyChangedBase 
     {
+#if !Silverlight
+        public virtual ServicePoint ServicePoint { get; set; }
+#endif
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
-
         public virtual string Proxy { get; set; }
         public virtual TimeSpan? Timeout { get; set; }
         public virtual string VersionPath { get; set; }

@@ -90,6 +90,8 @@
     <None Include="app.config" />
     <None Include="app.config.example" />
     <None Include="key.snk" />
+    <Compile Include="RestClientTests.Mocks.cs" />
+    <Compile Include="RestClientTests.Caching.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

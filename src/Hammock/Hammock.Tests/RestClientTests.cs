@@ -2,11 +2,9 @@
 using System.Configuration;
 using System.Net;
 using Hammock.Authentication;
-using Hammock.Caching;
 using Hammock.OAuth;
 using Hammock.Serialization;
 using Hammock.Tests.Converters;
-using Hammock.Tests.Helpers;
 using Hammock.Tests.Postmark;
 using Hammock.Web;
 using Newtonsoft.Json;
@@ -89,37 +87,6 @@ namespace Hammock.Tests
 
             Assert.IsNotNull(response);
             Console.WriteLine(response);
-        }
-
-        [Test]
-        public void Can_make_basic_auth_request_with_caching_synchronously()
-        {
-            var client = new RestClient
-                             {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1",
-                                 Cache = CacheFactory.AspNetCache,
-                                 CacheKeyFunction = () => _twitterUsername,
-                                 CacheOptions = new CacheOptions
-                                                    {
-                                                        Duration = 10.Minutes(),
-                                                        Mode = CacheMode.AbsoluteExpiration
-                                                    }
-                             };
-
-            var request = new RestRequest
-                              {
-                                  Credentials = BasicAuthForTwitter,
-                                  Path = "statuses/home_timeline.json",
-                              };
-
-            var first = client.Request(request);
-            Assert.IsNotNull(first);
-            Assert.IsFalse(first.IsFromCache, "First request was not served from the web.");
-
-            var second = client.Request(request);
-            Assert.IsNotNull(second);
-            Assert.IsTrue(second.IsFromCache, "Second request was not served from cache.");
         }
 
         [Test]

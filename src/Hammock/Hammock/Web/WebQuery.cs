@@ -20,12 +20,12 @@ namespace Hammock.Web
     public abstract partial class WebQuery
     {
         private static readonly object _sync = new object();
-        
+
         public virtual IWebQueryInfo Info { get; protected set; }
         public virtual string UserAgent { get; protected internal set; }
         public virtual IDictionary<string, string> Headers { get; protected set; }
         public virtual WebParameterCollection Parameters { get; protected set; }
-        protected virtual internal WebEntity Entity { get; set; }
+        protected internal virtual WebEntity Entity { get; set; }
         public virtual WebMethod Method { get; set; }
         public virtual string Proxy { get; set; }
         public virtual bool MockWebQueryClient { get; set; }
@@ -37,6 +37,11 @@ namespace Hammock.Web
         public virtual WebQueryResult Result { get; private set; }
         public virtual bool KeepAlive { get; set; }
         public virtual string SourceUrl { get; set; }
+        
+#if !Silverlight
+        public virtual ServicePoint ServicePoint { get; set; }
+#endif
+
         private WebResponse _webResponse;
         public virtual WebResponse WebResponse
         {
@@ -194,6 +199,22 @@ namespace Hammock.Web
 
         protected virtual void SetRequestMeta(HttpWebRequest request)
         {
+#if !SILVERLIGHT
+            if (ServicePoint != null)
+            {
+#if !Smartphone
+                request.ServicePoint.ConnectionLeaseTimeout = ServicePoint.ConnectionLeaseTimeout;
+                request.ServicePoint.ReceiveBufferSize = ServicePoint.ReceiveBufferSize;
+                request.ServicePoint.UseNagleAlgorithm = ServicePoint.UseNagleAlgorithm;
+                request.ServicePoint.BindIPEndPointDelegate = ServicePoint.BindIPEndPointDelegate;
+#endif
+                request.ServicePoint.ConnectionLimit = ServicePoint.ConnectionLimit;
+                request.ServicePoint.Expect100Continue = ServicePoint.Expect100Continue;
+                request.ServicePoint.MaxIdleTime = ServicePoint.MaxIdleTime;
+            }
+#endif
+            
+
 #if !SILVERLIGHT
             if (!Proxy.IsNullOrBlank())
             {
