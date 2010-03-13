@@ -219,8 +219,6 @@ namespace Hammock
                            ResponseUri = result.ResponseUri,
                        };
 
-            Trace.WriteLine(String.Concat((int)response.StatusCode, " ", response.StatusDescription));
-
             return response;
         }
 

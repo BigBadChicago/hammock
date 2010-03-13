@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Text;
 using Hammock.Attributes.Specialized;
 using Hammock.Caching;
 using Hammock.Extensions;
-using Hammock.Model;
 using Hammock.Validation;
 using Hammock.Web.Mocks;
 using Hammock.Web.Query;
@@ -123,6 +123,9 @@ namespace Hammock.Web
             var statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
             var statusDescription = httpWebResponse.StatusDescription;
 
+            Trace.WriteLine("RESPONSE: " + statusCode + " " + statusDescription);
+            Trace.WriteLine("BODY: " + e.Response);
+
             Result.ResponseHttpStatusCode = statusCode;
             Result.ResponseHttpStatusDescription = statusDescription;
             Result.ResponseType = httpWebResponse.ContentType;
@@ -170,6 +173,8 @@ namespace Hammock.Web
         protected virtual WebRequest BuildPostOrPutFormWebRequest(PostOrPut method, string url, out byte[] content)
         {
             var parameters = AppendParameters(url).Replace(url + "?", "");
+            Trace.WriteLine(method.ToUpper() + ": " + url);
+            Trace.WriteLine("BODY: " + parameters);
 
             var request = (HttpWebRequest) WebRequest.Create(url);
             AuthenticateRequest(request);
@@ -181,8 +186,7 @@ namespace Hammock.Web
 #if !SILVERLIGHT
             content = Encoding.ASCII.GetBytes(parameters);
             request.ContentLength = content.Length;
-#else
-    //content = Encoding.UTF8.GetBytes(url);
+#else       
             content = Encoding.UTF8.GetBytes(parameters);
 #endif
             return request;
@@ -191,6 +195,7 @@ namespace Hammock.Web
         private WebRequest BuildPostOrPutEntityWebRequest(PostOrPut method, string url, out byte[] content)
         {
             url = AppendParameters(url);
+            Trace.WriteLine(method.ToUpper() + ": " + url);
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             AuthenticateRequest(request);
@@ -199,7 +204,10 @@ namespace Hammock.Web
 
             SetRequestMeta(request);
 
-            content = Entity.ContentEncoding.GetBytes(Entity.Content.ToString());
+            var entity = Entity.Content.ToString();
+            Trace.WriteLine("BODY: " + entity);
+
+            content = Entity.ContentEncoding.GetBytes(entity);
 #if !Silverlight
             // [DC]: This is set by Silverlight
             request.ContentLength = content.Length;
@@ -211,6 +219,7 @@ namespace Hammock.Web
         protected virtual WebRequest BuildGetOrDeleteWebRequest(GetOrDelete method, string url)
         {
             url = AppendParameters(url);
+            Trace.WriteLine(method.ToUpper() + ": " + url);
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
@@ -890,6 +899,8 @@ namespace Hammock.Web
                                                                    IEnumerable<HttpPostParameter> parameters,
                                                                    out byte[] bytes)
         {
+            Trace.WriteLine(method.ToUpper() + ": " + url);
+
             var boundary = Guid.NewGuid().ToString();
             var request = (HttpWebRequest) WebRequest.Create(url);
             AuthenticateRequest(request);
@@ -901,8 +912,10 @@ namespace Hammock.Web
             request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 
+            // [DC]: This will need to be refactored for large uploads
             var contents = BuildMultiPartFormRequestParameters(boundary, parameters);
             var payload = contents.ToString();
+            Trace.WriteLine("BODY: " + payload);
 
 #if !Smartphone
             bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(payload);

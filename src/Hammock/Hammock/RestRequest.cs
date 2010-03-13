@@ -69,8 +69,6 @@ namespace Hammock
             }
             sb.Append(Path.IsNullOrBlank() ? "" : Path.StartsWith("/") ? Path.Substring(1) : Path);
 
-            Trace.WriteLine(sb);
-
             Uri uri;
             Uri.TryCreate(sb.ToString(), UriKind.RelativeOrAbsolute, out uri);
 

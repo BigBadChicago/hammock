@@ -86,7 +86,6 @@ namespace Hammock.Tests
                               };
 
             var response = client.Request(request);
-
             Assert.IsNotNull(response);
         }
 
@@ -111,9 +110,7 @@ namespace Hammock.Tests
             request.AddHeader("Only", "on this request");
 
             var response = client.Request(request);
-
             Assert.IsNotNull(response);
-            Console.WriteLine(response.Content);
         }
 
         [Test]
@@ -136,9 +133,7 @@ namespace Hammock.Tests
             request.AddParameter("request", "true");
 
             var response = client.Request(request);
-
             Assert.IsNotNull(response);
-            Console.WriteLine(response.Content);
         }
 
         [Test]
@@ -164,9 +159,7 @@ namespace Hammock.Tests
             client.AddParameter("status", "testing something new and awesome");
             
             var response = client.Request(request);
-
             Assert.IsNotNull(response);
-            Console.WriteLine(response.Content);
         }
 
         [Test]
@@ -208,7 +201,6 @@ namespace Hammock.Tests
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(result);
-            Console.WriteLine(response.Content);
         }
 
         [Test]
