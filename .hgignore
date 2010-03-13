@@ -3,10 +3,10 @@ syntax: glob
 *.pdb
 *.suo
 *.user
-web.config
 
 syntax: regexp
 /obj/
 /bin/
 /Bin/
 /_ReSharper.Hammock/
+glob:src/Hammock/Hammock.Tests/app.config
