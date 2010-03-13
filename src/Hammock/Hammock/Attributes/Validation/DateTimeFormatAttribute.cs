@@ -17,10 +17,24 @@ namespace Hammock.Attributes.Validation
 
         public override string TransformValue(System.Reflection.PropertyInfo property, object value)
         {
+#if !Smartphone
             DateTime result;
             return DateTime.TryParse(value.ToString(), out result) && !Format.IsNullOrBlank()
                        ? result.ToString(Format)
                        : base.TransformValue(property, value);
+#else
+            try
+            {
+                var result = DateTime.Parse(value.ToString());
+                return Format.IsNullOrBlank()
+                           ? result.ToString(Format)
+                           : base.TransformValue(property, value);
+            }
+            catch (Exception)
+            {
+                return base.TransformValue(property, value);
+            }
+#endif
         }
     }
 }

@@ -8,6 +8,8 @@ using Hammock.Web;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
+using Hammock.Web.Query;
+
 #else
 using System;
 using System.Collections.Specialized;

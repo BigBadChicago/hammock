@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.IsolatedStorage;
+using System.Text;
 
 namespace Hammock.Silverlight.Compat
 {
@@ -50,6 +51,11 @@ namespace Hammock.Silverlight.Compat
         public static void WriteLine(string message, params object[] args)
         {
             _streamWriter.WriteLine(message, args);
+        }
+
+        public static void WriteLine(StringBuilder sb)
+        {
+            _streamWriter.WriteLine(sb.ToString());
         }
     }
 }

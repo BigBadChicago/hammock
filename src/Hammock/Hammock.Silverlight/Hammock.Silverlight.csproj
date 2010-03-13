@@ -101,6 +101,9 @@
     <Compile Include="..\Hammock\Authentication\Basic\BasicAuthCredentials.cs">
       <Link>Authentication\Basic\BasicAuthCredentials.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Authentication\IWebCredentials.cs">
+      <Link>Authentication\IWebCredentials.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Authentication\OAuth\OAuthCredentials.cs">
       <Link>Authentication\OAuth\OAuthCredentials.cs</Link>
     </Compile>
@@ -275,6 +278,9 @@
     <Compile Include="..\Hammock\Web\IWebQueryInfo.cs">
       <Link>Web\IWebQueryInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\IMockable.cs">
+      <Link>Web\Mocks\IMockable.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Web\Pair.cs">
       <Link>Web\Pair.cs</Link>
     </Compile>
@@ -328,9 +334,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="key.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Web\Mocks\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

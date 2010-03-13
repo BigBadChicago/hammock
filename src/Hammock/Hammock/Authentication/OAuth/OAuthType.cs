@@ -8,9 +8,16 @@ namespace Hammock.Authentication.OAuth
 #endif
     public enum OAuthType
     {
+#if !SILVERLIGHT && !Smartphone
         [EnumMember] RequestToken,
         [EnumMember] AccessToken,
         [EnumMember] ProtectedResource,
         [EnumMember] ClientAuthentication
+#else
+        RequestToken,
+        AccessToken,
+        ProtectedResource,
+        ClientAuthentication
+#endif
     }
 }

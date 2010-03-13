@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Web;
 using Hammock.Extensions;
 using Hammock.OAuth;
 using Hammock.Web;
 using Hammock.Web.Query.OAuth;
+
+#if !SILVERLIGHT
+using System.Web;
+#endif
 
 namespace Hammock.Authentication.OAuth
 {
