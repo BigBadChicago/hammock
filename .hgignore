@@ -3,6 +3,7 @@ syntax: glob
 *.pdb
 *.suo
 *.user
+web.config
 
 syntax: regexp
 /obj/
