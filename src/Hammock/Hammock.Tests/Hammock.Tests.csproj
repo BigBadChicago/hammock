@@ -91,6 +91,9 @@
     <None Include="app.config.example" />
     <None Include="key.snk" />
     <Compile Include="Attributes\Validation\BooleanToIntegerTests.cs" />
+    <Compile Include="Attributes\Validation\DateTimeFormatTests.cs" />
+    <Compile Include="Attributes\Validation\RequiredAttributeTests.cs" />
+    <Compile Include="Attributes\Validation\SpecificationAttributeTests.cs" />
     <Compile Include="RestClientTests.Mocks.cs" />
     <Compile Include="RestClientTests.Caching.cs" />
   </ItemGroup>

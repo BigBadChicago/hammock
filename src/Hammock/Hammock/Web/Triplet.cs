@@ -1,9 +1,9 @@
 namespace Hammock.Web
 {
-    internal class Triplet<T, K, Z>
+    internal class Triplet<TFirst, TSecond, TThird>
     {
-        public T First { get; set; }
-        public K Second { get; set; }
-        public Z Third { get; set; }
+        public TFirst First { get; set; }
+        public TSecond Second { get; set; }
+        public TThird Third { get; set; }
     }
 }

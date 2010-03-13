@@ -1,17 +1,19 @@
+using System;
+using System.Runtime.Serialization;
+
 namespace Hammock.Web
 {
-    /// <summary>
-    /// The list of possible HTTP POST parameters sent with requests.
-    /// </summary>
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public enum HttpPostParameterType
     {
-        /// <summary>
-        /// A POST field.
-        /// </summary>
+#if !SILVERLIGHT
+        [EnumMember] Field,
+        [EnumMember] File
+#else
         Field,
-        /// <summary>
-        /// A POST file, sent as multi-part.
-        /// </summary>
         File
+#endif
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Hammock.Web.Query
+﻿namespace Hammock.Web
 {
     public enum PostOrPut
     {

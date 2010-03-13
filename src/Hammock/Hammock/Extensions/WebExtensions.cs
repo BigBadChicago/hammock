@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Hammock.Attributes;
 using Hammock.Attributes.Validation;
+using Hammock.Web;
 using Hammock.Web.Query;
 
 namespace Hammock.Extensions

@@ -124,9 +124,7 @@
     <Compile Include="Extensions\SerializationExtensions.cs" />
     <Compile Include="Web\HttpPostParameter.cs" />
     <Compile Include="Web\HttpPostParameterType.cs" />
-    <Compile Include="Web\IWebQueryClient.cs" />
     <Compile Include="Web\Mocks\IWebResponse.cs" />
-    <Compile Include="Web\Mocks\WebQueryClientMock.cs" />
     <Compile Include="Web\Mocks\WebRequestMock.cs" />
     <Compile Include="Web\Mocks\WebResponseMock.cs" />
     <Compile Include="Web\Pair.cs" />
@@ -138,13 +136,11 @@
     <Compile Include="Authentication\OAuth\OAuthWebQuery.cs" />
     <Compile Include="Authentication\OAuth\OAuthWebQueryInfo.cs" />
     <Compile Include="Web\PostOrPut.cs" />
-    <Compile Include="Web\WebCredentials.cs" />
     <Compile Include="Web\WebEntity.cs" />
     <Compile Include="Web\WebQuery.cs" />
     <Compile Include="Web\Triplet.cs" />
     <Compile Include="Web\WebCallback.cs" />
     <Compile Include="Authentication\Basic\BasicAuthCredentials.cs" />
-    <Compile Include="Web\WebFormat.cs" />
     <Compile Include="Web\WebMethod.cs" />
     <Compile Include="Web\WebParameter.cs" />
     <Compile Include="Web\WebParameterCollection.cs" />
@@ -177,6 +173,7 @@
     <Compile Include="Tasks\RateLimitingType.cs" />
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />
+    <Compile Include="Validation\ValidEmailSpecification.cs" />
     <Compile Include="Web\WebHeader.cs" />
     <Compile Include="Web\WebHeaderCollection.cs" />
     <Compile Include="Web\WebPair.cs" />
