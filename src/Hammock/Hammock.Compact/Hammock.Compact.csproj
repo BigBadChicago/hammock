@@ -278,6 +278,9 @@
     <Compile Include="..\Hammock\Tasks\RateLimitingType.cs">
       <Link>Tasks\RateLimitingType.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Tasks\TaskOptions.cs">
+      <Link>Tasks\TaskOptions.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Tasks\TimedTask.cs">
       <Link>Tasks\TimedTask.cs</Link>
     </Compile>

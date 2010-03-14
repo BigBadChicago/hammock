@@ -6,6 +6,7 @@ using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Retries;
+using Hammock.Tasks;
 using Hammock.Web;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -24,6 +25,7 @@ namespace Hammock
 
         private bool _firstTry = true;
         private int _remainingRetries;
+        private TimedTask _task;
 
 #if !Silverlight
         public virtual RestResponse Request(RestRequest request)
@@ -48,7 +50,6 @@ namespace Hammock
 
             // rate-limiting
             // recurring tasks
-            // multi-part
             // requestimpl for async
 
             var retryPolicy = GetRetryPolicy(request);
@@ -170,7 +171,23 @@ namespace Hammock
 
         private IEnumerable<HttpPostParameter> GetPostParameters(RestBase request)
         {
-            return request.PostParameters ?? PostParameters;
+            if(request.PostParameters != null)
+            {
+                foreach(var parameter in request.PostParameters)
+                {
+                    yield return parameter;
+                }
+            }
+
+            if (PostParameters == null)
+            {
+                yield break;
+            }
+
+            foreach (var parameter in PostParameters)
+            {
+                yield return parameter;
+            }
         }
 
         private CacheOptions GetCacheOptions(RestBase request)
@@ -229,17 +246,46 @@ namespace Hammock
             var policy = request.RetryPolicy ?? RetryPolicy;
             return policy;
         }
+        
+        private TaskOptions GetTaskOptions(RestBase request)
+        {
+            var options = request.TaskOptions ?? TaskOptions;
+            return options;
+        }
 
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
-            
+
+            var taskOptions = GetTaskOptions(request);
+            if(taskOptions != null)
+            {
+                if (taskOptions.RepeatInterval > TimeSpan.Zero)
+                {
+                    // Tasks without rate limiting
+                    _task = new TimedTask(TimeSpan.Zero, 
+                                          taskOptions.RepeatInterval, 
+                                          taskOptions.RepeatTimes,
+                                          true, skip => BeginRequestImpl(request, callback, query, uri));
+
+                    // Tasks with rate limiting
+                }
+            }
+
+            throw new NotImplementedException("Don't have an IAsyncResult from timed task yet");
+
+            // Normal operation
+            BeginRequestImpl(request, callback, query, uri);
+        }
+
+        public virtual IAsyncResult BeginRequestImpl(RestRequest request, RestCallback callback, WebQuery query, Uri uri)
+        {
             query.QueryResponse += (sender, args) =>
-                                       {
-                                           var response = BuildResponseFromResult(request, query);
-                                           callback.Invoke(request, response);
-                                       };
+            {
+                var response = BuildResponseFromResult(request, query);
+                callback.Invoke(request, response);
+            };
 
             return query.RequestAsync(uri.ToString());
         }

@@ -1,17 +1,21 @@
+using System;
 using System.Collections.Generic;
 
 namespace Hammock.Tasks
 {
-    public class TimedTaskCollection<T>
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    internal class TimedTaskCollection<T>
     {
         private readonly List<ITimedTask<T>> _tasks = new List<ITimedTask<T>>(0);
 
-        public ITimedTask<T> this[int index]
+        public virtual ITimedTask<T> this[int index]
         {
             get { return _tasks[index]; }
         }
 
-        public void StopAll()
+        public virtual void StopAll()
         {
             foreach (var task in _tasks)
             {
@@ -21,7 +25,7 @@ namespace Hammock.Tasks
             _tasks.Clear();
         }
 
-        protected internal void Add(ITimedTask<T> task)
+        protected internal virtual void Add(ITimedTask<T> task)
         {
             _tasks.Add(task);
         }

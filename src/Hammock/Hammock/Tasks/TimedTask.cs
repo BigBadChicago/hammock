@@ -3,29 +3,92 @@ using System.Threading;
 
 namespace Hammock.Tasks
 {
-    public class TimedTask<T> : ITimedTask<T>
+    internal class TimedTask : ITimedTask
     {
-        private readonly int _iterations;
-        private readonly Timer _timer;
+        protected int Iterations;
+        protected Timer Timer;
 
+        public virtual Action<bool> Action { get; protected set; }
+        public virtual Exception Exception { get; protected set; }
+        public virtual TimeSpan DueTime { get; protected set; }
+        public virtual TimeSpan Interval { get; protected set; }
+
+        public TimedTask(TimeSpan due, 
+                         TimeSpan interval, 
+                         int iterations, 
+                         bool continueOnError, 
+                         Action<bool> action) : this(due, interval, iterations, action)
+        {
+            var count = 0;
+            Timer = new Timer(state =>
+                                   {
+                                       try
+                                       {
+                                           Action(false);
+                                           count++;
+                                           if (Iterations > 0 && count >= Iterations)
+                                           {
+                                               Stop();
+                                           }
+                                       }
+                                       catch (Exception ex)
+                                       {
+                                           Exception = ex;
+                                           if (!continueOnError)
+                                           {
+                                               Stop();
+                                           }
+                                       }
+                                   }, null, DueTime, Interval);
+        }
+
+        public TimedTask(TimeSpan due, TimeSpan interval, int iterations, Action<bool> action)
+        {
+            DueTime = due;
+            Interval = interval;
+            Iterations = iterations;
+            Action = action;
+        }
+
+        public virtual void Stop()
+        {
+            Timer.Change(-1, -1);
+        }
+
+        public virtual void Start()
+        {
+            Timer.Change(DueTime, Interval);
+        }
+
+        public virtual void Start(TimeSpan dueTime, TimeSpan interval)
+        {
+            DueTime = dueTime;
+            Interval = interval;
+            Timer.Change(DueTime, Interval);
+        }
+
+        public virtual void Dispose()
+        {
+            Timer.Dispose();
+        }
+    }
+
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    internal class TimedTask<T> : TimedTask, ITimedTask<T>
+    {
         public TimedTask(TimeSpan due, 
                          TimeSpan interval, 
                          bool continueOnError, 
                          int iterations,
                          IRateLimitingRule<T> rateLimitingRule, 
-                         Action<bool> action)
+                         Action<bool> action) : base(due, interval, iterations, action)
         {
-            Action = action;
-
-            DueTime = due;
-            Interval = interval;
-            _iterations = iterations;
-
             RateLimitingRule = rateLimitingRule;
 
             var count = 0;
-
-            _timer = new Timer(state =>
+            Timer = new Timer(state =>
                                    {
                                        try
                                        {
@@ -34,7 +97,7 @@ namespace Hammock.Tasks
 
                                            count++;
 
-                                           if (_iterations > 0 && count >= _iterations)
+                                           if (Iterations > 0 && count >= Iterations)
                                            {
                                                Stop();
                                            }
@@ -52,39 +115,12 @@ namespace Hammock.Tasks
 
         #region ITimedTask Members
 
-        public Action<bool> Action { get; private set; }
-        public Exception Exception { get; private set; }
-
-        public bool RateLimited
+        public virtual bool RateLimited
         {
             get { return RateLimitingRule != null; }
         }
 
-        public TimeSpan DueTime { get; private set; }
-        public TimeSpan Interval { get; private set; }
-        public IRateLimitingRule<T> RateLimitingRule { get; set; }
-
-        public void Stop()
-        {
-            _timer.Change(-1, -1);
-        }
-
-        public void Start()
-        {
-            _timer.Change(DueTime, Interval);
-        }
-
-        public void Start(TimeSpan dueTime, TimeSpan interval)
-        {
-            DueTime = dueTime;
-            Interval = interval;
-            _timer.Change(DueTime, Interval);
-        }
-
-        public void Dispose()
-        {
-            _timer.Dispose();
-        }
+        public virtual IRateLimitingRule<T> RateLimitingRule { get; set; }
 
         #endregion
 

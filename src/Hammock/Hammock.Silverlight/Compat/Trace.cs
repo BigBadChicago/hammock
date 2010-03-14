@@ -48,6 +48,14 @@ namespace Hammock.Silverlight.Compat
             _streamWriter.WriteLine(message);
         }
 
+        public static void WriteLineIf(bool condition, string message)
+        {
+            if(condition)
+            {
+                _streamWriter.WriteLine(message);
+            }
+        }
+
         public static void WriteLine(string message, params object[] args)
         {
             _streamWriter.WriteLine(message, args);

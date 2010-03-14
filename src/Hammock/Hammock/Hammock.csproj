@@ -171,6 +171,7 @@
     <Compile Include="Tasks\ITimedTask.cs" />
     <Compile Include="Tasks\RateLimitingRule.cs" />
     <Compile Include="Tasks\RateLimitingType.cs" />
+    <Compile Include="Tasks\TaskOptions.cs" />
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />
     <Compile Include="Validation\ValidEmailSpecification.cs" />

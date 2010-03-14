@@ -124,7 +124,7 @@ namespace Hammock.Web
 
 #if TRACE
             Trace.WriteLine(String.Concat("RESPONSE: ", statusCode, " ", statusDescription));
-            Trace.WriteLine("HEADERS:");
+            Trace.WriteLineIf(httpWebResponse.Headers.AllKeys.Count() > 0, "HEADERS:");
             foreach (var trace in httpWebResponse.Headers.AllKeys.Select(
                 key => String.Concat("\t", key, ": ", httpWebResponse.Headers[key])))
             {
@@ -181,7 +181,7 @@ namespace Hammock.Web
         {
             var parameters = AppendParameters(url).Replace(url + "?", "");
 #if TRACE
-            Trace.WriteLine(method.ToUpper() + ": " + url);
+            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
             Trace.WriteLine("BODY: " + parameters);
 #endif
 
@@ -214,8 +214,8 @@ namespace Hammock.Web
 
             var entity = Entity.Content.ToString();
 #if TRACE
+            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
             Trace.WriteLine("BODY: " + entity);
-            Trace.WriteLine(method.ToUpper() + ": " + url);
 #endif
 
             content = Entity.ContentEncoding.GetBytes(entity);
@@ -231,9 +231,8 @@ namespace Hammock.Web
         {
             url = AppendParameters(url);
 #if TRACE
-            Trace.WriteLine(method.ToUpper() + ": " + url);
+            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
 #endif
-
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
             AuthenticateRequest(request);
@@ -351,7 +350,7 @@ namespace Hammock.Web
             }
 
 #if TRACE
-            Trace.WriteLine("HEADERS:");
+            Trace.WriteLineIf(request.Headers.AllKeys.Count() > 0, "HEADERS:");
             foreach (var trace in request.Headers.AllKeys.Select(
                 key => String.Concat("\t", key, ": ", request.Headers[key])))
             {
@@ -959,7 +958,7 @@ namespace Hammock.Web
             var payload = contents.ToString();
 
 #if TRACE
-            Trace.WriteLine(method.ToUpper() + ": " + url);
+            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
             Trace.WriteLine("BODY: " + payload);
 #endif
 
