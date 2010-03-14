@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
@@ -22,9 +23,18 @@ namespace Hammock
     {
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
+        protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }
+
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
         public virtual IWebCredentials Credentials { get; set; }
+
+        protected RestBase()
+        {
+            Headers = new NameValueCollection(0);
+            Parameters = new WebParameterCollection();
+            PostParameters = new List<HttpPostParameter>(0);
+        }
 
 #if !Silverlight
         public virtual ServicePoint ServicePoint { get; set; }
@@ -50,6 +60,18 @@ namespace Hammock
         public void AddParameter(string name, string value)
         {
             Parameters.Add(name, value);
+        }
+
+        public void AddField(string name, string value)
+        {
+            var field = new HttpPostParameter(name, value);
+            PostParameters.Add(field);
+        }
+
+        public void AddFile(string name, string fileName, string filePath)
+        {
+            var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, "application/octet-stream");
+            PostParameters.Add(parameter);
         }
     }
 }

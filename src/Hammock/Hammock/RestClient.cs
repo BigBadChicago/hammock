@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
@@ -23,12 +25,6 @@ namespace Hammock
         private bool _firstTry = true;
         private int _remainingRetries;
 
-        public RestClient()
-        {
-            Headers = new NameValueCollection(0);
-            Parameters = new WebParameterCollection();
-        }
-
 #if !Silverlight
         public virtual RestResponse Request(RestRequest request)
         {
@@ -46,14 +42,14 @@ namespace Hammock
 
         private WebQuery RequestImpl(RestRequest request)
         {
-            var firstTry = true;
-            
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
             SetQueryMeta(request, query);
 
-            // exceptions
+            // rate-limiting
+            // recurring tasks
             // multi-part
+            // requestimpl for async
 
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
@@ -68,19 +64,25 @@ namespace Hammock
                 var url = uri.ToString();
                 WebException exception;
 
-                if (!RequestWithCache(request, query, url, out exception))
+                if (!RequestWithCache(request, query, url, out exception) &&
+                    !RequestMultiPart(request, query, url, out exception))
                 {
                     query.Request(url, out exception);
                 }
 
-                var current = query.Result;
+                query.Result.Exception = exception;
                 query.Result.PreviousResult = previous;
-
+                var current = query.Result;
+               
                 var retry = false;
                 if(retryPolicy != null)
                 {
                     foreach(RetryErrorCondition condition in retryPolicy.RetryConditions)
                     {
+                        if(exception == null)
+                        {
+                            continue;
+                        }
                         retry |= condition.RetryIf(exception);
                     }
 
@@ -94,12 +96,31 @@ namespace Hammock
                         _remainingRetries = 0;
                     }
                 }
+                else
+                {
+                    _remainingRetries = 0;
+                }
 
                 query.Result = current;
             }
 
             _firstTry = _remainingRetries == 0;
             return query;
+        }
+
+        private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
+        {
+            var parameters = GetPostParameters(request);
+            if(parameters == null || parameters.Count() == 0)
+            {
+                exception = null;
+                return false;
+            }
+
+            // [DC]: Default to POST if no method provided
+            query.Method = query.Method != WebMethod.Post && Method != WebMethod.Put ? WebMethod.Post : query.Method;
+            query.Request(url, parameters, out exception);
+            return true;
         }
 
         private bool RequestWithCache(RestBase request, WebQuery query, string url, out WebException exception)
@@ -145,6 +166,11 @@ namespace Hammock
         private ICache GetCache(RestBase request)
         {
             return request.Cache ?? Cache;
+        }
+
+        private IEnumerable<HttpPostParameter> GetPostParameters(RestBase request)
+        {
+            return request.PostParameters ?? PostParameters;
         }
 
         private CacheOptions GetCacheOptions(RestBase request)

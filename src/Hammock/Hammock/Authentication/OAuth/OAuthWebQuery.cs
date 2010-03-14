@@ -231,6 +231,7 @@ namespace Hammock.Authentication.OAuth
             return base.Request(url, out exception);
         }
 #endif
+
         private void RecalculateProtectedResourceSignature(string url)
         {
             var info = (OAuthWebQueryInfo) Info;

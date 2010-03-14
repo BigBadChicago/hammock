@@ -46,12 +46,6 @@ namespace Hammock
         public virtual Type ResponseEntityType { get; set; }
         public virtual Type RequestEntityType { get; set; }
 
-        public RestRequest()
-        {
-            Headers = new NameValueCollection(0);
-            Parameters = new WebParameterCollection();
-        }
-
         protected internal Uri BuildEndpoint(RestClient client)
         {
             var sb = new StringBuilder();

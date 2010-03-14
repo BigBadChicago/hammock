@@ -11,7 +11,7 @@
   <Class Name="Hammock.Retries.RetryPolicy">
     <Position X="2.5" Y="1" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>QAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>QAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
       <FileName>Retries\RetryPolicy.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>

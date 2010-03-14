@@ -54,22 +54,6 @@ namespace Hammock.Tests
             }
         }
 
-        public IWebCredentials OAuthForTwitterRequestToken
-        {
-            get
-            {
-                var credentials = new OAuthCredentials
-                                      {
-                                          Type = OAuthType.RequestToken,
-                                          SignatureMethod = OAuthSignatureMethod.HmacSha1,
-                                          ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
-                                          ConsumerKey = _consumerKey,
-                                          ConsumerSecret = _consumerSecret,
-                                      };
-                return credentials;
-            }
-        }
-        
         [Test]
         public void Can_make_basic_auth_request_synchronously()
         {
@@ -205,7 +189,7 @@ namespace Hammock.Tests
                 Method = WebMethod.Post
             };
 
-            client.AddParameter("status", "testing something new and awesome");
+            client.AddParameter("status", "tweet tweet");
             
             var response = client.Request(request);
             Assert.IsNotNull(response);
@@ -254,24 +238,6 @@ namespace Hammock.Tests
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(result);
-        }
-
-        [Test]
-        public void Can_get_oauth_request_token_sequentially()
-        {
-            var client = new RestClient
-                             {
-                                 Authority = "http://twitter.com/oauth"
-                             };
-
-            var request = new RestRequest
-                              {
-                                  Credentials = OAuthForTwitterRequestToken,
-                                  Path="request_token"
-                              };
-
-            var response = client.Request(request);
-            Assert.IsNotNull(response);
         }
 
         private static JsonSerializerSettings GetSerializerSettings()

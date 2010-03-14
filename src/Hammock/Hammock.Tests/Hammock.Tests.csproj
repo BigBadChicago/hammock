@@ -97,6 +97,14 @@
     <Compile Include="Helpers\HammockJsonDotNetSerializer.cs" />
     <Compile Include="RestClientTests.Mocks.cs" />
     <Compile Include="RestClientTests.Caching.cs" />
+    <Compile Include="RestClientTests.MultiPart.cs" />
+    <Compile Include="RestClientTests.OAuth.cs" />
+    <Compile Include="RestClientTests.Retries.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="twitterProfilePhoto.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Attributes\Specialized\" />
