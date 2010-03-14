@@ -3,6 +3,7 @@ using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Model;
+using Hammock.Retries;
 using Hammock.Serialization;
 using Hammock.Web;
 
@@ -19,23 +20,23 @@ namespace Hammock
 #endif
     public abstract class RestBase : PropertyChangedBase 
     {
-#if !Silverlight
-        public virtual ServicePoint ServicePoint { get; set; }
-#endif
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
-        public virtual string Proxy { get; set; }
-        public virtual TimeSpan? Timeout { get; set; }
-        public virtual string VersionPath { get; set; }
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
         public virtual IWebCredentials Credentials { get; set; }
 
+#if !Silverlight
+        public virtual ServicePoint ServicePoint { get; set; }
+#endif
+        public virtual string Proxy { get; set; }
+        public virtual TimeSpan? Timeout { get; set; }
+        public virtual string VersionPath { get; set; }
         public virtual ISerializer Serializer { get; set; }
         public virtual IDeserializer Deserializer { get; set; }
-        
         public virtual ICache Cache { get; set; }
         public virtual CacheOptions CacheOptions { get; set; }
+        public virtual RetryPolicy RetryPolicy { get; set; }
         public virtual Func<string> CacheKeyFunction { get; set; }
         public DecompressionMethods DecompressionMethods { get; set; }
         public virtual IWebQueryInfo Info { get; set; }

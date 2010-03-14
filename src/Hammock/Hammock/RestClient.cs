@@ -3,6 +3,7 @@ using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
+using Hammock.Retries;
 using Hammock.Web;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -18,6 +19,9 @@ namespace Hammock
     public class RestClient : RestBase, IRestClient
     {
         public virtual string Authority { get; set; }
+
+        private bool _firstTry = true;
+        private int _remainingRetries;
 
         public RestClient()
         {
@@ -42,44 +46,75 @@ namespace Hammock
 
         private WebQuery RequestImpl(RestRequest request)
         {
+            var firstTry = true;
+            
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
+            SetQueryMeta(request, query);
 
-            // retries
             // exceptions
             // multi-part
 
-            /*
+            var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
             {
-                _remainingRetries = Configuration.MaxRetries + 1;
+                _remainingRetries = (retryPolicy != null ? retryPolicy.RetryCount : 0) + 1;
                 _firstTry = false;
-            }*/
-
-            SetQueryMeta(request, query);
-
-            var url = uri.ToString();
-
-            if(!RequestWithCache(request, query, url))
-            {
-                WebException exception;
-                query.Request(url, out exception);
             }
 
+            WebQueryResult previous = null;
+            while (_remainingRetries > 0)
+            {
+                var url = uri.ToString();
+                WebException exception;
+
+                if (!RequestWithCache(request, query, url, out exception))
+                {
+                    query.Request(url, out exception);
+                }
+
+                var current = query.Result;
+                query.Result.PreviousResult = previous;
+
+                var retry = false;
+                if(retryPolicy != null)
+                {
+                    foreach(RetryErrorCondition condition in retryPolicy.RetryConditions)
+                    {
+                        retry |= condition.RetryIf(exception);
+                    }
+
+                    if(retry)
+                    {
+                        previous = current;
+                        _remainingRetries--;
+                    }
+                    else
+                    {
+                        _remainingRetries = 0;
+                    }
+                }
+
+                query.Result = current;
+            }
+
+            _firstTry = _remainingRetries == 0;
             return query;
         }
 
-        private bool RequestWithCache(RestBase request, WebQuery query, string url)
+        private bool RequestWithCache(RestBase request, WebQuery query, string url, out WebException exception)
         {
             var cache = GetCache(request);
             if (Cache == null)
             {
+                exception = null;
                 return false;
             }
 
             var options = GetCacheOptions(request);
             if (options == null)
             {
+                exception = null;
                 return false;
             }
 
@@ -87,7 +122,6 @@ namespace Hammock
             var function = GetCacheKeyFunction(request);
             var key = function != null ? function.Invoke() : "";
 
-            WebException exception;
             switch (options.Mode)
             {
                 case CacheMode.NoExpiration:
@@ -162,6 +196,12 @@ namespace Hammock
                              : request.Method.Value;
 
             return method;
+        }
+
+        private RetryPolicy GetRetryPolicy(RestBase request)
+        {
+            var policy = request.RetryPolicy ?? RetryPolicy;
+            return policy;
         }
 
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)

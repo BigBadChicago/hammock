@@ -218,6 +218,24 @@
     <Compile Include="..\Hammock\RestResponse.cs">
       <Link>RestResponse.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Retries\ConnectionClosed.cs">
+      <Link>Retries\ConnectionClosed.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\IRetryCondition.cs">
+      <Link>Retries\IRetryCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\NetworkError.cs">
+      <Link>Retries\NetworkError.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\RetryErrorCondition.cs">
+      <Link>Retries\RetryErrorCondition.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\RetryPolicy.cs">
+      <Link>Retries\RetryPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\Timeout.cs">
+      <Link>Retries\Timeout.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Serialization\HammockXmlSerializer.cs">
       <Link>Serialization\HammockXmlSerializer.cs</Link>
     </Compile>

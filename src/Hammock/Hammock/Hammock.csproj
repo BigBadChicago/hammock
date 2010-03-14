@@ -155,7 +155,12 @@
     <Compile Include="Caching\SimpleCache.cs" />
     <Compile Include="RestBase.cs" />
     <Compile Include="RestCallback.cs" />
+    <Compile Include="Retries\ConnectionClosed.cs" />
+    <Compile Include="Retries\IRetryCondition.cs" />
+    <Compile Include="Retries\NetworkError.cs" />
+    <Compile Include="Retries\RetryErrorCondition.cs" />
     <Compile Include="Retries\RetryPolicy.cs" />
+    <Compile Include="Retries\Timeout.cs" />
     <Compile Include="Serialization\HammockDataContractJsonSerializer.cs" />
     <Compile Include="Serialization\IDeserializer.cs" />
     <Compile Include="Serialization\HammockDataContractSerializer.cs" />
@@ -181,6 +186,7 @@
     <None Include="Caching\_Caching.cd" />
     <None Include="key.snk" />
     <None Include="Model\_Model.cd" />
+    <None Include="Retries\_Retries.cd" />
     <None Include="Tasks\_Tasks.cd" />
     <None Include="Web\_Web.cd" />
     <None Include="_Hammock.cd" />

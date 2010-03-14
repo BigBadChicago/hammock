@@ -36,7 +36,7 @@ namespace Hammock.Web
         public DecompressionMethods DecompressionMethods { get; set; }
         public virtual bool UseTransparentProxy { get; set; }
         public virtual TimeSpan? RequestTimeout { get; set; }
-        public virtual WebQueryResult Result { get; private set; }
+        public virtual WebQueryResult Result { get; internal set; }
         public virtual bool KeepAlive { get; set; }
         public virtual string SourceUrl { get; set; }
         
@@ -380,7 +380,7 @@ namespace Hammock.Web
                       {"Expect", (r, v) => r.Expect = v},
                       {"Date", (r, v) => { /* Set by system */ }},
                       {"Host", (r, v) => { /* Set by system */ }},
-                      {"If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v)},
+                      {"RetryIf-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v)},
                       {"Range", (r, v) => { throw new NotSupportedException( /* r.AddRange() */); }},
                       {"Referer", (r, v) => r.Referer = v},
                       {"Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; }},

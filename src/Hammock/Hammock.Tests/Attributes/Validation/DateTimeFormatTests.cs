@@ -2,7 +2,6 @@
 using Hammock.Attributes.Specialized;
 using Hammock.Attributes.Validation;
 using Hammock.Web;
-using Hammock.Web.Query;
 using NUnit.Framework;
 
 namespace Hammock.Tests.Attributes.Validation
