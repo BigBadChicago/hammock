@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Web;
-using Hammock.Web.Query;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
 #else
@@ -313,8 +311,8 @@ namespace Hammock
             // [DC]: UserAgent is set via Info
             // [DC]: Request credentials trump client credentials
             var query = credentials != null
-                            ? credentials.GetQueryFor(uri.ToString(), request, Info, method)
-                            : new BasicAuthWebQuery(Info);
+                            ? credentials.GetQueryFor(uri.ToString(), request, info, method)
+                            : new BasicAuthWebQuery(info);
 
             return query;
         }

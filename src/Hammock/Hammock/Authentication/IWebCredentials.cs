@@ -1,5 +1,4 @@
 using Hammock.Web;
-using Hammock.Web.Query;
 
 namespace Hammock.Authentication
 {

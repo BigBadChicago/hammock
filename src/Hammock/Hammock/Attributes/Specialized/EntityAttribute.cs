@@ -15,7 +15,7 @@ namespace Hammock.Attributes.Specialized
             ContentEncoding = Encoding.UTF8;
         }
 
-        public string ContentType { get; private set; }
-        public Encoding ContentEncoding { get; set; }
+        public virtual string ContentType { get; private set; }
+        public virtual Encoding ContentEncoding { get; set; }
     }
 }

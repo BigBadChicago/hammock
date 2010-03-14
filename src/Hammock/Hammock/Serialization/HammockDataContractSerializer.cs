@@ -1,5 +1,4 @@
 ﻿using System;
-#if !Smartphone
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
@@ -71,7 +70,8 @@ namespace Hammock.Serialization
                     }
                 }
 
-                result = ContentEncoding.GetString(stream.ToArray());
+                var data = stream.ToArray();
+                result = ContentEncoding.GetString(data, 0, data.Length);
             }
 
             return result;
@@ -99,4 +99,3 @@ namespace Hammock.Serialization
         }
     }
 }
-#endif

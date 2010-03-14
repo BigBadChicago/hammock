@@ -15,7 +15,7 @@ namespace Hammock.Attributes.Specialized
 
         #region INamedAttribute Members
 
-        public string Name { get; private set; }
+        public virtual string Name { get; private set; }
 
         #endregion
     }

@@ -174,6 +174,7 @@
     <Compile Include="Web\WebPairCollection.cs" />
     <Compile Include="Web\WebQuery.Async.cs" />
     <None Include="Attributes\Specialized\_Specialized.cd" />
+    <None Include="Attributes\Validation\_Validation.cd" />
     <None Include="Authentication\OAuth\_OAuth.cd" />
     <None Include="Authentication\_Authentication.cd" />
     <None Include="Caching\_Caching.cd" />
@@ -181,9 +182,6 @@
     <None Include="Model\_Model.cd" />
     <None Include="Web\_Web.cd" />
     <None Include="_Hammock.cd" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="OAuth\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,6 +1,4 @@
-﻿#if !Smartphone
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Json;
@@ -16,15 +14,16 @@ namespace Hammock.Serialization
 
         public string Serialize(object instance, Type type)
         {
-            string content;
+            string result;
             using (var stream = new MemoryStream())
             {
                 var serializer = CacheOrGetSerializerFor(type);
                 serializer.WriteObject(stream, instance);
 
-                content = ContentEncoding.GetString(stream.ToArray());
+                var data = stream.ToArray();
+                result = ContentEncoding.GetString(data, 0, data.Length);
             }
-            return content;
+            return result;
         }
 
         public virtual string ContentType
@@ -76,5 +75,3 @@ namespace Hammock.Serialization
         }
     }
 }
-
-#endif
