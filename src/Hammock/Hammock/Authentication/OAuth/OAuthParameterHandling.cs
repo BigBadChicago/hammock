@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace Hammock.Authentication.OAuth
 {
@@ -7,7 +8,12 @@ namespace Hammock.Authentication.OAuth
 #endif
     public enum OAuthParameterHandling
     {
+#if !SILVERLIGHT && !Smartphone
+        [EnumMember] HttpAuthorizationHeader,
+        [EnumMember] UrlOrPostParameters
+#else
         HttpAuthorizationHeader,
         UrlOrPostParameters
+#endif
     }
 }

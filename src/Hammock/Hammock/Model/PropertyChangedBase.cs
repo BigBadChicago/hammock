@@ -13,7 +13,7 @@ namespace Hammock.Model
 #if !SILVERLIGHT
         [field: NonSerialized]
 #endif
-            public event PropertyChangedEventHandler PropertyChanged;
+        public virtual event PropertyChangedEventHandler PropertyChanged;
 
         #endregion
 

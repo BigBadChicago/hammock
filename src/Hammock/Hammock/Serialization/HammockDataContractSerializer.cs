@@ -7,6 +7,9 @@ using System.Xml.Linq;
 
 namespace Hammock.Serialization
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class HammockDataContractSerializer : Utf8Serializer, ISerializer, IDeserializer
     {
         private readonly Dictionary<RuntimeTypeHandle, DataContractSerializer> _serializers =

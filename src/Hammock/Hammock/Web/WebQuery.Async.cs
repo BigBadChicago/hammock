@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using Hammock.Caching;
-using Hammock.Web.Query;
 
 namespace Hammock.Web
 {

@@ -2,6 +2,9 @@ using System;
 
 namespace Hammock.Caching
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public static class CacheFactory
     {
 #if !Smartphone && !Silverlight

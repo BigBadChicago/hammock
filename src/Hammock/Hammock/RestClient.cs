@@ -49,6 +49,13 @@ namespace Hammock
             // exceptions
             // multi-part
 
+            /*
+            if (_firstTry)
+            {
+                _remainingRetries = Configuration.MaxRetries + 1;
+                _firstTry = false;
+            }*/
+
             SetQueryMeta(request, query);
 
             var url = uri.ToString();

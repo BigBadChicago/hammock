@@ -12,7 +12,6 @@ using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Validation;
 using Hammock.Web.Mocks;
-using Hammock.Web.Query;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;

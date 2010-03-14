@@ -4,21 +4,20 @@ using System.Security.Cryptography;
 using System.Text;
 using Hammock.Extensions;
 using Hammock.Web;
-using Hammock.Web.Extensions;
 
-namespace Hammock.OAuth
+namespace Hammock.Authentication.OAuth
 {
-    /// <summary>
-    /// A utility class to generate required request parameters for an OAuth query.
-    /// <seealso cref="http://www.hueniverse.com/hueniverse/2007/10/beginners-gui-1.html"/>
-    /// </summary>
-    public class OAuthTools
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    public static class OAuthTools
     {
-        private const string ALPHA_NUMERIC = UPPER + LOWER + DIGIT;
-        private const string DIGIT = "1234567890";
-        private const string LOWER = "abcdefghijklmnopqrstuvwxyz";
-        private const string UNRESERVED = ALPHA_NUMERIC + "-._~";
-        private const string UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const string AlphaNumeric = Upper + Lower + Digit;
+        private const string Digit = "1234567890";
+        private const string Lower = "abcdefghijklmnopqrstuvwxyz";
+        private const string Unreserved = AlphaNumeric + "-._~";
+        private const string Upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
         private static readonly Random _random;
         private static readonly object _randomLock = new object();
 
@@ -51,7 +50,7 @@ namespace Hammock.OAuth
         /// <returns></returns>
         public static string GetNonce()
         {
-            const string chars = (LOWER + DIGIT);
+            const string chars = (Lower + Digit);
 
             var nonce = new char[16];
             lock (_randomLock)
@@ -107,12 +106,12 @@ namespace Hammock.OAuth
         /// <seealso cref="http://oauth.net/core/1.0#encoding_parameters" />
         public static string UrlEncodeParameterString(string value)
         {
-            //ISSUE 49 - need to escape the apostrophe as well or the sig will fail
+            // [JD]: We need to escape the apostrophe as well or the signature will fail
             var original = value;
             var ret = value;
             foreach (var c in original)
             {
-                if (!UNRESERVED.Contains(c) && c != '%')
+                if (!Unreserved.Contains(c) && c != '%')
                 {
                     ret = ret.Replace(c.ToString(), c.ToString().PercentEncode());
                 }

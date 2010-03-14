@@ -3,28 +3,28 @@ using System.Collections.Generic;
 
 namespace Hammock.Caching
 {
-    /// <summary>
-    /// A basic in-memory cache.
-    /// </summary>
-    internal class SimpleCache : ICache
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    public class SimpleCache : ICache
     {
-        private const string NOT_SUPPORTED_MESSAGE = "This simple cache does not support expiration.";
+        private const string NotSupportedMessage = "This simple cache does not support expiration.";
 
         private static readonly IDictionary<string, object> _cache = new Dictionary<string, object>(0);
 
-        public int Count
+        public virtual int Count
         {
             get { return _cache.Count; }
         }
 
-        public IEnumerable<string> Keys
+        public virtual IEnumerable<string> Keys
         {
             get { return _cache.Keys; }
         }
 
         #region ICache Members
 
-        public void Insert(string key, object value)
+        public virtual void Insert(string key, object value)
         {
             if (!_cache.ContainsKey(key))
             {
@@ -36,17 +36,17 @@ namespace Hammock.Caching
             }
         }
 
-        public void Insert(string key, object value, DateTime absoluteExpiration)
+        public virtual void Insert(string key, object value, DateTime absoluteExpiration)
         {
-            throw new NotSupportedException(NOT_SUPPORTED_MESSAGE);
+            throw new NotSupportedException(NotSupportedMessage);
         }
 
-        public void Insert(string key, object value, TimeSpan slidingExpiration)
+        public virtual void Insert(string key, object value, TimeSpan slidingExpiration)
         {
-            throw new NotSupportedException(NOT_SUPPORTED_MESSAGE);
+            throw new NotSupportedException(NotSupportedMessage);
         }
 
-        public T Get<T>(string key)
+        public virtual T Get<T>(string key)
         {
             if (_cache.ContainsKey(key))
             {
@@ -55,7 +55,7 @@ namespace Hammock.Caching
             return default(T);
         }
 
-        public void Remove(string key)
+        public virtual void Remove(string key)
         {
             if (_cache.ContainsKey(key))
             {
@@ -65,5 +65,4 @@ namespace Hammock.Caching
 
         #endregion
     }
-
 }

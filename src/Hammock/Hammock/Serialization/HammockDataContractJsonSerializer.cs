@@ -5,6 +5,9 @@ using System.Runtime.Serialization.Json;
 
 namespace Hammock.Serialization
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class HammockDataContractJsonSerializer : Utf8Serializer, ISerializer, IDeserializer
     {
         private readonly Dictionary<RuntimeTypeHandle, DataContractJsonSerializer> _serializers =
@@ -12,7 +15,7 @@ namespace Hammock.Serialization
 
         #region ISerializer Members
 
-        public string Serialize(object instance, Type type)
+        public virtual string Serialize(object instance, Type type)
         {
             string result;
             using (var stream = new MemoryStream())

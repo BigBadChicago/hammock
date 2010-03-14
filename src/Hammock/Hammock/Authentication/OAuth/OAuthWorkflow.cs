@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Hammock.Extensions;
-using Hammock.OAuth;
 using Hammock.Web;
-using Hammock.Web.Query.OAuth;
-
 #if !SILVERLIGHT
 using System.Web;
 #endif

@@ -155,6 +155,7 @@
     <Compile Include="Caching\SimpleCache.cs" />
     <Compile Include="RestBase.cs" />
     <Compile Include="RestCallback.cs" />
+    <Compile Include="Retries\RetryPolicy.cs" />
     <Compile Include="Serialization\HammockDataContractJsonSerializer.cs" />
     <Compile Include="Serialization\IDeserializer.cs" />
     <Compile Include="Serialization\HammockDataContractSerializer.cs" />
@@ -180,6 +181,7 @@
     <None Include="Caching\_Caching.cd" />
     <None Include="key.snk" />
     <None Include="Model\_Model.cd" />
+    <None Include="Tasks\_Tasks.cd" />
     <None Include="Web\_Web.cd" />
     <None Include="_Hammock.cd" />
   </ItemGroup>

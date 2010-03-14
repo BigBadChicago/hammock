@@ -1,7 +1,6 @@
 using System;
 using Hammock.Extensions;
 using Hammock.Web;
-using Hammock.Web.Query;
 
 namespace Hammock.Authentication.Basic
 {
@@ -10,8 +9,8 @@ namespace Hammock.Authentication.Basic
 #endif
     public class BasicAuthCredentials : IWebCredentials
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public virtual string Username { get; set; }
+        public virtual string Password { get; set; }
 
         public WebQuery GetQueryFor(string url, 
                                     RestBase request, 
@@ -23,7 +22,7 @@ namespace Hammock.Authentication.Basic
                        : new BasicAuthWebQuery(info);
         }
 
-        public bool HasAuth
+        public virtual bool HasAuth
         {
             get
             {

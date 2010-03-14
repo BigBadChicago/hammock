@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Hammock.OAuth;
+using Hammock.Authentication.OAuth;
 using Hammock.Web;
 using RestCore.Tests.Helpers;
 using NUnit.Framework;

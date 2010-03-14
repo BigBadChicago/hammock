@@ -3,36 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using Hammock.Authentication.OAuth;
 using Hammock.Extensions;
-using Hammock.OAuth;
+using Hammock.Web;
 #if !Silverlight
 using System.Web;
 #endif
 
-namespace Hammock.Web.Query.OAuth
+namespace Hammock.Authentication.OAuth
 {
-    /// <summary>
-    /// A web query engine for OAuth requests.
-    /// </summary>
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class OAuthWebQuery : WebQuery
     {
-        /// <summary>
-        /// Gets or sets the HTTP Realm.
-        /// </summary>
-        /// <value>The realm.</value>
         public string Realm { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter handling.
-        /// </summary>
-        /// <value>The parameter handling.</value>
         public OAuthParameterHandling ParameterHandling { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OAuthWebQuery"/> class.
-        /// </summary>
-        /// <param name="info">The info.</param>
         public OAuthWebQuery(OAuthWebQueryInfo info)
             : base(info)
         {
@@ -43,7 +29,6 @@ namespace Hammock.Web.Query.OAuth
 #if SILVERLIGHT
         private string _authorizationHeader = "X-Twitter-Auth";
 #endif
-
         protected override WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
             Uri uri;
@@ -221,8 +206,8 @@ namespace Hammock.Web.Query.OAuth
 
             var parameters = 0;
             foreach (var parameter in Parameters.Where(parameter => 
-                !parameter.Name.IsNullOrBlank() && 
-                !parameter.Value.IsNullOrBlank()))
+                                                       !parameter.Name.IsNullOrBlank() && 
+                                                       !parameter.Value.IsNullOrBlank()))
             {
                 parameters++;
                 var format = parameters < Parameters.Count ? "{0}=\"{1}\"," : "{0}=\"{1}\"";
@@ -246,7 +231,6 @@ namespace Hammock.Web.Query.OAuth
             return base.Request(url, out exception);
         }
 #endif
-
         private void RecalculateProtectedResourceSignature(string url)
         {
             var info = (OAuthWebQueryInfo) Info;

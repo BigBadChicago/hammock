@@ -4,6 +4,9 @@ using System.Web.Script.Serialization;
 
 namespace Hammock.Serialization
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class HammockJavaScriptSerializer : Utf8Serializer, ISerializer, IDeserializer
     {
         private readonly JavaScriptSerializer _serializer;
@@ -25,22 +28,22 @@ namespace Hammock.Serialization
             _serializer.RegisterConverters(converters);
         }
 
-        public string Serialize(object instance, Type type)
+        public virtual string Serialize(object instance, Type type)
         {
             return _serializer.Serialize(instance);
         }
 
-        public string ContentType
+        public virtual string ContentType
         {
             get { return "application/json"; }
         }
 
-        public object Deserialize(string content, Type type)
+        public virtual object Deserialize(string content, Type type)
         {
             return _serializer.DeserializeObject(content);
         }
 
-        public T Deserialize<T>(string content)
+        public virtual T Deserialize<T>(string content)
         {
             return _serializer.Deserialize<T>(content);
         }

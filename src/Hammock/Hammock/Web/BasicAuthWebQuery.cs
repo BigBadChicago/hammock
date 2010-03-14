@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using Hammock.Extensions;
-using Hammock.Web.Query;
 
 namespace Hammock.Web
 {

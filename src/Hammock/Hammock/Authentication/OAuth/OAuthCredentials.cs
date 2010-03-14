@@ -1,8 +1,5 @@
 ﻿using System;
-using Hammock.OAuth;
 using Hammock.Web;
-using Hammock.Web.Query;
-using Hammock.Web.Query.OAuth;
 
 namespace Hammock.Authentication.OAuth
 {

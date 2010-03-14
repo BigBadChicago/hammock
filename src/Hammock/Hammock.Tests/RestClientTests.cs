@@ -4,7 +4,6 @@ using System.Net;
 using Hammock.Authentication;
 using Hammock.Authentication.Basic;
 using Hammock.Authentication.OAuth;
-using Hammock.OAuth;
 using Hammock.Serialization;
 using Hammock.Tests.Converters;
 using Hammock.Tests.Postmark;
