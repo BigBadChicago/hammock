@@ -44,6 +44,7 @@ namespace Hammock
         public virtual Func<string> CacheKeyFunction { get; set; }
         public DecompressionMethods DecompressionMethods { get; set; }
         public virtual IWebQueryInfo Info { get; set; }
+        public virtual string Path { get; set; }
 
         public void AddHeader(string name, string value)
         {

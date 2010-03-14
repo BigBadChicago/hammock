@@ -11,6 +11,7 @@ using Hammock.Tests.Postmark;
 using Hammock.Web;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using HammockJsonDotNetSerializer = Hammock.Tests.Helpers.HammockJsonDotNetSerializer;
 
 namespace Hammock.Tests
 {

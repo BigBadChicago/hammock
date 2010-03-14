@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using Hammock.Serialization;
 using Newtonsoft.Json;
 
-namespace Hammock.Serialization
+namespace Hammock.Tests.Helpers
 {
     public class HammockJsonDotNetSerializer : Utf8Serializer, ISerializer, IDeserializer
     {

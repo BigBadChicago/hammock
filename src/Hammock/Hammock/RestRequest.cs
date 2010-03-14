@@ -43,7 +43,6 @@ namespace Hammock
             }
         }
 
-        public virtual string Path { get; set; }
         public virtual Type ResponseEntityType { get; set; }
         public virtual Type RequestEntityType { get; set; }
 
@@ -56,9 +55,13 @@ namespace Hammock
         protected internal Uri BuildEndpoint(RestClient client)
         {
             var sb = new StringBuilder();
-            var versionPath = client.VersionPath.IsNullOrBlank()
-                                  ? VersionPath.IsNullOrBlank() ? "" : VersionPath
-                                  : client.VersionPath;
+
+            var path = Path.IsNullOrBlank()
+                           ? client.Path.IsNullOrBlank() ? "" : client.Path
+                           : Path;
+            var versionPath = VersionPath.IsNullOrBlank()
+                                  ? client.VersionPath.IsNullOrBlank() ? "" : client.VersionPath
+                                  : VersionPath;
 
             sb.Append(client.Authority.IsNullOrBlank() ? "" : client.Authority);
             sb.Append(client.Authority.EndsWith("/") ? "" : "/");
@@ -67,7 +70,7 @@ namespace Hammock
             {
                 sb.Append(versionPath.EndsWith("/") ? "" : "/");
             }
-            sb.Append(Path.IsNullOrBlank() ? "" : Path.StartsWith("/") ? Path.Substring(1) : Path);
+            sb.Append(path.IsNullOrBlank() ? "" : path.StartsWith("/") ? path.Substring(1) : path);
 
             Uri uri;
             Uri.TryCreate(sb.ToString(), UriKind.RelativeOrAbsolute, out uri);

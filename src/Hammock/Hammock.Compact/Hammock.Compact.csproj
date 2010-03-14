@@ -61,10 +61,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
-    <Reference Include="Newtonsoft.Json.Compact, Version=3.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Newtonsoft.Json.Compact.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -165,9 +161,6 @@
     <Compile Include="..\Hammock\Extensions\FormatExtensions.cs">
       <Link>Extensions\FormatExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Extensions\JsonExtensions.cs">
-      <Link>Extensions\JsonExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Extensions\MathExtensions.cs">
       <Link>Extensions\MathExtensions.cs</Link>
     </Compile>
@@ -224,9 +217,6 @@
     </Compile>
     <Compile Include="..\Hammock\RestResponse.cs">
       <Link>RestResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Serialization\HammockJsonDotNetSerializer.cs">
-      <Link>Serialization\HammockJsonDotNetSerializer.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Serialization\HammockXmlSerializer.cs">
       <Link>Serialization\HammockXmlSerializer.cs</Link>
@@ -288,9 +278,6 @@
     <Compile Include="..\Hammock\Web\HttpPostParameterType.cs">
       <Link>Web\HttpPostParameterType.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Web\IWebQueryClient.cs">
-      <Link>Web\IWebQueryClient.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Web\IWebQueryInfo.cs">
       <Link>Web\IWebQueryInfo.cs</Link>
     </Compile>
@@ -299,9 +286,6 @@
     </Compile>
     <Compile Include="..\Hammock\Web\Mocks\IWebResponse.cs">
       <Link>Web\Mocks\IWebResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\Mocks\WebQueryClientMock.cs">
-      <Link>Web\Mocks\WebQueryClientMock.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Web\Mocks\WebRequestMock.cs">
       <Link>Web\Mocks\WebRequestMock.cs</Link>
@@ -321,14 +305,8 @@
     <Compile Include="..\Hammock\Web\WebCallback.cs">
       <Link>Web\WebCallback.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Web\WebCredentials.cs">
-      <Link>Web\WebCredentials.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Web\WebEntity.cs">
       <Link>Web\WebEntity.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Web\WebFormat.cs">
-      <Link>Web\WebFormat.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Web\WebHeader.cs">
       <Link>Web\WebHeader.cs</Link>
