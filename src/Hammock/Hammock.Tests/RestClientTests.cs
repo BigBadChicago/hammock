@@ -3,14 +3,12 @@ using System.Configuration;
 using System.Net;
 using Hammock.Authentication;
 using Hammock.Authentication.Basic;
-using Hammock.Authentication.OAuth;
-using Hammock.Serialization;
+using Hammock.Extras;
 using Hammock.Tests.Converters;
 using Hammock.Tests.Postmark;
 using Hammock.Web;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using HammockJsonDotNetSerializer = Hammock.Tests.Helpers.HammockJsonDotNetSerializer;
 
 namespace Hammock.Tests
 {

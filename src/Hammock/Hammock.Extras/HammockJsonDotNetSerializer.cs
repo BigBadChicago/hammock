@@ -3,7 +3,7 @@ using System.IO;
 using Hammock.Serialization;
 using Newtonsoft.Json;
 
-namespace Hammock.Tests.Helpers
+namespace Hammock.Extras
 {
     public class HammockJsonDotNetSerializer : Utf8Serializer, ISerializer, IDeserializer
     {
