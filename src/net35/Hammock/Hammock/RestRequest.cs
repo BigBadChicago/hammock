@@ -18,6 +18,19 @@ namespace Hammock
     public class RestRequest  : RestBase
     {
         private object _entity;
+
+        protected internal WebHeaderCollection ExpectHeaders { get; set; }
+
+        public object ExpectEntity
+        {
+            get; set;
+        }
+
+        public RestRequest()
+        {
+            ExpectHeaders = new WebHeaderCollection(0);
+        }
+
         public virtual object Entity
         {
             get
@@ -70,6 +83,11 @@ namespace Hammock
             Uri.TryCreate(sb.ToString(), UriKind.RelativeOrAbsolute, out uri);
 
             return uri;
+        }
+
+        public void ExpectHeader(string name, string value)
+        {
+            ExpectHeaders.Add(name, value);
         }
     }
 }

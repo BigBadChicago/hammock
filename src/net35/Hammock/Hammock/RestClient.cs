@@ -12,6 +12,8 @@ using Hammock.Web;
 using Hammock.Silverlight.Compat;
 #else
 using System.Collections.Specialized;
+using Hammock.Web.Mocks;
+
 #endif
 
 namespace Hammock
@@ -51,6 +53,7 @@ namespace Hammock
             // rate-limiting
             // recurring tasks
             // requestimpl for async
+            // mock trigger
 
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
@@ -63,8 +66,14 @@ namespace Hammock
             while (_remainingRetries > 0)
             {
                 var url = uri.ToString();
-                WebException exception;
+                if (request.ExpectEntity != null ||
+                    request.ExpectHeaders.Count > 0)
+                {
+                    WebRequest.RegisterPrefix("mocks_", new MockWebRequestFactory());
+                    url = String.Concat("mocks_", url);
+                }
 
+                WebException exception;
                 if (!RequestWithCache(request, query, url, out exception) &&
                     !RequestMultiPart(request, query, url, out exception))
                 {

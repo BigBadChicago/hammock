@@ -1,11 +1,9 @@
 using System;
-using System.IO;
 using System.Net;
-using System.Text;
 
 namespace Hammock.Web.Mocks
 {
-    public class WebResponseMock : WebResponse
+    public class MockWebResponse : WebResponse
     {
         private readonly Uri _origin;
         public string Content { get; private set; }
@@ -15,7 +13,7 @@ namespace Hammock.Web.Mocks
             get { return _origin; }
         }
 
-        public WebResponseMock(Uri origin, string content)
+        public MockWebResponse(Uri origin, string content)
         {
             _origin = origin;
             Content = content;

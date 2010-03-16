@@ -6,8 +6,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Hammock.Web.Extensions;
 
-#if SILVERLIGHT
+#if SILVERLIGHT && !WindowsPhone
 using System.Windows.Browser;
+#endif
+
+#if WindowsPhone
+using System.Web;
 #endif
 
 #if !SILVERLIGHT

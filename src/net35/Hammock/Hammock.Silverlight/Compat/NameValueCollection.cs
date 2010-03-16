@@ -21,6 +21,11 @@ namespace Hammock.Silverlight.Compat
             }
         }
 
+        public NameValueCollection() : base()
+        {
+
+        }
+
         public NameValueCollection(int capacity) : base(capacity)
         {
             

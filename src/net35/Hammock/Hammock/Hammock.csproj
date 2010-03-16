@@ -119,8 +119,8 @@
     <Compile Include="Web\HttpPostParameter.cs" />
     <Compile Include="Web\HttpPostParameterType.cs" />
     <Compile Include="Web\Mocks\IWebResponse.cs" />
-    <Compile Include="Web\Mocks\WebRequestMock.cs" />
-    <Compile Include="Web\Mocks\WebResponseMock.cs" />
+    <Compile Include="Web\Mocks\MockWebRequest.cs" />
+    <Compile Include="Web\Mocks\MockWebResponse.cs" />
     <Compile Include="Web\Pair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Web\BasicAuthWebQuery.cs" />
@@ -175,6 +175,7 @@
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />
     <Compile Include="Validation\ValidEmailSpecification.cs" />
+    <Compile Include="Web\Mocks\MockWebRequestFactory.cs" />
     <Compile Include="Web\WebHeader.cs" />
     <Compile Include="Web\WebHeaderCollection.cs" />
     <Compile Include="Web\WebPair.cs" />
@@ -189,6 +190,7 @@
     <None Include="Model\_Model.cd" />
     <None Include="Retries\_Retries.cd" />
     <None Include="Tasks\_Tasks.cd" />
+    <None Include="Web\Mocks\_Mocks.cd" />
     <None Include="Web\_Web.cd" />
     <None Include="_Hammock.cd" />
   </ItemGroup>
