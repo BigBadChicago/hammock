@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 
 namespace Hammock.Web.Mocks
@@ -7,6 +8,26 @@ namespace Hammock.Web.Mocks
     {
         private readonly Uri _origin;
         public string Content { get; private set; }
+
+        public override Stream GetResponseStream()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Close()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override long ContentLength
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override string ContentType
+        {
+            get { throw new NotImplementedException(); }
+        }
 
         public override Uri ResponseUri
         {

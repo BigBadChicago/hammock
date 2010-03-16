@@ -292,6 +292,15 @@
     <Compile Include="..\Hammock\Web\Mocks\IMockable.cs">
       <Link>Web\Mocks\IMockable.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\MockWebRequest.cs">
+      <Link>Web\Mocks\MockWebRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\MockWebRequestFactory.cs">
+      <Link>Web\Mocks\MockWebRequestFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\MockWebResponse.cs">
+      <Link>Web\Mocks\MockWebResponse.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Web\Pair.cs">
       <Link>Web\Pair.cs</Link>
     </Compile>

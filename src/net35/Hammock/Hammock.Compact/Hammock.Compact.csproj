@@ -308,11 +308,14 @@
     <Compile Include="..\Hammock\Web\Mocks\IWebResponse.cs">
       <Link>Web\Mocks\IWebResponse.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Web\Mocks\WebRequestMock.cs">
-      <Link>Web\Mocks\WebRequestMock.cs</Link>
+    <Compile Include="..\Hammock\Web\Mocks\MockWebRequest.cs">
+      <Link>Web\Mocks\MockWebRequest.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Web\Mocks\WebResponseMock.cs">
-      <Link>Web\Mocks\WebResponseMock.cs</Link>
+    <Compile Include="..\Hammock\Web\Mocks\MockWebRequestFactory.cs">
+      <Link>Web\Mocks\MockWebRequestFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Web\Mocks\MockWebResponse.cs">
+      <Link>Web\Mocks\MockWebResponse.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Web\Pair.cs">
       <Link>Web\Pair.cs</Link>
