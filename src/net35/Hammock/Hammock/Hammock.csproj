@@ -119,8 +119,8 @@
     <Compile Include="Web\HttpPostParameter.cs" />
     <Compile Include="Web\HttpPostParameterType.cs" />
     <Compile Include="Web\Mocks\IWebResponse.cs" />
-    <Compile Include="Web\Mocks\MockWebRequest.cs" />
-    <Compile Include="Web\Mocks\MockWebResponse.cs" />
+    <Compile Include="Web\Mocks\MockHttpWebRequest.cs" />
+    <Compile Include="Web\Mocks\MockHttpWebResponse.cs" />
     <Compile Include="Web\Pair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Web\BasicAuthWebQuery.cs" />

@@ -66,11 +66,19 @@ namespace Hammock
             while (_remainingRetries > 0)
             {
                 var url = uri.ToString();
-                if (request.ExpectEntity != null ||
-                    request.ExpectHeaders.Count > 0)
+                if (RequestExpectsMock(request))
                 {
-                    WebRequest.RegisterPrefix("mocks_", new MockWebRequestFactory());
-                    url = String.Concat("mocks_", url);
+                    WebRequest.RegisterPrefix("mock", new MockWebRequestFactory());
+                    url = url.Replace("https", "mock").Replace("http", "mock");
+                    
+                    if(request.ExpectStatusCode.HasValue)
+                    {
+                        query.Parameters.Add("mockStatusCode", ((int)request.ExpectStatusCode.Value).ToString());
+                        if(request.ExpectStatusDescription.IsNullOrBlank())
+                        {
+                            query.Parameters.Add("mockStatusDescription", request.ExpectStatusCode.ToString());
+                        }
+                    }
                 }
 
                 WebException exception;
@@ -116,6 +124,16 @@ namespace Hammock
 
             _firstTry = _remainingRetries == 0;
             return query;
+        }
+
+        private static bool RequestExpectsMock(RestRequest request)
+        {
+            return request.ExpectEntity != null ||
+                   request.ExpectHeaders.Count > 0 ||
+                   request.ExpectStatusCode.HasValue ||
+                   !request.ExpectContent.IsNullOrBlank() ||
+                   !request.ExpectContentType.IsNullOrBlank() ||
+                   !request.ExpectStatusDescription.IsNullOrBlank();
         }
 
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)

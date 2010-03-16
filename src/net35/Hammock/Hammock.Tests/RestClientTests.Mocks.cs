@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Hammock.Extras;
 using Hammock.Tests.Postmark;
-using Hammock.Web.Mocks;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -14,7 +13,6 @@ namespace Hammock.Tests
             var settings = GetSerializerSettings();
             var serializer = new HammockJsonDotNetSerializer(settings);
 
-            // Mocking should be unique to RestRequest
             // Add IsMock to result
            
             var client = new RestClient
@@ -33,6 +31,7 @@ namespace Hammock.Tests
 
             var request = new RestRequest();
             request.ExpectHeader("Mock", "true");
+            request.ExpectStatusCode = HttpStatusCode.OK;
             request.ExpectEntity = success;
 
             var response = client.Request<PostmarkResponse>(request);

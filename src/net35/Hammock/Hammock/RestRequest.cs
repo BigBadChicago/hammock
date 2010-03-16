@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text;
 using Hammock.Extensions;
 using Hammock.Web;
@@ -8,6 +9,8 @@ using Hammock.Silverlight.Compat;
 #else
 using System.Collections.Specialized;
 using System.Diagnostics;
+using WebHeaderCollection=Hammock.Web.WebHeaderCollection;
+
 #endif
 
 namespace Hammock
@@ -20,7 +23,10 @@ namespace Hammock
         private object _entity;
 
         protected internal WebHeaderCollection ExpectHeaders { get; set; }
-
+        public HttpStatusCode? ExpectStatusCode { get; set; }
+        public string ExpectStatusDescription { get; set; }
+        public string ExpectContent { get; set; }
+        public string ExpectContentType { get; set; }
         public object ExpectEntity
         {
             get; set;

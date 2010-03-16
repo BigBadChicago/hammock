@@ -11,7 +11,6 @@ using Hammock.Attributes.Specialized;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Validation;
-using Hammock.Web.Mocks;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -30,20 +29,15 @@ namespace Hammock.Web
         protected internal virtual WebEntity Entity { get; set; }
         public virtual WebMethod Method { get; set; }
         public virtual string Proxy { get; set; }
-        public virtual bool MockWebQueryClient { get; set; }
         public virtual string AuthorizationHeader { get; protected set; }
-        public virtual IEnumerable<IMockable> MockGraph { get; set; }
         public DecompressionMethods DecompressionMethods { get; set; }
-        public virtual bool UseTransparentProxy { get; set; }
         public virtual TimeSpan? RequestTimeout { get; set; }
         public virtual WebQueryResult Result { get; internal set; }
         public virtual bool KeepAlive { get; set; }
-        public virtual string SourceUrl { get; set; }
         
 #if !Silverlight
         public virtual ServicePoint ServicePoint { get; set; }
 #endif
-
         private WebResponse _webResponse;
         public virtual WebResponse WebResponse
         {
@@ -184,13 +178,23 @@ namespace Hammock.Web
             Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
             Trace.WriteLine("BODY: " + parameters);
 #endif
-
-            var request = (HttpWebRequest) WebRequest.Create(url);
+            var request = WebRequest.Create(url);
             AuthenticateRequest(request);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             request.ContentType = "application/x-www-form-urlencoded";
-            
-            SetRequestMeta(request);
+
+            // [DC] LSP violation necessary for "pure" mocks
+            if (request is HttpWebRequest)
+            {
+                SetRequestMeta((HttpWebRequest)request);
+            }
+            else
+            {
+                if (!UserAgent.IsNullOrBlank())
+                {
+                    request.Headers["User-Agent"] = UserAgent;
+                }
+            }
 
 #if !SILVERLIGHT
             content = Encoding.ASCII.GetBytes(parameters);
@@ -205,25 +209,34 @@ namespace Hammock.Web
         {
             url = AppendParameters(url);
 
-            var request = (HttpWebRequest)WebRequest.Create(url);
+            var request = WebRequest.Create(url);
             AuthenticateRequest(request);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             request.ContentType = Entity.ContentType;
 
-            SetRequestMeta(request);
+            // [DC] LSP violation necessary for "pure" mocks
+            if (request is HttpWebRequest)
+            {
+                SetRequestMeta((HttpWebRequest)request);
+            }
+            else
+            {
+                if (!UserAgent.IsNullOrBlank())
+                {
+                    request.Headers["User-Agent"] = UserAgent;
+                }
+            }
 
             var entity = Entity.Content.ToString();
 #if TRACE
             Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
             Trace.WriteLine("BODY: " + entity);
 #endif
-
             content = Entity.ContentEncoding.GetBytes(entity);
 #if !Silverlight
             // [DC]: This is set by Silverlight
             request.ContentLength = content.Length;
 #endif
-
             return request;
         }
 
@@ -233,10 +246,22 @@ namespace Hammock.Web
 #if TRACE
             Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
 #endif
-            var request = (HttpWebRequest)WebRequest.Create(url);
+            var request = WebRequest.Create(url);
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
             AuthenticateRequest(request);
-            SetRequestMeta(request);
+
+            // [DC] LSP violation necessary for "pure" mocks
+            if(request is HttpWebRequest)
+            {
+                SetRequestMeta((HttpWebRequest)request);
+            }
+            else
+            {
+                if(!UserAgent.IsNullOrBlank())
+                {
+                    request.Headers["User-Agent"] = UserAgent;
+                }
+            }
 
             return request;
         }
@@ -937,18 +962,17 @@ namespace Hammock.Web
             }
         }
 #endif
-
-        protected virtual HttpWebRequest BuildMultiPartFormRequest(PostOrPut method, string url,
+        protected virtual WebRequest BuildMultiPartFormRequest(PostOrPut method, string url,
                                                                    IEnumerable<HttpPostParameter> parameters,
                                                                    out byte[] bytes)
         {
             var boundary = Guid.NewGuid().ToString();
-            var request = (HttpWebRequest) WebRequest.Create(url);
+            var request = WebRequest.Create(url);
             AuthenticateRequest(request);
 
 #if !SILVERLIGHT
-            request.PreAuthenticate = true;
-            request.AllowWriteStreamBuffering = true;
+            //request.PreAuthenticate = true;
+            //request.AllowWriteStreamBuffering = true;
 #endif
             request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
