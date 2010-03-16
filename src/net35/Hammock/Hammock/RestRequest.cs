@@ -6,11 +6,6 @@ using Hammock.Web;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
-#else
-using System.Collections.Specialized;
-using System.Diagnostics;
-using WebHeaderCollection=Hammock.Web.WebHeaderCollection;
-
 #endif
 
 namespace Hammock
@@ -22,19 +17,16 @@ namespace Hammock
     {
         private object _entity;
 
-        protected internal WebHeaderCollection ExpectHeaders { get; set; }
+        protected internal System.Net.WebHeaderCollection ExpectHeaders { get; set; }
         public HttpStatusCode? ExpectStatusCode { get; set; }
         public string ExpectStatusDescription { get; set; }
         public string ExpectContent { get; set; }
         public string ExpectContentType { get; set; }
-        public object ExpectEntity
-        {
-            get; set;
-        }
+        public object ExpectEntity { get; set; }
 
         public RestRequest()
         {
-            ExpectHeaders = new WebHeaderCollection(0);
+            ExpectHeaders = new System.Net.WebHeaderCollection();
         }
 
         public virtual object Entity

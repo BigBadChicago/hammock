@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
 using Hammock.Caching;
+using Hammock.Web.Mocks;
 
 namespace Hammock.Web
 {
@@ -691,6 +693,91 @@ namespace Hammock.Web
 
             return request.BeginGetResponse(GetAsyncStreamCallback, state);
         }
-	    
+
+        private object ResponseAsHttpWebResponse(out int statusCode, out string statusDescription, out string contentType, out long contentLength, out Uri responseUri, out System.Net.WebHeaderCollection headers)
+        {
+            var httpWebResponse = WebResponse != null && WebResponse is HttpWebResponse
+                                      ? (HttpWebResponse) WebResponse
+                                      : null;
+
+            if(httpWebResponse == null)
+            {
+                statusCode = 0;
+                statusDescription = null;
+                contentType = null;
+                contentLength = 0;
+                responseUri = null;
+                headers = null;
+                return null;
+            }
+
+            statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
+            statusDescription = httpWebResponse.StatusDescription;
+            contentType = httpWebResponse.ContentType;
+            contentLength = httpWebResponse.ContentLength;
+            responseUri = httpWebResponse.ResponseUri;
+            headers = httpWebResponse.Headers;
+            return httpWebResponse;
+        }
+
+        // [DC]: Duplication is unfortunate but necessary. Use an interface / anonymous type?
+        private object ResponseAsMockHttpWebResponse(out int statusCode, out string statusDescription, out string contentType, out long contentLength, out Uri responseUri, out System.Net.WebHeaderCollection headers)
+        {
+            var httpWebResponse = WebResponse != null && WebResponse is MockHttpWebResponse
+                                      ? (MockHttpWebResponse)WebResponse
+                                      : null;
+
+            if (httpWebResponse == null)
+            {
+                statusCode = 0;
+                statusDescription = null;
+                contentType = null;
+                contentLength = 0;
+                responseUri = null;
+                headers = null;
+                return null;
+            }
+
+            statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
+            statusDescription = httpWebResponse.StatusDescription;
+            contentType = httpWebResponse.ContentType;
+            contentLength = httpWebResponse.ContentLength;
+            responseUri = httpWebResponse.ResponseUri;
+            headers = httpWebResponse.Headers;
+            return httpWebResponse;
+        }
+
+        private void CastWebResponse(out int statusCode, 
+                                     out string statusDescription, 
+                                     out System.Net.WebHeaderCollection headers,
+                                     out string contentType, 
+                                     out long contentLength, 
+                                     out Uri responseUri)
+        {
+            var response = ResponseAsHttpWebResponse(
+                out statusCode, out statusDescription, 
+                out contentType, out contentLength, 
+                out responseUri, out headers
+                );
+            if (response != null)
+            {
+                return;
+            }
+            
+            response = ResponseAsMockHttpWebResponse(
+                out statusCode, out statusDescription,
+                out contentType, out contentLength,
+                out responseUri, out headers
+                );
+
+            if (response != null)
+            {
+                return;
+            }
+            
+            throw new NullReferenceException(
+                "No suitable HTTP response object was cast."
+                );
+        }
     }
 }

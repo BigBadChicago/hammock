@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -11,6 +10,7 @@ using Hammock.Attributes.Specialized;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Validation;
+using Hammock.Web.Mocks;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -103,35 +103,36 @@ namespace Hammock.Web
             Result.ResponseDate = DateTime.UtcNow;
             Result.Response = e.Response;
             Result.RequestHttpMethod = Method.ToUpper();
+            Result.IsMock = WebResponse is MockHttpWebResponse;
 
-            var httpWebResponse = WebResponse != null && WebResponse is HttpWebResponse
-                                      ? (HttpWebResponse) WebResponse
-                                      : null;
-
-            if(httpWebResponse == null)
-            {
-                return;
-            }
-
-            var statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
-            var statusDescription = httpWebResponse.StatusDescription;
-
+            int statusCode;
+            string statusDescription;
+            System.Net.WebHeaderCollection headers;
+            string contentType;
+            long contentLength;
+            Uri responseUri;
+            CastWebResponse(
+                out statusCode, out statusDescription, out headers, 
+                out contentType, out contentLength, out responseUri
+                );
 #if TRACE
             Trace.WriteLine(String.Concat("RESPONSE: ", statusCode, " ", statusDescription));
-            Trace.WriteLineIf(httpWebResponse.Headers.AllKeys.Count() > 0, "HEADERS:");
-            foreach (var trace in httpWebResponse.Headers.AllKeys.Select(
-                key => String.Concat("\t", key, ": ", httpWebResponse.Headers[key])))
+            Trace.WriteLineIf(headers.AllKeys.Count() > 0, "HEADERS:");
+            foreach (var trace in headers.AllKeys.Select(
+                key => String.Concat("\t", key, ": ", headers[key])))
             {
                 Trace.WriteLine(trace);
             }
-            Trace.WriteLine("BODY: " + e.Response);
+            Trace.WriteLine(String.Concat(
+                "BODY: ",e.Response)
+                );
 #endif
 
             Result.ResponseHttpStatusCode = statusCode;
             Result.ResponseHttpStatusDescription = statusDescription;
-            Result.ResponseType = httpWebResponse.ContentType;
-            Result.ResponseLength = httpWebResponse.ContentLength;
-            Result.ResponseUri = httpWebResponse.ResponseUri;
+            Result.ResponseType = contentType;
+            Result.ResponseLength = contentLength;
+            Result.ResponseUri = responseUri;
         }
 
         private void SetRequestResults(WebQueryRequestEventArgs e)
@@ -174,15 +175,16 @@ namespace Hammock.Web
         protected virtual WebRequest BuildPostOrPutFormWebRequest(PostOrPut method, string url, out byte[] content)
         {
             var parameters = AppendParameters(url).Replace(url + "?", "");
-#if TRACE
-            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
-            Trace.WriteLine("BODY: " + parameters);
-#endif
+
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             request.ContentType = "application/x-www-form-urlencoded";
-
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                );
+#endif
             // [DC] LSP violation necessary for "pure" mocks
             if (request is HttpWebRequest)
             {
@@ -190,11 +192,18 @@ namespace Hammock.Web
             }
             else
             {
+                AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
                     request.Headers["User-Agent"] = UserAgent;
                 }
             }
+
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "BODY: ",parameters)
+                );
+#endif
 
 #if !SILVERLIGHT
             content = Encoding.ASCII.GetBytes(parameters);
@@ -214,6 +223,12 @@ namespace Hammock.Web
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             request.ContentType = Entity.ContentType;
 
+            var entity = Entity.Content;
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                );
+#endif
             // [DC] LSP violation necessary for "pure" mocks
             if (request is HttpWebRequest)
             {
@@ -221,17 +236,18 @@ namespace Hammock.Web
             }
             else
             {
+                AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
                     request.Headers["User-Agent"] = UserAgent;
                 }
             }
-
-            var entity = Entity.Content.ToString();
 #if TRACE
-            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
-            Trace.WriteLine("BODY: " + entity);
+            Trace.WriteLine(String.Concat(
+                "BODY: ", entity)
+                );
 #endif
+
             content = Entity.ContentEncoding.GetBytes(entity);
 #if !Silverlight
             // [DC]: This is set by Silverlight
@@ -243,20 +259,23 @@ namespace Hammock.Web
         protected virtual WebRequest BuildGetOrDeleteWebRequest(GetOrDelete method, string url)
         {
             url = AppendParameters(url);
-#if TRACE
-            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
-#endif
+
             var request = WebRequest.Create(url);
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
             AuthenticateRequest(request);
-
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                );
+#endif
             // [DC] LSP violation necessary for "pure" mocks
             if(request is HttpWebRequest)
-            {
+            {   
                 SetRequestMeta((HttpWebRequest)request);
             }
             else
             {
+                AppendHeaders(request);
                 if(!UserAgent.IsNullOrBlank())
                 {
                     request.Headers["User-Agent"] = UserAgent;
@@ -339,7 +358,8 @@ namespace Hammock.Web
 
         protected virtual void AppendHeaders(WebRequest request)
         {
-            if (!(request is HttpWebRequest))
+            if (!(request is HttpWebRequest) &&
+                !(request is MockHttpWebRequest))
             {
                 return;
             }
@@ -366,7 +386,14 @@ namespace Hammock.Web
             {
                 if (_restrictedHeaderActions.ContainsKey(header.Key))
                 {
-                    _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
+                    if(request is HttpWebRequest)
+                    {
+                        _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
+                    }
+                    if(request is MockHttpWebRequest)
+                    {
+                        AddHeader(header, request);
+                    }
                 }
                 else
                 {

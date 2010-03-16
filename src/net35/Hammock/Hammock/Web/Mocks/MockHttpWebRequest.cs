@@ -6,24 +6,41 @@ namespace Hammock.Web.Mocks
 {
     public class MockHttpWebRequest : WebRequest
     {
-        private readonly string _content;
-        private readonly string _contentType;
         private readonly Uri _requestUri;
 
-        public string ExpectStatusCode { get; set; }
-        public string ExpectStatusDescription { get; set; }
-        public string ExpectContent { get; set; }
-        public string ExpectContentType { get; set; }
+        public virtual HttpStatusCode ExpectStatusCode { get; protected internal set; }
+        public virtual string ExpectStatusDescription { get; protected internal set; }
+        public virtual System.Net.WebHeaderCollection ExpectHeaders { get; protected internal set; }
+
+        public virtual string Content { get; set; }
+
+#if !SILVERLIGHT
+        public override long ContentLength { get; set; }
+#else
+        public long ContentLength { get; set; }
+#endif
+        public override string ContentType { get; set; }
 
         public MockHttpWebRequest(Uri requestUri)
         {
             _requestUri = requestUri;
+            Headers = new System.Net.WebHeaderCollection();
+            ExpectHeaders = new System.Net.WebHeaderCollection();
         }
 
 #if !SILVERLIGHT
         public override WebResponse GetResponse()
         {
-            var response = new MockHttpWebResponse(_requestUri, _content, _contentType);
+            var response = new MockHttpWebResponse(_requestUri, ContentType)
+                               {
+                                   StatusCode = ExpectStatusCode,
+                                   StatusDescription = ExpectStatusDescription,
+                                   Content = Content
+                               };
+            foreach(var key in ExpectHeaders.AllKeys)
+            {
+                response.Headers.Add(key, ExpectHeaders[key]);
+            }
             return response;
         }
 #endif      
@@ -31,6 +48,13 @@ namespace Hammock.Web.Mocks
         {
             
         }
+
+#if !SILVERLIGHT
+        public override Stream GetRequestStream()
+        {
+            return new MemoryStream();
+        }
+#endif
 
         public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
@@ -52,7 +76,6 @@ namespace Hammock.Web.Mocks
             throw new NotImplementedException();
         }
 
-        public override string ContentType { get; set; }
         public override System.Net.WebHeaderCollection Headers { get; set; }
         public override string Method { get; set; }
 

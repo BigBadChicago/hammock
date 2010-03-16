@@ -19,6 +19,7 @@ namespace Hammock.Web
         public virtual string ResponseHttpStatusDescription { get; set; }
         public virtual long ResponseLength { get; set; }
         public virtual Uri ResponseUri { get; set; }
+        public virtual bool IsMock { get; set; }
 
         // Set by RestClient
         public virtual WebQueryResult PreviousResult { get; set; }

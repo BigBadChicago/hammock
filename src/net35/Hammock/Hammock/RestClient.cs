@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
@@ -53,7 +54,6 @@ namespace Hammock
             // rate-limiting
             // recurring tasks
             // requestimpl for async
-            // mock trigger
 
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
@@ -68,17 +68,7 @@ namespace Hammock
                 var url = uri.ToString();
                 if (RequestExpectsMock(request))
                 {
-                    WebRequest.RegisterPrefix("mock", new MockWebRequestFactory());
-                    url = url.Replace("https", "mock").Replace("http", "mock");
-                    
-                    if(request.ExpectStatusCode.HasValue)
-                    {
-                        query.Parameters.Add("mockStatusCode", ((int)request.ExpectStatusCode.Value).ToString());
-                        if(request.ExpectStatusDescription.IsNullOrBlank())
-                        {
-                            query.Parameters.Add("mockStatusDescription", request.ExpectStatusCode.ToString());
-                        }
-                    }
+                    url = BuildMockRequestUrl(request, query, url);
                 }
 
                 WebException exception;
@@ -124,6 +114,86 @@ namespace Hammock
 
             _firstTry = _remainingRetries == 0;
             return query;
+        }
+
+        private string BuildMockRequestUrl(RestRequest request, WebQuery query, string url)
+        {
+            WebRequest.RegisterPrefix("mock", new MockWebRequestFactory());
+            if (url.Contains("https"))
+            {
+                url = url.Replace("https", "mock");
+                query.Parameters.Add("mockScheme", "https");
+            }
+            if (url.Contains("http"))
+            {
+                url = url.Replace("http", "mock");
+                query.Parameters.Add("mockScheme", "http");
+            }
+
+            if (request.ExpectStatusCode.HasValue)
+            {
+                query.Parameters.Add("mockStatusCode", ((int) request.ExpectStatusCode.Value).ToString());
+                if (request.ExpectStatusDescription.IsNullOrBlank())
+                {
+                    query.Parameters.Add("mockStatusDescription", request.ExpectStatusCode.ToString());
+                }
+            }
+            if (!request.ExpectStatusDescription.IsNullOrBlank())
+            {
+                query.Parameters.Add("mockStatusDescription", request.ExpectStatusDescription);
+            }
+
+            var entity = SerializeExpectEntity(request);
+            if (entity != null)
+            {
+                query.Parameters.Add("mockContent", entity.Content);
+                query.Parameters.Add("mockContentType", entity.ContentType);
+            }
+            else
+            {
+                if (!request.ExpectContent.IsNullOrBlank())
+                {
+                    query.Parameters.Add("mockContent", request.ExpectContent);
+                    query.Parameters.Add("mockContentType",
+                                         !request.ExpectContentType.IsNullOrBlank()
+                                             ?
+                                                 request.ExpectContentType
+                                             :
+                                                 "text/html"
+                        );
+                }
+                else
+                {
+                    if (!request.ExpectContentType.IsNullOrBlank())
+                    {
+                        query.Parameters.Add(
+                            "mockContentType", request.ExpectContentType
+                            );
+                    }
+                }
+            }
+
+            if (request.ExpectHeaders.Count > 0)
+            {
+                var names = new StringBuilder();
+                var values = new StringBuilder();
+                var count = 0;
+                foreach (var key in request.ExpectHeaders.AllKeys)
+                {
+                    names.Append(key);
+                    values.Append(request.ExpectHeaders[key]);
+                    count++;
+                    if(count < request.ExpectHeaders.Count)
+                    {
+                        names.Append(",");
+                        values.Append(",");
+                    }
+                }
+
+                query.Parameters.Add("mockHeaderNames", names.ToString());
+                query.Parameters.Add("mockHeaderValues", values.ToString());
+            }
+            return url;
         }
 
         private static bool RequestExpectsMock(RestRequest request)
@@ -446,6 +516,27 @@ namespace Hammock
                                          ContentType = serializer.ContentType
                                      }
                                : null;
+        }
+
+        private WebEntity SerializeExpectEntity(RestRequest request)
+        {
+            var serializer = request.Serializer ?? Serializer;
+            if (serializer == null || request.ExpectEntity == null)
+            {
+                // No suitable serializer or entity
+                return null;
+            }
+
+            var entityBody = serializer.Serialize(request.ExpectEntity, request.RequestEntityType);
+            var entity = !entityBody.IsNullOrBlank()
+                               ? new WebEntity
+                               {
+                                   Content = entityBody,
+                                   ContentEncoding = serializer.ContentEncoding,
+                                   ContentType = serializer.ContentType
+                               }
+                               : null;
+            return entity;
         }
 
         private WebQuery GetQueryFor(RestBase request, Uri uri)

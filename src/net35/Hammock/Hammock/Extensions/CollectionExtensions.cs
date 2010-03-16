@@ -63,6 +63,29 @@ namespace Hammock.Extensions
             }
         }
 
+        public static string ToQueryString(this NameValueCollection collection)
+        {
+            var sb = new StringBuilder();
+            if (collection.Count > 0)
+            {
+                sb.Append("?");
+            }
+
+            var count = 0;
+            foreach(var key in collection.AllKeys)
+            {
+                sb.AppendFormat("{0}={1}", key, collection[key].UrlEncode());
+                count++;
+
+                if (count >= collection.Count)
+                {
+                    continue;
+                }
+                sb.Append("&");
+            }
+            return sb.ToString();
+        }
+
         public static string Concatenate(this WebParameterCollection collection, string separator, string spacer)
         {
             var sb = new StringBuilder();
