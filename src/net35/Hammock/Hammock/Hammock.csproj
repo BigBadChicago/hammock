@@ -168,9 +168,10 @@
     <Compile Include="Serialization\HammockXmlSerializer.cs" />
     <Compile Include="Serialization\Utf8Serializer.cs" />
     <Compile Include="Tasks\IRateLimitingRule.cs" />
+    <Compile Include="Tasks\ITaskOptions.cs" />
     <Compile Include="Tasks\ITimedTask.cs" />
     <Compile Include="Tasks\RateLimitingRule.cs" />
-    <Compile Include="Tasks\RateLimitingType.cs" />
+    <Compile Include="Tasks\RateLimitType.cs" />
     <Compile Include="Tasks\TaskOptions.cs" />
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Tasks\TimedTaskCollection.cs" />

@@ -55,7 +55,6 @@ namespace Hammock.Web.Mocks
             return new MemoryStream();
         }
 #endif
-
         public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
             throw new NotImplementedException();

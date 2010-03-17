@@ -7,42 +7,52 @@ namespace Hammock.Tasks
     {
         protected int Iterations;
         protected Timer Timer;
+        protected bool ContinueOnError;
 
-        public virtual Action<bool> Action { get; protected set; }
-        public virtual Exception Exception { get; protected set; }
-        public virtual TimeSpan DueTime { get; protected set; }
-        public virtual TimeSpan Interval { get; protected set; }
+        public Action<bool> Action { get; protected set; }
+        public Exception Exception { get; protected set; }
+        public TimeSpan DueTime { get; protected set; }
+        public TimeSpan Interval { get; protected set; }
 
         public TimedTask(TimeSpan due, 
                          TimeSpan interval, 
                          int iterations, 
                          bool continueOnError, 
-                         Action<bool> action) : this(due, interval, iterations, action)
+                         Action<bool> action) : 
+            this(due, interval, iterations, action)
+        {
+            ContinueOnError = continueOnError;   
+        }
+
+        private void Start(bool continueOnError)
         {
             var count = 0;
             Timer = new Timer(state =>
-                                   {
-                                       try
-                                       {
-                                           Action(false);
-                                           count++;
-                                           if (Iterations > 0 && count >= Iterations)
-                                           {
-                                               Stop();
-                                           }
-                                       }
-                                       catch (Exception ex)
-                                       {
-                                           Exception = ex;
-                                           if (!continueOnError)
-                                           {
-                                               Stop();
-                                           }
-                                       }
-                                   }, null, DueTime, Interval);
+                                  {
+                                      try
+                                      {
+                                          Action(false);
+                                          count++;
+                                          if (Iterations > 0 && count >= Iterations)
+                                          {
+                                              Stop();
+                                          }
+                                      }
+                                      catch (Exception ex)
+                                      {
+                                          Exception = ex;
+                                          if (!continueOnError)
+                                          {
+                                              Stop();
+                                          }
+                                      }
+                                  }, null, DueTime, Interval);
         }
 
-        public TimedTask(TimeSpan due, TimeSpan interval, int iterations, Action<bool> action)
+        public TimedTask(TimeSpan due, 
+                         TimeSpan interval, 
+                         int iterations, 
+                         Action<bool> action)
         {
             DueTime = due;
             Interval = interval;
@@ -57,7 +67,14 @@ namespace Hammock.Tasks
 
         public virtual void Start()
         {
-            Timer.Change(DueTime, Interval);
+            if(Timer != null)
+            {
+                Timer.Change(DueTime, Interval);
+            }
+            else
+            {
+                Start(ContinueOnError);
+            }
         }
 
         public virtual void Start(TimeSpan dueTime, TimeSpan interval)
@@ -80,10 +97,11 @@ namespace Hammock.Tasks
     {
         public TimedTask(TimeSpan due, 
                          TimeSpan interval, 
+                         int iterations, 
                          bool continueOnError, 
-                         int iterations,
-                         IRateLimitingRule<T> rateLimitingRule, 
-                         Action<bool> action) : base(due, interval, iterations, action)
+                         Action<bool> action, 
+                         IRateLimitingRule<T> rateLimitingRule) : 
+            base(due, interval, iterations, action)
         {
             RateLimitingRule = rateLimitingRule;
 
@@ -120,14 +138,14 @@ namespace Hammock.Tasks
             get { return RateLimitingRule != null; }
         }
 
-        public virtual IRateLimitingRule<T> RateLimitingRule { get; set; }
+        public IRateLimitingRule<T> RateLimitingRule { get; set; }
 
         #endregion
 
         private bool ShouldSkipForRateLimiting()
         {
             // [JD]: Only pre-skip via predicate; percentage based adjusts rate after the call
-            if (RateLimitingRule == null || RateLimitingRule.RateLimitingType != RateLimitingType.ByPredicate)
+            if (RateLimitingRule == null || RateLimitingRule.RateLimitType != RateLimitType.ByPredicate)
             {
                 return false;
             }

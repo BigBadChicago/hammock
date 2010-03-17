@@ -6,7 +6,7 @@ namespace Hammock.Tasks
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public enum RateLimitingType
+    public enum RateLimitType
     {
 #if !SILVERLIGHT && !Smartphone
         [EnumMember] ByPercent,

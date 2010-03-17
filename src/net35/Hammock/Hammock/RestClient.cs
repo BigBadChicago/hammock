@@ -7,14 +7,13 @@ using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Retries;
+using Hammock.Serialization;
 using Hammock.Tasks;
 using Hammock.Web;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
 #else
-using System.Collections.Specialized;
 using Hammock.Web.Mocks;
-
 #endif
 
 namespace Hammock
@@ -52,7 +51,6 @@ namespace Hammock
             SetQueryMeta(request, query);
 
             // rate-limiting
-            // recurring tasks
             // requestimpl for async
 
             var retryPolicy = GetRetryPolicy(request);
@@ -310,6 +308,11 @@ namespace Hammock
             return userAgent;
         }
 
+        private ISerializer GetSerializer(RestBase request)
+        {
+            return request.Serializer ?? Serializer;
+        }
+
         private IWebCredentials GetWebCredentials(RestBase request)
         {
             var credentials = request.Credentials ?? Credentials;
@@ -356,24 +359,101 @@ namespace Hammock
             var query = GetQueryFor(request, uri);
 
             var taskOptions = GetTaskOptions(request);
-            if(taskOptions != null)
+            IAsyncResult result;
+            if(BeginRequestWithTask(request, uri, taskOptions, callback, query, out result))
             {
-                if (taskOptions.RepeatInterval > TimeSpan.Zero)
-                {
-                    // Tasks without rate limiting
-                    _task = new TimedTask(TimeSpan.Zero, 
-                                          taskOptions.RepeatInterval, 
-                                          taskOptions.RepeatTimes,
-                                          true, skip => BeginRequestImpl(request, callback, query, uri));
-
-                    // Tasks with rate limiting
-                }
+                return result;
             }
-
-            throw new NotImplementedException("Don't have an IAsyncResult from timed task yet");
+            
+            // Cache
+            // Multipart
 
             // Normal operation
-            BeginRequestImpl(request, callback, query, uri);
+            return BeginRequestImpl(request, callback, query, uri);
+        }
+
+        private bool BeginRequestWithTask(RestRequest request, 
+                                          Uri uri, 
+                                          ITaskOptions taskOptions, 
+                                          RestCallback callback, 
+                                          WebQuery query, 
+                                          out IAsyncResult result)
+        {
+            if (taskOptions == null)
+            {
+                result = null;
+                return false;
+            }
+
+            if (taskOptions.RepeatInterval <= TimeSpan.Zero)
+            {
+                result = null;
+                return false;
+            }
+
+            if(!taskOptions.GetType().IsGenericType)
+            {
+                // Tasks without rate limiting
+                _task = new TimedTask(taskOptions.DueTime,
+                                      taskOptions.RepeatInterval,
+                                      taskOptions.RepeatTimes,
+                                      taskOptions.ContinueOnError,
+                                      skip => BeginRequestImpl(request,
+                                                               callback,
+                                                               query,
+                                                               uri));
+            }
+            else
+            {
+                // Tasks with rate limiting
+                var innerType = taskOptions.GetDeclaredTypeForGeneric(typeof(ITaskOptions<>));
+                var rateType = typeof(RateLimitingRule<>).MakeGenericType(innerType);
+                var taskType = typeof(TimedTask<>).MakeGenericType(innerType);
+                var taskAction = new Action<bool>(skip => BeginRequestImpl(request, callback, query, uri));
+                var rateLimitingType = (RateLimitType)taskOptions.GetValue("RateLimitType");
+                
+                object taskRule;
+                switch(rateLimitingType)
+                {
+                    case RateLimitType.ByPercent:
+                        var rateLimitingPercent = taskOptions.GetValue("RateLimitPercent");
+                        taskRule = Activator.CreateInstance(
+                            rateType, rateLimitingPercent
+                            );
+                        break;
+                    case RateLimitType.ByPredicate:
+                        var rateLimitingPredicate = taskOptions.GetValue("RateLimitPredicate");
+                        taskRule = Activator.CreateInstance(
+                            rateType, rateLimitingPredicate
+                            );
+                        var getRateLimitStatus = taskOptions.GetValue("GetRateLimitStatus");
+                        if (getRateLimitStatus != null)
+                        {
+                            rateType.SetValue("GetRateLimitStatus", getRateLimitStatus);
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                var task = Activator.CreateInstance(taskType,
+                    taskOptions.DueTime, 
+                    taskOptions.RepeatInterval, 
+                    taskOptions.RepeatTimes,
+                    taskOptions.ContinueOnError,
+                    taskAction,
+                    taskRule
+                    );
+
+                _task = (TimedTask)task;
+            }
+
+            var action = new Action(
+                () => _task.Start()
+                );
+
+            result = action.BeginInvoke(ar => { /* No callback */ }, null);
+            return true;
         }
 
         public virtual IAsyncResult BeginRequestImpl(RestRequest request, RestCallback callback, WebQuery query, Uri uri)
@@ -500,7 +580,7 @@ namespace Hammock
 
         private void SerializeEntityBody(WebQuery query, RestRequest request)
         {
-            var serializer = request.Serializer ?? Serializer;
+            var serializer = GetSerializer(request);
             if (serializer == null)
             {
                 // No suitable serializer for entity
@@ -520,7 +600,7 @@ namespace Hammock
 
         private WebEntity SerializeExpectEntity(RestRequest request)
         {
-            var serializer = request.Serializer ?? Serializer;
+            var serializer = GetSerializer(request);
             if (serializer == null || request.ExpectEntity == null)
             {
                 // No suitable serializer or entity
@@ -534,8 +614,7 @@ namespace Hammock
                                    Content = entityBody,
                                    ContentEncoding = serializer.ContentEncoding,
                                    ContentType = serializer.ContentType
-                               }
-                               : null;
+                               } : null;
             return entity;
         }
 

@@ -253,14 +253,17 @@
     <Compile Include="..\Hammock\Tasks\IRateLimitingRule.cs">
       <Link>Tasks\IRateLimitingRule.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Tasks\ITaskOptions.cs">
+      <Link>Tasks\ITaskOptions.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Tasks\ITimedTask.cs">
       <Link>Tasks\ITimedTask.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Tasks\RateLimitingRule.cs">
       <Link>Tasks\RateLimitingRule.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Tasks\RateLimitingType.cs">
-      <Link>Tasks\RateLimitingType.cs</Link>
+    <Compile Include="..\Hammock\Tasks\RateLimitType.cs">
+      <Link>Tasks\RateLimitType.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Tasks\TaskOptions.cs">
       <Link>Tasks\TaskOptions.cs</Link>

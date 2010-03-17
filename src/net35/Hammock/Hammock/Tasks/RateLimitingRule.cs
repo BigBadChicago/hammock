@@ -7,17 +7,17 @@ namespace Hammock.Tasks
 #endif
     public class RateLimitingRule<T> : IRateLimitingRule<T>
     {
-        private readonly RateLimitingType _rateLimitingType;
+        private readonly RateLimitType _rateLimitType;
 
         public RateLimitingRule(Predicate<T> predicate)
         {
-            _rateLimitingType = RateLimitingType.ByPredicate;
+            _rateLimitType = RateLimitType.ByPredicate;
             RateLimitPredicate = predicate;
         }
 
         public RateLimitingRule(double percentOfTotal)
         {
-            _rateLimitingType = RateLimitingType.ByPercent;
+            _rateLimitType = RateLimitType.ByPercent;
             LimitToPercentOfTotal = percentOfTotal;
         }
 
@@ -30,13 +30,13 @@ namespace Hammock.Tasks
         #region IRateLimitingRule Members
 
         public virtual double? LimitToPercentOfTotal { get; private set; }
-        public virtual RateLimitingType RateLimitingType
+        public virtual RateLimitType RateLimitType
         {
-            get { return _rateLimitingType; }
+            get { return _rateLimitType; }
         }
 
-        public virtual Func<T> GetRateLimitStatus { get; set; }
-        public virtual Predicate<T> RateLimitPredicate { get; private set; }
+        public Func<T> GetRateLimitStatus { get; set; }
+        public Predicate<T> RateLimitPredicate { get; private set; }
 
         #endregion
     }

@@ -127,7 +127,6 @@ namespace Hammock.Web
                 "BODY: ",e.Response)
                 );
 #endif
-
             Result.ResponseHttpStatusCode = statusCode;
             Result.ResponseHttpStatusDescription = statusDescription;
             Result.ResponseType = contentType;

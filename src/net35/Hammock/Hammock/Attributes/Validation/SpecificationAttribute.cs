@@ -1,5 +1,4 @@
 using System;
-using DotNetMerchant.Extensions;
 using Hammock.Extensions;
 using Hammock.Specifications;
 using Hammock.Validation;
