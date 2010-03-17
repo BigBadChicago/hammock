@@ -12,8 +12,9 @@ namespace Hammock.Web
         public virtual WaitHandle AsyncWaitHandle { get; protected internal set; }
         public virtual object AsyncState { get; protected internal set; }
         public virtual bool CompletedSynchronously { get; protected internal set; }
-        public virtual IAsyncResult InnerResult { get; set; }
 
+        public virtual IAsyncResult InnerResult { get; set; }
+        public virtual object Tag { get; set; }
         private AutoResetEvent _block;
 
         public WebQueryAsyncResult()

@@ -356,14 +356,75 @@ namespace Hammock
             return BeginRequest(request, callback, null, null, false /* isInternal */);
         }
 
+        public IAsyncResult BeginRequest(RestRequest request)
+        {
+            return BeginRequest(request, null);
+        }
+
+        public IAsyncResult BeginRequest<T>(RestRequest request)
+        {
+            return BeginRequest<T>(request, null);
+        }
+
+        // Pattern: http://msdn.microsoft.com/en-us/library/ms228963.aspx
         public RestResponse EndRequest(IAsyncResult result)
         {
-            throw new NotImplementedException();
+            var webResult = EndRequestImpl(result);
+            return webResult.AsyncState as RestResponse;
         }
 
         public RestResponse<T> EndRequest<T>(IAsyncResult result)
         {
-            throw new NotImplementedException();
+            var webResult = EndRequestImpl(result);
+            return webResult.AsyncState as RestResponse<T>;
+        }
+
+        private WebQueryAsyncResult EndRequestImpl(IAsyncResult result)
+        {
+            var webResult = result as WebQueryAsyncResult;
+            if (webResult == null)
+            {
+                throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
+            }
+
+            if(webResult.CompletedSynchronously)
+            {
+                // [DC]: From cache
+                var query = (WebQuery) webResult.AsyncState;
+                var tag = (Pair<RestRequest, RestCallback>) webResult.Tag;
+
+                CompleteQuery(query, tag.First, tag.Second, webResult);
+            }
+
+            if (!webResult.IsCompleted)
+            {
+                webResult.AsyncWaitHandle.WaitOne();
+            }
+            return webResult;
+        }
+
+        private WebQueryAsyncResult EndRequestImpl<T>(IAsyncResult result)
+        {
+            var webResult = result as WebQueryAsyncResult;
+            if (webResult == null)
+            {
+                throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
+            }
+
+            if (webResult.CompletedSynchronously)
+            {
+                // [DC]: From cache
+                var query = (WebQuery)webResult.AsyncState;
+                var tag = (Pair<RestRequest, RestCallback<T>>)webResult.Tag;
+
+                CompleteQuery(query, tag.First, tag.Second, webResult);
+            }
+
+            if (!webResult.IsCompleted)
+            {
+                webResult.AsyncWaitHandle.WaitOne();
+            }
+            return webResult;
         }
 
         private IAsyncResult BeginRequest(RestRequest request, 
@@ -401,86 +462,91 @@ namespace Hammock
 
             WebQueryResult previous = null;
             query.QueryResponse += (sender, args) =>
-                                       {
-                                           query.Result.PreviousResult = previous;
-                                           var current = query.Result;
+            {
+                query.Result.PreviousResult = previous;
+                var current = query.Result;
 
-                                           var retry = false;
-                                           if (retryPolicy != null)
-                                           {
-                                               // [DC]: Query should already have exception applied
-                                               var exception = query.Result.Exception;
+                var retry = false;
+                if (retryPolicy != null)
+                {
+                    // [DC]: Query should already have exception applied
+                    var exception = query.Result.Exception;
 
-                                               // Known error retries
-                                               foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
-                                               {
-                                                   if (exception == null)
-                                                   {
-                                                       continue;
-                                                   }
-                                                   retry |= condition.RetryIf(exception);
-                                               }
+                    // Known error retries
+                    foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
+                    {
+                        if (exception == null)
+                        {
+                            continue;
+                        }
+                        retry |= condition.RetryIf(exception);
+                    }
 
-                                               // Generic unknown retries?
-                                               // todo
+                    // Generic unknown retries?
+                    // todo
 
-                                               if (retry)
-                                               {
-                                                   previous = current;
-                                                   BeginRequest(request, callback, query, url, true);
-                                                   Interlocked.Decrement(ref _remainingRetries);
-                                               }
-                                               else
-                                               {   
-                                                   _remainingRetries = 0;
-                                               }
-                                           }
-                                           else
-                                           {
-                                               _remainingRetries = 0;
-                                           }
+                    if (retry)
+                    {
+                        previous = current;
+                        BeginRequest(request, callback, query, url, true);
+                        Interlocked.Decrement(ref _remainingRetries);
+                    }
+                    else
+                    {
+                        _remainingRetries = 0;
+                    }
+                }
+                else
+                {
+                    _remainingRetries = 0;
+                }
 
-                                           query.Result = current;
+                query.Result = current;
 
-                                           // [DC]: Callback is for a final result, not a retry
-                                           if (_remainingRetries == 0)
-                                           {
-                                               var response = BuildResponseFromResult(request, query);
-                                               result.IsCompleted = true;
-                                               if (callback != null)
-                                               {
-                                                   callback.Invoke(request, response);
-                                               }
-                                               result.Signal();
-                                           }
-                                       };
+                // [DC]: Callback is for a final result, not a retry
+                if (_remainingRetries == 0)
+                {
+                    CompleteQuery(query, request, callback, result);
+                }
+            };
 
             return result;
         }
 
-        private WebQueryAsyncResult BeginRequestFunction(bool isInternal, RestRequest request, WebQuery query, string url, RestCallback callback)
+        private WebQueryAsyncResult BeginRequestFunction(bool isInternal,
+                                                         RestRequest request,
+                                                         WebQuery query,
+                                                         string url,
+                                                         RestCallback callback)
         {
-            if(!isInternal)
+            WebQueryAsyncResult result;
+            if (!isInternal)
             {
-                WebQueryAsyncResult result;
-                if (BeginRequestWithTask(request, callback, query, url, out result))
+                if (!BeginRequestWithTask(request, callback, query, url, out result))
                 {
-                    return result;
-                }
-
-                if (BeginRequestWithCache(request, query, url, out result))
-                {
-                    return result;
-                }
-
-                if (BeginRequestMultiPart(request, query, url, out result))
-                {
-                    return result;
+                    if (!BeginRequestWithCache(request, query, url, out result))
+                    {
+                        if (!BeginRequestMultiPart(request, query, url, out result))
+                        {
+                            // Normal operation
+                            result = query.RequestAsync(url);
+                        }
+                    }
                 }
             }
+            else
+            {
+                // Normal operation
+                result = query.RequestAsync(url);
+            }
 
-            // Normal operation
-            return query.RequestAsync(url);
+            result.Tag = new Pair<RestRequest, RestCallback>
+                             {
+                                 First = request,
+                                 Second = callback
+                             };
+        
+            return result;
         }
 
         // [DC]: Should look for further code sharing with non-generic
@@ -558,42 +624,66 @@ namespace Hammock
                 // [DC]: Callback is for a final result, not a retry
                 if (_remainingRetries == 0)
                 {
-                    var response = BuildResponseFromResult<T>(request, query);
-                    result.IsCompleted = true;
-                    if(callback != null)
-                    {
-                        callback.Invoke(request, response);
-                    }
-                    result.Signal();
+                    CompleteQuery(query, request, callback, result);
                 }
             };
 
             return result;
         }
 
+        private void CompleteQuery<T>(WebQuery query, RestRequest request, RestCallback<T> callback, WebQueryAsyncResult result)
+        {
+            var response = BuildResponseFromResult<T>(request, query);
+            result.AsyncState = response;
+            result.IsCompleted = true;
+            if(callback != null)
+            {
+                callback.Invoke(request, response);
+            }
+            result.Signal();
+        }
+
+        private void CompleteQuery(WebQuery query, RestRequest request, RestCallback callback, WebQueryAsyncResult result)
+        {
+            var response = BuildResponseFromResult(request, query);
+            result.AsyncState = response;
+            result.IsCompleted = true;
+            if (callback != null)
+            {
+                callback.Invoke(request, response);
+            }
+            result.Signal();
+        }
+
         private WebQueryAsyncResult BeginRequestFunction<T>(bool isInternal, RestRequest request, WebQuery query, string url, RestCallback<T> callback)
         {
+            WebQueryAsyncResult result;
             if (!isInternal)
             {
-                WebQueryAsyncResult result;
-                if (BeginRequestWithTask(request, callback, query, url, out result))
+                if (!BeginRequestWithTask(request, callback, query, url, out result))
                 {
-                    return result;
-                }
-
-                if (BeginRequestWithCache(request, query, url, out result))
-                {
-                    return result;
-                }
-
-                if (BeginRequestMultiPart(request, query, url, out result))
-                {
-                    return result;
+                    if (!BeginRequestWithCache(request, query, url, out result))
+                    {
+                        if (!BeginRequestMultiPart(request, query, url, out result))
+                        {
+                            // Normal operation
+                            result = query.RequestAsync(url);
+                        }
+                    }
                 }
             }
+            else
+            {
+                // Normal operation
+                result = query.RequestAsync(url);
+            }
 
-            // Normal operation
-            return query.RequestAsync(url);
+            result.Tag = new Pair<RestRequest, RestCallback<T>>
+            {
+                First = request,
+                Second = callback
+            };
+            return result;
         }
 
         private bool BeginRequestWithTask(RestRequest request,

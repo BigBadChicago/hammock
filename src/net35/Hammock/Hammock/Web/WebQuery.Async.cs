@@ -32,96 +32,75 @@ namespace Hammock.Web
         }
 
         private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
-                                                     string key, 
-                                                     string url, 
-                                                     WebRequest request)
+                                                            string key, 
+                                                            string url, 
+                                                            WebRequest request)
         {
             var fetch = cache.Get<string>(key);
-
             if (fetch != null)
             {
                 var args = new WebQueryResponseEventArgs(fetch);
                 OnQueryResponse(args);
 
-                return null;
+                var result = new WebQueryAsyncResult
+                {
+                    CompletedSynchronously = true
+                };
+                return result;
             }
             else
             {
-                var state = new Pair<ICache, string>
+                var state = new Pair<WebRequest, Pair<ICache, string>>
                                 {
-                                    First = cache,
-                                    Second = key
+                                    First = request,
+                                    Second = new Pair<ICache, string>
+                                                 {
+                                        First = cache,
+                                        Second = key
+                                    }
                                 };
 
                 var args = new WebQueryRequestEventArgs(url);
                 OnQueryRequest(args);
 
-                var inner = request.BeginGetRequestStream(GetAsyncResponseCallback, state);
+                var inner = request.BeginGetResponse(GetAsyncResponseCallback, state);
                 var result = new WebQueryAsyncResult { InnerResult = inner };
                 return result;
             }
         }
 
         private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
-                                                     string key, 
-                                                     string url, 
-                                                     DateTime absoluteExpiration, 
-                                                     WebRequest request)
+                                                            string key, 
+                                                            string url, 
+                                                            DateTime absoluteExpiration, 
+                                                            WebRequest request)
         {
             var fetch = cache.Get<string>(key);
-
             if (fetch != null)
             {
                 var args = new WebQueryResponseEventArgs(fetch);
                 OnQueryResponse(args);
 
-                return null;
-            }
-            else
-            {
-                var state = new Pair<ICache, Pair<string, DateTime>>
-                                {
-                                    First = cache,
-                                    Second = new Pair<string, DateTime>
-                                                 {
-                                                     First = key,
-                                                     Second = absoluteExpiration
-                                                 }
-                                };
-
-                var args = new WebQueryRequestEventArgs(url);
-                OnQueryRequest(args);
-
-                var inner = request.BeginGetRequestStream(GetAsyncResponseCallback, state);
-                var result = new WebQueryAsyncResult { InnerResult = inner };
+                var result = new WebQueryAsyncResult
+                                 {
+                                     CompletedSynchronously = true,
+                                     AsyncState = this
+                                 };
                 return result;
             }
-        }
-
-        private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
-                                                     string key, 
-                                                     string url,
-                                                     TimeSpan slidingExpiration, 
-                                                     WebRequest request)
-        {
-            var fetch = cache.Get<string>(key);
-
-            if (fetch != null)
-            {
-                var args = new WebQueryResponseEventArgs(fetch);
-                OnQueryResponse(args);
-
-                return null;
-            }
             else
             {
-                var state = new Pair<ICache, Pair<string, TimeSpan>>
+                var state = new Pair<WebRequest, Pair<ICache, Pair<string, DateTime>>>
                                 {
-                                    First = cache,
-                                    Second = new Pair<string, TimeSpan>
+                                    First = request,
+                                    Second = new Pair<ICache, Pair<string, DateTime>>
                                                  {
-                                                     First = key,
-                                                     Second = slidingExpiration
+                                                     First = cache,
+                                                     Second = new Pair<string, DateTime>
+                                                                  {
+                                                                      First = key,
+                                                                      Second = absoluteExpiration
+                                                                  }
                                                  }
                                 };
 
@@ -134,10 +113,53 @@ namespace Hammock.Web
             }
         }
 
+        private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+                                                            string key, 
+                                                            string url,
+                                                            TimeSpan slidingExpiration, 
+                                                            WebRequest request)
+        {
+            var fetch = cache.Get<string>(key);
+            if (fetch != null)
+            {
+                var args = new WebQueryResponseEventArgs(fetch);
+                OnQueryResponse(args);
+
+                var result = new WebQueryAsyncResult
+                {
+                    CompletedSynchronously = true
+                };
+                return result;
+            }
+            else
+            {
+                var state = new Pair<WebRequest, Pair<ICache, Pair<string, TimeSpan>>>
+                                {
+                                    First = request,
+                                    Second = new Pair<ICache, Pair<string, TimeSpan>>
+                                                 {
+                                        First = cache,
+                                        Second = new Pair<string, TimeSpan>
+                                                     {
+                                                         First = key,
+                                                         Second = slidingExpiration
+                                                     }
+                                    }
+                                };
+
+                var args = new WebQueryRequestEventArgs(url);
+                OnQueryRequest(args);
+
+                var inner = request.BeginGetResponse(GetAsyncResponseCallback, state);
+                var result = new WebQueryAsyncResult { InnerResult = inner };
+                return result;
+            }
+        }
+
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
-                                                               string url, 
-                                                               string prefixKey, 
-                                                               ICache cache)
+                                                                      string url, 
+                                                                      string prefixKey, 
+                                                                      ICache cache)
         {
             WebResponse = null;
 
@@ -148,10 +170,10 @@ namespace Hammock.Web
         }
 
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, 
-                                                               string url, 
-                                                               string prefixKey, 
-                                                               ICache cache, 
-                                                               DateTime absoluteExpiration)
+                                                                      string url, 
+                                                                      string prefixKey, 
+                                                                      ICache cache, 
+                                                                      DateTime absoluteExpiration)
         {
             WebResponse = null;
 
@@ -162,10 +184,10 @@ namespace Hammock.Web
         }
 
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
-                                                               string url, 
-                                                               string prefixKey,
-                                                               ICache cache,
-                                                               TimeSpan slidingExpiration)
+                                                                      string url, 
+                                                                      string prefixKey,
+                                                                      ICache cache,
+                                                                      TimeSpan slidingExpiration)
         {
             WebResponse = null;
 
@@ -191,10 +213,8 @@ namespace Hammock.Web
 
         protected virtual void GetAsyncResponseCallback(IAsyncResult asyncResult)
         {
-            // [DC]: Second parameter is fuzzy cache
-            var state = (Pair<WebRequest, object>)asyncResult.AsyncState;
-            var request = state.First;
-            var store = state.Second;
+            object store;
+            var request = GetAsyncCacheStore(asyncResult, out store);
 
 #if !Smartphone && !Silverlight
             // Async operations ignore the WebRequest's Timeout property
@@ -254,6 +274,43 @@ namespace Hammock.Web
                     OnQueryResponse(responseArgs);
                 }
             }
+        }
+
+        private static WebRequest GetAsyncCacheStore(IAsyncResult asyncResult, out object store)
+        {
+            WebRequest request;
+
+            var noCache = asyncResult.AsyncState as Pair<WebRequest, object>;
+            if(noCache != null)
+            {
+                request = noCache.First;
+                store = noCache.Second;
+            }
+            else
+            {
+                var absoluteCache = asyncResult.AsyncState as Pair<WebRequest, Pair<ICache, Pair<string, DateTime>>>;
+                if(absoluteCache != null)
+                {
+                    request = absoluteCache.First;
+                    store = absoluteCache.Second;
+                }
+                else
+                {
+                    var slidingCache = asyncResult.AsyncState as Pair<WebRequest, Pair<ICache, Pair<string, TimeSpan>>>;
+                    if(slidingCache != null)
+                    {
+                        request = slidingCache.First;
+                        store = slidingCache.Second;
+                    }
+                    else
+                    {
+                        throw new ArgumentOutOfRangeException(
+                            "asyncResult", "Wrong cache signature found."
+                            );
+                    }
+                }
+            }
+            return request;
         }
 
         private void GetAsyncStreamCallback(IAsyncResult asyncResult)
@@ -479,7 +536,10 @@ namespace Hammock.Web
 
                 request.BeginGetResponse(PostAsyncResponseCallback,
                                          new Pair<WebRequest, Triplet<ICache, object, string>>
-                                             {First = request, Second = store});
+                                             {
+                                                 First = request,
+                                                 Second = store
+                                             });
             }
         }
 
