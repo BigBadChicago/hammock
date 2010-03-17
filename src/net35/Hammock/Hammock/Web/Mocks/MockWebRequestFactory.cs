@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using Hammock.Extensions;
 
 #if !SILVERLIGHT
 using System.Web;
+using System.Collections.Specialized;
 #else
 using Hammock.Silverlight.Compat;
+#endif
+
+#if SILVERLIGHT3
+using System.Windows.Browser;
 #endif
 
 namespace Hammock.Web.Mocks
@@ -24,8 +28,11 @@ namespace Hammock.Web.Mocks
 
         public WebRequest Create(Uri uri)
         {
+#if !SILVERLIGHT
             var query = HttpUtility.ParseQueryString(uri.Query);
-
+#else
+            var query = uri.Query.ParseQueryString();
+#endif
             var scheme = query[MockScheme];
             var statusCode = query[MockStatusCode];
             var statusDescription = query[MockStatusDescription];
@@ -36,7 +43,11 @@ namespace Hammock.Web.Mocks
 
             // Remove mocks parameters
             var queryString = new NameValueCollection();
+#if !SILVERLIGHT
             foreach(var key in query.AllKeys)
+#else
+            foreach(var key in query.Keys)
+#endif
             {
                 if(key.EqualsAny(
                     MockScheme,
@@ -52,9 +63,18 @@ namespace Hammock.Web.Mocks
                 }
                 queryString.Add(key, query[key]);
             }
+
+            // [DC] Silverlight does not have uri.Authority
             var uriQuery = queryString.ToQueryString();
+            var authority = "{0}{1}".FormatWith(
+                uri.Host,
+                (uri.Scheme.EqualsIgnoreCase("http") && uri.Port != 80 ||
+                 uri.Scheme.EqualsIgnoreCase("https") && uri.Port != 443)
+                    ? ":" + uri.Port
+                    : "");
+
             uri = new Uri("{0}://{1}{2}{3}".FormatWithInvariantCulture
-                              (scheme, uri.Authority, uri.AbsolutePath, uriQuery)
+                              (scheme, authority, uri.AbsolutePath, uriQuery)
                               );
 
             var request = new MockHttpWebRequest(uri);

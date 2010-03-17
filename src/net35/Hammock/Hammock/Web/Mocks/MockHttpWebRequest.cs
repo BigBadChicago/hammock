@@ -10,7 +10,7 @@ namespace Hammock.Web.Mocks
 
         public virtual HttpStatusCode ExpectStatusCode { get; protected internal set; }
         public virtual string ExpectStatusDescription { get; protected internal set; }
-        public virtual System.Net.WebHeaderCollection ExpectHeaders { get; protected internal set; }
+        public virtual WebHeaderCollection ExpectHeaders { get; protected internal set; }
 
         public virtual string Content { get; set; }
 
@@ -25,7 +25,7 @@ namespace Hammock.Web.Mocks
         {
             _requestUri = requestUri;
             Headers = new System.Net.WebHeaderCollection();
-            ExpectHeaders = new System.Net.WebHeaderCollection();
+            ExpectHeaders = new WebHeaderCollection();
         }
 
 #if !SILVERLIGHT
@@ -39,7 +39,7 @@ namespace Hammock.Web.Mocks
                                };
             foreach(var key in ExpectHeaders.AllKeys)
             {
-                response.Headers.Add(key, ExpectHeaders[key]);
+                response.Headers.Add(key, ExpectHeaders[key].Value);
             }
             return response;
         }

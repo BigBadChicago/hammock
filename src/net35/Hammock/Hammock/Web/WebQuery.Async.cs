@@ -763,21 +763,18 @@ namespace Hammock.Web
             {
                 return;
             }
-            
+
             response = ResponseAsMockHttpWebResponse(
                 out statusCode, out statusDescription,
                 out contentType, out contentLength,
                 out responseUri, out headers
                 );
 
-            if (response != null)
+            // [DC]: Caching would result in a null response
+            if(response == null)
             {
-                return;
+               headers = new System.Net.WebHeaderCollection(); 
             }
-            
-            throw new NullReferenceException(
-                "No suitable HTTP response object was cast."
-                );
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Hammock
     {
         private object _entity;
 
-        protected internal System.Net.WebHeaderCollection ExpectHeaders { get; set; }
+        protected internal Web.WebHeaderCollection ExpectHeaders { get; set; }
         public HttpStatusCode? ExpectStatusCode { get; set; }
         public string ExpectStatusDescription { get; set; }
         public string ExpectContent { get; set; }
@@ -26,7 +26,7 @@ namespace Hammock
 
         public RestRequest()
         {
-            ExpectHeaders = new System.Net.WebHeaderCollection();
+            ExpectHeaders = new Web.WebHeaderCollection();
         }
 
         public virtual object Entity

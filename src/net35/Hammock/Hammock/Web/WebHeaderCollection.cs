@@ -35,5 +35,13 @@ namespace Hammock.Web
             // Headers can be non-unique
             get { return this.First(p => p.Name.Equals(name)); }
         }
+
+        public IEnumerable<string> AllKeys
+        {
+            get
+            {
+                return Names;
+            }
+        }
     }
 }

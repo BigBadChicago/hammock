@@ -50,9 +50,6 @@ namespace Hammock
             var query = GetQueryFor(request, uri);
             SetQueryMeta(request, query);
 
-            // rate-limiting
-            // requestimpl for async
-
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
             {
@@ -355,30 +352,68 @@ namespace Hammock
 
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
-            var uri = request.BuildEndpoint(this);
-            var query = GetQueryFor(request, uri);
+            return BeginRequest(request, callback, null, null, false /* isInternal */);
+        }
 
-            var taskOptions = GetTaskOptions(request);
-            IAsyncResult result;
-            if(BeginRequestWithTask(request, uri, taskOptions, callback, query, out result))
+        private IAsyncResult BeginRequest(RestRequest request, 
+                                          RestCallback callback,
+                                          WebQuery query,
+                                          Uri uri,
+                                          bool isInternal)
+        {
+            // <T> mode
+            // Retries
+
+            if (!isInternal)
             {
-                return result;
+                uri = request.BuildEndpoint(this);
+                query = GetQueryFor(request, uri);
             }
+
+            // [DC]: Required hook for every result
+            query.QueryResponse += (sender, args) =>
+            {
+                var retryPolicy = GetRetryPolicy(request);
+                if (_firstTry)
+                {
+                    _remainingRetries = (retryPolicy != null ? retryPolicy.RetryCount : 0) + 1;
+                    _firstTry = false;
+                }
+
+                var response = BuildResponseFromResult(request, query);
+                callback.Invoke(request, response);
+            };
             
-            // Cache
-            // Multipart
+            if(!isInternal)
+            {
+                IAsyncResult result;
+                if (BeginRequestWithTask(request, callback, query, uri, out result))
+                {
+                    return result;
+                }
+
+                if (BeginRequestWithCache(request, query, uri, out result))
+                {
+                    return result;
+                }
+
+                if (BeginRequestMultiPart(request, query, uri, out result))
+                {
+                    return result;
+                }
+            }
 
             // Normal operation
-            return BeginRequestImpl(request, callback, query, uri);
+            return query.RequestAsync(uri.ToString());
         }
 
         private bool BeginRequestWithTask(RestRequest request, 
-                                          Uri uri, 
-                                          ITaskOptions taskOptions, 
                                           RestCallback callback, 
                                           WebQuery query, 
+                                          Uri uri, 
                                           out IAsyncResult result)
         {
+            var taskOptions = GetTaskOptions(request);
             if (taskOptions == null)
             {
                 result = null;
@@ -398,10 +433,11 @@ namespace Hammock
                                       taskOptions.RepeatInterval,
                                       taskOptions.RepeatTimes,
                                       taskOptions.ContinueOnError,
-                                      skip => BeginRequestImpl(request,
-                                                               callback,
-                                                               query,
-                                                               uri));
+                                      skip => BeginRequest(request, 
+                                                           callback,
+                                                           query, 
+                                                           uri, 
+                                                           true));
             }
             else
             {
@@ -409,7 +445,7 @@ namespace Hammock
                 var innerType = taskOptions.GetDeclaredTypeForGeneric(typeof(ITaskOptions<>));
                 var rateType = typeof(RateLimitingRule<>).MakeGenericType(innerType);
                 var taskType = typeof(TimedTask<>).MakeGenericType(innerType);
-                var taskAction = new Action<bool>(skip => BeginRequestImpl(request, callback, query, uri));
+                var taskAction = new Action<bool>(skip => BeginRequest(request, callback, query, uri, true));
                 var rateLimitingType = (RateLimitType)taskOptions.GetValue("RateLimitType");
                 
                 object taskRule;
@@ -456,29 +492,70 @@ namespace Hammock
             return true;
         }
 
-        public virtual IAsyncResult BeginRequestImpl(RestRequest request, RestCallback callback, WebQuery query, Uri uri)
-        {
-            query.QueryResponse += (sender, args) =>
-            {
-                var response = BuildResponseFromResult(request, query);
-                callback.Invoke(request, response);
-            };
-
-            return query.RequestAsync(uri.ToString());
-        }
-
         public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback)
         {
-            var uri = request.BuildEndpoint(this);
-            var query = GetQueryFor(request, uri);
+            return null;
+        }
 
-            query.QueryResponse += (sender, args) =>
+        private bool BeginRequestMultiPart(RestBase request,
+                                           WebQuery query, 
+                                           Uri uri, 
+                                           out IAsyncResult result)
+        {
+            var parameters = GetPostParameters(request);
+            if (parameters == null || parameters.Count() == 0)
             {
-                var response = BuildResponseFromResult<T>(request, query);
-                callback.Invoke(request, response);
-            };
-           
-            return query.RequestAsync(uri.ToString());
+                result = null;
+                return false;
+            }
+
+            // [DC]: Default to POST if no method provided
+            query.Method = query.Method != WebMethod.Post && Method != WebMethod.Put ? WebMethod.Post : query.Method;
+            result = query.RequestAsync(uri.ToString(), parameters);
+            return true;
+        }
+
+        private bool BeginRequestWithCache(RestBase request,
+                                           WebQuery query, 
+                                           Uri uri, 
+                                           out IAsyncResult result)
+        {
+            var cache = GetCache(request);
+            if (Cache == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var options = GetCacheOptions(request);
+            if (options == null)
+            {
+                result = null;
+                return false;
+            }
+
+            // [DC]: This is currently prefixed to the full URL
+            var function = GetCacheKeyFunction(request);
+            var key = function != null ? function.Invoke() : "";
+            var url = uri.ToString();
+
+            switch (options.Mode)
+            {
+                case CacheMode.NoExpiration:
+                    result = query.RequestAsync(url, key, cache);
+                    break;
+                case CacheMode.AbsoluteExpiration:
+                    var expiry = options.Duration.FromNow();
+                    result = query.RequestAsync(url, key, cache, expiry);
+                    break;
+                case CacheMode.SlidingExpiration:
+                    result = query.RequestAsync(url, key, cache, options.Duration);
+                    break;
+                default:
+                    throw new NotSupportedException("Unknown CacheMode");
+            }
+
+            return true;
         }
         
         private RestResponse BuildResponseFromResult(RestRequest request, WebQuery query)

@@ -16,6 +16,10 @@ using Hammock.Web.Mocks;
 using Hammock.Silverlight.Compat;
 #endif
 
+#if SILVERLIGHT && !WindowsPhone
+using System.Windows.Browser;
+#endif
+
 namespace Hammock.Web
 {
     public abstract partial class WebQuery
