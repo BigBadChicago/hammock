@@ -17,14 +17,19 @@ namespace Hammock
     {
         private object _entity;
 
-        protected internal Web.WebHeaderCollection ExpectHeaders { get; set; }
-        public HttpStatusCode? ExpectStatusCode { get; set; }
-        public string ExpectStatusDescription { get; set; }
-        public string ExpectContent { get; set; }
-        public string ExpectContentType { get; set; }
-        public object ExpectEntity { get; set; }
+        protected internal virtual Web.WebHeaderCollection ExpectHeaders { get; set; }
+        public virtual HttpStatusCode? ExpectStatusCode { get; set; }
+        public virtual string ExpectStatusDescription { get; set; }
+        public virtual string ExpectContent { get; set; }
+        public virtual string ExpectContentType { get; set; }
+        public virtual object ExpectEntity { get; set; }
 
         public RestRequest()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
         {
             ExpectHeaders = new Web.WebHeaderCollection();
         }

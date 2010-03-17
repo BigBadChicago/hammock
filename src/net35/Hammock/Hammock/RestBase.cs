@@ -32,6 +32,11 @@ namespace Hammock
 
         protected RestBase()
         {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
             Headers = new NameValueCollection(0);
             Parameters = new WebParameterCollection();
             PostParameters = new List<HttpPostParameter>(0);

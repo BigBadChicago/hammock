@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -375,7 +376,7 @@ namespace Hammock
 
         public RestResponse<T> EndRequest<T>(IAsyncResult result)
         {
-            var webResult = EndRequestImpl(result);
+            var webResult = EndRequestImpl<T>(result);
             return webResult.AsyncState as RestResponse<T>;
         }
 
@@ -387,13 +388,27 @@ namespace Hammock
                 throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
             }
 
-            if(webResult.CompletedSynchronously)
-            {
-                // [DC]: From cache
-                var query = (WebQuery) webResult.AsyncState;
-                var tag = (Pair<RestRequest, RestCallback>) webResult.Tag;
+            var tag = (Pair<RestRequest, RestCallback>)webResult.Tag;
 
-                CompleteQuery(query, tag.First, tag.Second, webResult);
+            if (RequestExpectsMock(tag.First))
+            {
+                // [DC]: Mock results come via InnerResult
+                webResult = (WebQueryAsyncResult)webResult.InnerResult;
+            }
+
+            if (webResult.CompletedSynchronously)
+            {
+                var query = webResult.AsyncState as WebQuery;
+                if (query != null)
+                {
+                    // [DC]: From cache
+                    CompleteWithQuery(query, tag.First, tag.Second, webResult);
+                }
+                else
+                {
+                    // [DC]: From mocks
+                    webResult = CompleteWithMockWebResponse(result, webResult, tag);
+                }
             }
 
             if (!webResult.IsCompleted)
@@ -411,13 +426,27 @@ namespace Hammock
                 throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
             }
 
+            var tag = (Pair<RestRequest, RestCallback<T>>)webResult.Tag;
+
+            if (RequestExpectsMock(tag.First))
+            {
+                // [DC]: Mock results come via InnerResult
+                webResult = (WebQueryAsyncResult)webResult.InnerResult;
+            }
+
             if (webResult.CompletedSynchronously)
             {
-                // [DC]: From cache
-                var query = (WebQuery)webResult.AsyncState;
-                var tag = (Pair<RestRequest, RestCallback<T>>)webResult.Tag;
-
-                CompleteQuery(query, tag.First, tag.Second, webResult);
+                var query = webResult.AsyncState as WebQuery;
+                if(query != null)
+                {
+                    // [DC]: From cache
+                    CompleteWithQuery(query, tag.First, tag.Second, webResult);
+                }
+                else
+                {
+                    // [DC]: From mocks
+                    webResult = CompleteWithMockWebResponse(result, webResult, tag);
+                }
             }
 
             if (!webResult.IsCompleted)
@@ -425,6 +454,95 @@ namespace Hammock
                 webResult.AsyncWaitHandle.WaitOne();
             }
             return webResult;
+        }
+
+        private WebQueryAsyncResult CompleteWithMockWebResponse<T>(IAsyncResult result, IAsyncResult webResult, Pair<RestRequest, RestCallback<T>> tag)
+        {
+            var webResponse = (WebResponse)webResult.AsyncState;
+            var restRequest = tag.First;
+            var restResponse = new RestResponse<T>();
+
+            string content;
+            using(var stream = webResponse.GetResponseStream())
+            {
+                using(var reader = new StreamReader(stream))
+                {
+                    content = reader.ReadToEnd();
+                }
+            }
+
+            restResponse.Content = content;
+            restResponse.ContentType = webResponse.ContentType;
+            restResponse.ContentLength = webResponse.ContentLength;
+            restResponse.StatusCode = restRequest.ExpectStatusCode.HasValue
+                                          ? restRequest.ExpectStatusCode.Value
+                                          : 0;
+            restResponse.StatusDescription = restRequest.ExpectStatusDescription;
+            restResponse.ResponseUri = webResponse.ResponseUri;
+
+            var deserializer = restRequest.Deserializer ?? Deserializer;
+            if (deserializer != null && !restResponse.Content.IsNullOrBlank())
+            {
+                restResponse.ContentEntity = deserializer.Deserialize<T>(restResponse.Content);
+            }
+                    
+            var parentResult = (WebQueryAsyncResult)result;
+            parentResult.AsyncState = restResponse;
+            parentResult.IsCompleted = true;
+                    
+            var callback = tag.Second;
+            if (callback != null)
+            {
+                callback.Invoke(restRequest, restResponse);
+            }
+            parentResult.Signal();
+            return parentResult;
+        }
+
+        private WebQueryAsyncResult CompleteWithMockWebResponse(
+            IAsyncResult result, 
+            IAsyncResult webResult, 
+            Pair<RestRequest, RestCallback> tag)
+        {
+            var webResponse = (WebResponse)webResult.AsyncState;
+            var restRequest = tag.First;
+            var restResponse = new RestResponse();
+
+            string content;
+            using (var stream = webResponse.GetResponseStream())
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    content = reader.ReadToEnd();
+                }
+            }
+
+            restResponse.Content = content;
+            restResponse.ContentType = webResponse.ContentType;
+            restResponse.ContentLength = webResponse.ContentLength;
+            restResponse.StatusCode = restRequest.ExpectStatusCode.HasValue
+                                          ? restRequest.ExpectStatusCode.Value
+                                          : 0;
+            restResponse.StatusDescription = restRequest.ExpectStatusDescription;
+            restResponse.ResponseUri = webResponse.ResponseUri;
+
+            var deserializer = restRequest.Deserializer ?? Deserializer;
+            if (deserializer != null && !restResponse.Content.IsNullOrBlank() && restRequest.ResponseEntityType != null)
+            {
+                restResponse.ContentEntity = deserializer.Deserialize(restResponse.Content, restRequest.ResponseEntityType);
+            }
+
+            var parentResult = (WebQueryAsyncResult)result;
+            parentResult.AsyncState = restResponse;
+            parentResult.IsCompleted = true;
+
+            var callback = tag.Second;
+            if (callback != null)
+            {
+                callback.Invoke(restRequest, restResponse);
+            }
+            parentResult.Signal();
+            return parentResult;
         }
 
         private IAsyncResult BeginRequest(RestRequest request, 
@@ -506,7 +624,7 @@ namespace Hammock
                 // [DC]: Callback is for a final result, not a retry
                 if (_remainingRetries == 0)
                 {
-                    CompleteQuery(query, request, callback, result);
+                    CompleteWithQuery(query, request, callback, result);
                 }
             };
 
@@ -624,14 +742,14 @@ namespace Hammock
                 // [DC]: Callback is for a final result, not a retry
                 if (_remainingRetries == 0)
                 {
-                    CompleteQuery(query, request, callback, result);
+                    CompleteWithQuery(query, request, callback, result);
                 }
             };
 
             return result;
         }
 
-        private void CompleteQuery<T>(WebQuery query, RestRequest request, RestCallback<T> callback, WebQueryAsyncResult result)
+        private void CompleteWithQuery<T>(WebQuery query, RestRequest request, RestCallback<T> callback, WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult<T>(request, query);
             result.AsyncState = response;
@@ -643,7 +761,7 @@ namespace Hammock
             result.Signal();
         }
 
-        private void CompleteQuery(WebQuery query, RestRequest request, RestCallback callback, WebQueryAsyncResult result)
+        private void CompleteWithQuery(WebQuery query, RestRequest request, RestCallback callback, WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult(request, query);
             result.AsyncState = response;

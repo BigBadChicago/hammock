@@ -11,7 +11,10 @@ namespace Hammock.Web.Mocks
         public virtual HttpStatusCode ExpectStatusCode { get; protected internal set; }
         public virtual string ExpectStatusDescription { get; protected internal set; }
         public virtual WebHeaderCollection ExpectHeaders { get; protected internal set; }
-
+#if SILVERLIGHT
+        // Need a wrapper around System.Net.WebHeaderCollection to allow headers in mocks   
+#endif
+        
         public virtual string Content { get; set; }
 
 #if !SILVERLIGHT
@@ -24,6 +27,11 @@ namespace Hammock.Web.Mocks
         public MockHttpWebRequest(Uri requestUri)
         {
             _requestUri = requestUri;
+            Initialize();
+        }
+
+        private void Initialize()
+        {
             Headers = new System.Net.WebHeaderCollection();
             ExpectHeaders = new WebHeaderCollection();
         }
@@ -31,22 +39,29 @@ namespace Hammock.Web.Mocks
 #if !SILVERLIGHT
         public override WebResponse GetResponse()
         {
-            var response = new MockHttpWebResponse(_requestUri, ContentType)
-                               {
-                                   StatusCode = ExpectStatusCode,
-                                   StatusDescription = ExpectStatusDescription,
-                                   Content = Content
-                               };
-            foreach(var key in ExpectHeaders.AllKeys)
-            {
-                response.Headers.Add(key, ExpectHeaders[key].Value);
-            }
-            return response;
+            return CreateResponse();
         }
 #endif      
         public override void Abort()
         {
             
+        }
+
+        private WebResponse CreateResponse()
+        {
+            var response = new MockHttpWebResponse(_requestUri, ContentType)
+            {
+                StatusCode = ExpectStatusCode,
+                StatusDescription = ExpectStatusDescription,
+                Content = Content
+            };
+#if !SILVERLIGHT
+            foreach (var key in ExpectHeaders.AllKeys)
+            {
+                response.Headers.Add(key, ExpectHeaders[key].Value);
+            }
+#endif
+            return response;
         }
 
 #if !SILVERLIGHT
@@ -57,22 +72,39 @@ namespace Hammock.Web.Mocks
 #endif
         public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
-            throw new NotImplementedException();
+            var result = new WebQueryAsyncResult
+                             {
+                                 AsyncState = new MemoryStream(),
+                                 IsCompleted = true,
+                                 CompletedSynchronously = true
+                             };
+            return result;
         }
 
         public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
         {
-            throw new NotImplementedException();
+            var response = CreateResponse();
+
+            var result = new WebQueryAsyncResult
+                             {
+                                 AsyncState = response,
+                                 IsCompleted = true,
+                                 CompletedSynchronously = true
+                             };
+
+            return result;
         }
 
         public override Stream EndGetRequestStream(IAsyncResult asyncResult)
         {
-            throw new NotImplementedException();
+            var result = (WebQueryAsyncResult) asyncResult;
+            return result.AsyncState as MemoryStream;
         }
 
         public override WebResponse EndGetResponse(IAsyncResult asyncResult)
         {
-            throw new NotImplementedException();
+            var result = (WebQueryAsyncResult)asyncResult;
+            return result.AsyncState as WebResponse;
         }
 
         public override System.Net.WebHeaderCollection Headers { get; set; }

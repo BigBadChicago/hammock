@@ -98,6 +98,8 @@
     <Compile Include="Attributes\Validation\DateTimeFormatTests.cs" />
     <Compile Include="Attributes\Validation\RequiredAttributeTests.cs" />
     <Compile Include="Attributes\Validation\SpecificationAttributeTests.cs" />
+    <Compile Include="RestClientTests.Async.Caching.cs" />
+    <Compile Include="RestClientTests.Async.Mocks.cs" />
     <Compile Include="RestClientTests.Mocks.cs" />
     <Compile Include="RestClientTests.Caching.cs" />
     <Compile Include="RestClientTests.MultiPart.cs" />

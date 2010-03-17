@@ -6,11 +6,12 @@ using NUnit.Framework;
 
 namespace Hammock.Tests
 {
-	partial class RestClientTests
-	{
+    partial class RestClientTests
+    {
         [Test]
         [Category("Mocks")]
-        public void Can_request_with_mock_response_with_request_entity()
+        [Category("Async")]
+        public void Can_request_with_mock_response_with_request_entity_asynchronously()
         {
             var settings = GetSerializerSettings();
 
@@ -48,51 +49,20 @@ namespace Hammock.Tests
 
             // Mocking triggers
             var success = new PostmarkResponse
-                              {
-                                  Status = PostmarkStatus.Success,
-                                  Message = "OK"
-                              };
-            request.ExpectStatusCode = (HttpStatusCode) 200;
+            {
+                Status = PostmarkStatus.Success,
+                Message = "OK"
+            };
+            request.ExpectStatusCode = (HttpStatusCode)200;
             request.ExpectEntity = success;
             request.ExpectHeader("Mock", "true");
 
-            var response = client.Request<PostmarkResponse>(request);
+            var asyncResult = client.BeginRequest<PostmarkResponse>(request);
+            var response = client.EndRequest<PostmarkResponse>(asyncResult);
             var result = response.ContentEntity;
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(result);
         }
-
-	    [Test]
-        public void Can_request_with_mock_response_with_response_entity()
-        {
-            var settings = GetSerializerSettings();
-            var serializer = new HammockJsonDotNetSerializer(settings);
-
-            // Add IsMock to result
-           
-            var client = new RestClient
-                             {
-                                 Authority = "http://api.postmarkapp.com",
-                                 Path = "email",
-                                 Serializer = serializer,
-                                 Deserializer = serializer
-                             };
-
-            var success = new PostmarkResponse
-                                 {
-                                     Status = PostmarkStatus.Success,
-                                     Message = "OK"
-                                 };
-
-            var request = new RestRequest();
-            request.ExpectHeader("Mock", "true");
-            request.ExpectStatusCode = HttpStatusCode.OK;
-            request.ExpectEntity = success;
-
-            var response = client.Request<PostmarkResponse>(request);
-            Assert.IsNotNull(response.ContentEntity);
-            Assert.IsTrue(response.ContentEntity.Status == PostmarkStatus.Success);
-        }
-	}
+    }
 }
