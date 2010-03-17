@@ -7,14 +7,10 @@ using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Retries;
+using Hammock.Web.Mocks;
 using Hammock.Serialization;
 using Hammock.Tasks;
 using Hammock.Web;
-#if SILVERLIGHT
-using Hammock.Silverlight.Compat;
-#else
-using Hammock.Web.Mocks;
-#endif
 
 namespace Hammock
 {
@@ -25,7 +21,9 @@ namespace Hammock
     {
         public virtual string Authority { get; set; }
 
+#if !Silverlight
         private bool _firstTry = true;
+#endif
         private int _remainingRetries;
         private TimedTask _task;
 
@@ -111,96 +109,6 @@ namespace Hammock
             return query;
         }
 
-        private string BuildMockRequestUrl(RestRequest request, WebQuery query, string url)
-        {
-            WebRequest.RegisterPrefix("mock", new MockWebRequestFactory());
-            if (url.Contains("https"))
-            {
-                url = url.Replace("https", "mock");
-                query.Parameters.Add("mockScheme", "https");
-            }
-            if (url.Contains("http"))
-            {
-                url = url.Replace("http", "mock");
-                query.Parameters.Add("mockScheme", "http");
-            }
-
-            if (request.ExpectStatusCode.HasValue)
-            {
-                query.Parameters.Add("mockStatusCode", ((int) request.ExpectStatusCode.Value).ToString());
-                if (request.ExpectStatusDescription.IsNullOrBlank())
-                {
-                    query.Parameters.Add("mockStatusDescription", request.ExpectStatusCode.ToString());
-                }
-            }
-            if (!request.ExpectStatusDescription.IsNullOrBlank())
-            {
-                query.Parameters.Add("mockStatusDescription", request.ExpectStatusDescription);
-            }
-
-            var entity = SerializeExpectEntity(request);
-            if (entity != null)
-            {
-                query.Parameters.Add("mockContent", entity.Content);
-                query.Parameters.Add("mockContentType", entity.ContentType);
-            }
-            else
-            {
-                if (!request.ExpectContent.IsNullOrBlank())
-                {
-                    query.Parameters.Add("mockContent", request.ExpectContent);
-                    query.Parameters.Add("mockContentType",
-                                         !request.ExpectContentType.IsNullOrBlank()
-                                             ?
-                                                 request.ExpectContentType
-                                             :
-                                                 "text/html"
-                        );
-                }
-                else
-                {
-                    if (!request.ExpectContentType.IsNullOrBlank())
-                    {
-                        query.Parameters.Add(
-                            "mockContentType", request.ExpectContentType
-                            );
-                    }
-                }
-            }
-
-            if (request.ExpectHeaders.Count > 0)
-            {
-                var names = new StringBuilder();
-                var values = new StringBuilder();
-                var count = 0;
-                foreach (var key in request.ExpectHeaders.AllKeys)
-                {
-                    names.Append(key);
-                    values.Append(request.ExpectHeaders[key]);
-                    count++;
-                    if(count < request.ExpectHeaders.Count)
-                    {
-                        names.Append(",");
-                        values.Append(",");
-                    }
-                }
-
-                query.Parameters.Add("mockHeaderNames", names.ToString());
-                query.Parameters.Add("mockHeaderValues", values.ToString());
-            }
-            return url;
-        }
-
-        private static bool RequestExpectsMock(RestRequest request)
-        {
-            return request.ExpectEntity != null ||
-                   request.ExpectHeaders.Count > 0 ||
-                   request.ExpectStatusCode.HasValue ||
-                   !request.ExpectContent.IsNullOrBlank() ||
-                   !request.ExpectContentType.IsNullOrBlank() ||
-                   !request.ExpectStatusDescription.IsNullOrBlank();
-        }
-
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
         {
             var parameters = GetPostParameters(request);
@@ -255,6 +163,93 @@ namespace Hammock
             return true;
         }
 #endif
+        private string BuildMockRequestUrl(RestRequest request, WebQuery query, string url)
+        {
+            WebRequest.RegisterPrefix("mock", new MockWebRequestFactory());
+            if (url.Contains("https"))
+            {
+                url = url.Replace("https", "mock");
+                query.Parameters.Add("mockScheme", "https");
+            }
+            if (url.Contains("http"))
+            {
+                url = url.Replace("http", "mock");
+                query.Parameters.Add("mockScheme", "http");
+            }
+
+            if (request.ExpectStatusCode.HasValue)
+            {
+                query.Parameters.Add("mockStatusCode", ((int)request.ExpectStatusCode.Value).ToString());
+                if (request.ExpectStatusDescription.IsNullOrBlank())
+                {
+                    query.Parameters.Add("mockStatusDescription", request.ExpectStatusCode.ToString());
+                }
+            }
+            if (!request.ExpectStatusDescription.IsNullOrBlank())
+            {
+                query.Parameters.Add("mockStatusDescription", request.ExpectStatusDescription);
+            }
+
+            var entity = SerializeExpectEntity(request);
+            if (entity != null)
+            {
+                query.Parameters.Add("mockContent", entity.Content);
+                query.Parameters.Add("mockContentType", entity.ContentType);
+            }
+            else
+            {
+                if (!request.ExpectContent.IsNullOrBlank())
+                {
+                    query.Parameters.Add("mockContent", request.ExpectContent);
+                    query.Parameters.Add("mockContentType",
+                                         !request.ExpectContentType.IsNullOrBlank()
+                                             ? request.ExpectContentType
+                                             : "text/html"
+                        );
+                }
+                else
+                {
+                    if (!request.ExpectContentType.IsNullOrBlank())
+                    {
+                        query.Parameters.Add(
+                            "mockContentType", request.ExpectContentType
+                            );
+                    }
+                }
+            }
+
+            if (request.ExpectHeaders.Count > 0)
+            {
+                var names = new StringBuilder();
+                var values = new StringBuilder();
+                var count = 0;
+                foreach (var key in request.ExpectHeaders.AllKeys)
+                {
+                    names.Append(key);
+                    values.Append(request.ExpectHeaders[key]);
+                    count++;
+                    if (count < request.ExpectHeaders.Count)
+                    {
+                        names.Append(",");
+                        values.Append(",");
+                    }
+                }
+
+                query.Parameters.Add("mockHeaderNames", names.ToString());
+                query.Parameters.Add("mockHeaderValues", values.ToString());
+            }
+            return url;
+        }
+
+        private static bool RequestExpectsMock(RestRequest request)
+        {
+            return request.ExpectEntity != null ||
+                   request.ExpectHeaders.Count > 0 ||
+                   request.ExpectStatusCode.HasValue ||
+                   !request.ExpectContent.IsNullOrBlank() ||
+                   !request.ExpectContentType.IsNullOrBlank() ||
+                   !request.ExpectStatusDescription.IsNullOrBlank();
+        }
 
         private ICache GetCache(RestBase request)
         {
@@ -355,62 +350,200 @@ namespace Hammock
             return BeginRequest(request, callback, null, null, false /* isInternal */);
         }
 
+        public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback)
+        {
+            return BeginRequest<T>(request, callback, null, null, false /* isInternal */);
+        }
+
         private IAsyncResult BeginRequest(RestRequest request, 
                                           RestCallback callback,
                                           WebQuery query,
-                                          Uri uri,
+                                          string url,
                                           bool isInternal)
         {
-            // <T> mode
-            // Retries
-
             if (!isInternal)
             {
-                uri = request.BuildEndpoint(this);
+                var uri = request.BuildEndpoint(this);
                 query = GetQueryFor(request, uri);
+                url = uri.ToString();
+            }
+            
+            if (RequestExpectsMock(request))
+            {
+                url = BuildMockRequestUrl(request, query, url);
             }
 
-            // [DC]: Required hook for every result
-            query.QueryResponse += (sender, args) =>
-            {
-                var retryPolicy = GetRetryPolicy(request);
-                if (_firstTry)
-                {
-                    _remainingRetries = (retryPolicy != null ? retryPolicy.RetryCount : 0) + 1;
-                    _firstTry = false;
-                }
+            var retryPolicy = GetRetryPolicy(request);
+            _remainingRetries = (retryPolicy != null
+                                     ? retryPolicy.RetryCount
+                                     : 0);
 
-                var response = BuildResponseFromResult(request, query);
-                callback.Invoke(request, response);
-            };
+            WebQueryResult previous = null;
+            query.QueryResponse += (sender, args) =>
+                                       {
+                                           query.Result.PreviousResult = previous;
+                                           var current = query.Result;
+
+                                           var retry = false;
+                                           if (retryPolicy != null)
+                                           {
+                                               // [DC]: Query should already have exception applied
+                                               var exception = query.Result.Exception;
+                                               foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
+                                               {
+                                                   if (exception == null)
+                                                   {
+                                                       continue;
+                                                   }
+                                                   retry |= condition.RetryIf(exception);
+                                               }
+
+                                               if (retry)
+                                               {
+                                                   previous = current;
+                                                   BeginRequest(request, callback, query, url, true);
+                                                   _remainingRetries--;
+                                               }
+                                               else
+                                               {
+                                                   _remainingRetries = 0;
+                                               }
+                                           }
+                                           else
+                                           {
+                                               _remainingRetries = 0;
+                                           }
+
+                                           query.Result = current;
+
+                                           // [DC]: Callback is for a final result, not a retry
+                                           if (_remainingRetries == 0)
+                                           {
+                                               var response = BuildResponseFromResult(request, query);
+                                               callback.Invoke(request, response);
+                                           }
+                                       };
             
             if(!isInternal)
             {
                 IAsyncResult result;
-                if (BeginRequestWithTask(request, callback, query, uri, out result))
+                if (BeginRequestWithTask(request, callback, query, url, out result))
                 {
                     return result;
                 }
 
-                if (BeginRequestWithCache(request, query, uri, out result))
+                if (BeginRequestWithCache(request, query, url, out result))
                 {
                     return result;
                 }
 
-                if (BeginRequestMultiPart(request, query, uri, out result))
+                if (BeginRequestMultiPart(request, query, url, out result))
                 {
                     return result;
                 }
             }
 
             // Normal operation
-            return query.RequestAsync(uri.ToString());
+            return query.RequestAsync(url);
+        }
+
+        // [DC]: Should look for further code sharing with non-generic
+        private IAsyncResult BeginRequest<T>(RestRequest request,
+                                             RestCallback<T> callback,
+                                             WebQuery query,
+                                             string url,
+                                             bool isInternal)
+        {
+            if (!isInternal)
+            {
+                var uri = request.BuildEndpoint(this);
+                query = GetQueryFor(request, uri);
+                url = uri.ToString();
+            }
+
+            if (RequestExpectsMock(request))
+            {
+                url = BuildMockRequestUrl(request, query, url);
+            }
+
+            var retryPolicy = GetRetryPolicy(request);
+            _remainingRetries = (retryPolicy != null
+                                     ? retryPolicy.RetryCount
+                                     : 0);
+
+            WebQueryResult previous = null;
+            query.QueryResponse += (sender, args) =>
+            {
+                query.Result.PreviousResult = previous;
+                var current = query.Result;
+
+                var retry = false;
+                if (retryPolicy != null)
+                {
+                    // [DC]: Query should already have exception applied
+                    var exception = query.Result.Exception;
+                    foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
+                    {
+                        if (exception == null)
+                        {
+                            continue;
+                        }
+                        retry |= condition.RetryIf(exception);
+                    }
+
+                    if (retry)
+                    {
+                        previous = current;
+                        BeginRequest<T>(request, callback, query, url, true);
+                        _remainingRetries--;
+                    }
+                    else
+                    {
+                        _remainingRetries = 0;
+                    }
+                }
+                else
+                {
+                    _remainingRetries = 0;
+                }
+
+                query.Result = current;
+
+                // [DC]: Callback is for a final result, not a retry
+                if (_remainingRetries == 0)
+                {
+                    var response = BuildResponseFromResult<T>(request, query);
+                    callback.Invoke(request, response);
+                }
+            };
+
+            if (!isInternal)
+            {
+                IAsyncResult result;
+                if (BeginRequestWithTask<T>(request, callback, query, url, out result))
+                {
+                    return result;
+                }
+
+                if (BeginRequestWithCache(request, query, url, out result))
+                {
+                    return result;
+                }
+
+                if (BeginRequestMultiPart(request, query, url, out result))
+                {
+                    return result;
+                }
+            }
+
+            // Normal operation
+            return query.RequestAsync(url);
         }
 
         private bool BeginRequestWithTask(RestRequest request, 
                                           RestCallback callback, 
                                           WebQuery query, 
-                                          Uri uri, 
+                                          string url, 
                                           out IAsyncResult result)
         {
             var taskOptions = GetTaskOptions(request);
@@ -426,8 +559,10 @@ namespace Hammock
                 return false;
             }
 
+#if !NETCF
             if(!taskOptions.GetType().IsGenericType)
             {
+#endif
                 // Tasks without rate limiting
                 _task = new TimedTask(taskOptions.DueTime,
                                       taskOptions.RepeatInterval,
@@ -436,54 +571,22 @@ namespace Hammock
                                       skip => BeginRequest(request, 
                                                            callback,
                                                            query, 
-                                                           uri, 
+                                                           url, 
                                                            true));
+#if !NETCF
             }
             else
             {
                 // Tasks with rate limiting
-                var innerType = taskOptions.GetDeclaredTypeForGeneric(typeof(ITaskOptions<>));
-                var rateType = typeof(RateLimitingRule<>).MakeGenericType(innerType);
-                var taskType = typeof(TimedTask<>).MakeGenericType(innerType);
-                var taskAction = new Action<bool>(skip => BeginRequest(request, callback, query, uri, true));
-                var rateLimitingType = (RateLimitType)taskOptions.GetValue("RateLimitType");
-                
-                object taskRule;
-                switch(rateLimitingType)
-                {
-                    case RateLimitType.ByPercent:
-                        var rateLimitingPercent = taskOptions.GetValue("RateLimitPercent");
-                        taskRule = Activator.CreateInstance(
-                            rateType, rateLimitingPercent
-                            );
-                        break;
-                    case RateLimitType.ByPredicate:
-                        var rateLimitingPredicate = taskOptions.GetValue("RateLimitPredicate");
-                        taskRule = Activator.CreateInstance(
-                            rateType, rateLimitingPredicate
-                            );
-                        var getRateLimitStatus = taskOptions.GetValue("GetRateLimitStatus");
-                        if (getRateLimitStatus != null)
-                        {
-                            rateType.SetValue("GetRateLimitStatus", getRateLimitStatus);
-                        }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                var task = Activator.CreateInstance(taskType,
-                    taskOptions.DueTime, 
-                    taskOptions.RepeatInterval, 
-                    taskOptions.RepeatTimes,
-                    taskOptions.ContinueOnError,
-                    taskAction,
-                    taskRule
-                    );
+                var task = BuildRateLimitingTask(request,
+                                                taskOptions,
+                                                callback,
+                                                query,
+                                                url);
 
                 _task = (TimedTask)task;
             }
-
+#endif    
             var action = new Action(
                 () => _task.Start()
                 );
@@ -492,14 +595,132 @@ namespace Hammock
             return true;
         }
 
-        public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback)
+        private bool BeginRequestWithTask<T>(RestRequest request,
+                                          RestCallback<T> callback,
+                                          WebQuery query,
+                                          string url,
+                                          out IAsyncResult result)
         {
-            return null;
+            var taskOptions = GetTaskOptions(request);
+            if (taskOptions == null)
+            {
+                result = null;
+                return false;
+            }
+
+            if (taskOptions.RepeatInterval <= TimeSpan.Zero)
+            {
+                result = null;
+                return false;
+            }
+
+#if !NETCF
+            if (!taskOptions.GetType().IsGenericType)
+            {
+#endif
+                // Tasks without rate limiting
+                _task = new TimedTask(taskOptions.DueTime,
+                                      taskOptions.RepeatInterval,
+                                      taskOptions.RepeatTimes,
+                                      taskOptions.ContinueOnError,
+                                      skip => BeginRequest<T>(request,
+                                                              callback,
+                                                              query,
+                                                              url,
+                                                              true));
+#if !NETCF
+            }
+            else
+            {
+                // Tasks with rate limiting
+                var task = BuildRateLimitingTask<T>(request,
+                                                    taskOptions,
+                                                    callback,
+                                                    query,
+                                                    url);
+
+                _task = (TimedTask) task;
+            }
+#endif
+            var action = new Action(
+                () => _task.Start()
+                );
+
+            result = action.BeginInvoke(ar =>
+                                            {
+                                                /* No callback */
+                                            }, null);
+            return true;
         }
+
+#if !NETCF
+        private object BuildRateLimitingTask(RestRequest request,
+                                            ITaskOptions taskOptions,
+                                            RestCallback callback,
+                                            WebQuery query,
+                                            string url)
+        {
+            var taskAction = new Action<bool>(skip => BeginRequest(request, callback, query, url, true));
+
+            return BuildRateLimitingTaskImpl(taskOptions, taskAction);
+        }
+
+        private object BuildRateLimitingTask<T>(RestRequest request,
+                                            ITaskOptions taskOptions,
+                                            RestCallback<T> callback,
+                                            WebQuery query,
+                                            string url)
+        {
+            var taskAction = new Action<bool>(skip => BeginRequest<T>(request, callback, query, url, true));
+
+            return BuildRateLimitingTaskImpl(taskOptions, taskAction);
+        }
+
+        private static object BuildRateLimitingTaskImpl(ITaskOptions taskOptions, 
+                                                        Action<bool> taskAction)
+        {
+            var innerType = taskOptions.GetDeclaredTypeForGeneric(typeof(ITaskOptions<>));
+            var rateType = typeof(RateLimitingRule<>).MakeGenericType(innerType);
+            var taskType = typeof(TimedTask<>).MakeGenericType(innerType);
+            var rateLimitingType = (RateLimitType)taskOptions.GetValue("RateLimitType");
+                
+            object taskRule;
+            switch(rateLimitingType)
+            {
+                case RateLimitType.ByPercent:
+                    var rateLimitingPercent = taskOptions.GetValue("RateLimitPercent");
+                    taskRule = Activator.CreateInstance(
+                        rateType, rateLimitingPercent
+                        );
+                    break;
+                case RateLimitType.ByPredicate:
+                    var rateLimitingPredicate = taskOptions.GetValue("RateLimitIf");
+                    taskRule = Activator.CreateInstance(
+                        rateType, rateLimitingPredicate
+                        );
+                    var getRateLimitStatus = taskOptions.GetValue("GetRateLimitStatus");
+                    if (getRateLimitStatus != null)
+                    {
+                        rateType.SetValue("GetRateLimitStatus", getRateLimitStatus);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return Activator.CreateInstance(taskType,
+                                            taskOptions.DueTime, 
+                                            taskOptions.RepeatInterval, 
+                                            taskOptions.RepeatTimes,
+                                            taskOptions.ContinueOnError,
+                                            taskAction,
+                                            taskRule);
+        }
+#endif
 
         private bool BeginRequestMultiPart(RestBase request,
                                            WebQuery query, 
-                                           Uri uri, 
+                                           string url, 
                                            out IAsyncResult result)
         {
             var parameters = GetPostParameters(request);
@@ -511,13 +732,13 @@ namespace Hammock
 
             // [DC]: Default to POST if no method provided
             query.Method = query.Method != WebMethod.Post && Method != WebMethod.Put ? WebMethod.Post : query.Method;
-            result = query.RequestAsync(uri.ToString(), parameters);
+            result = query.RequestAsync(url, parameters);
             return true;
         }
 
         private bool BeginRequestWithCache(RestBase request,
                                            WebQuery query, 
-                                           Uri uri, 
+                                           string url, 
                                            out IAsyncResult result)
         {
             var cache = GetCache(request);
@@ -537,8 +758,7 @@ namespace Hammock
             // [DC]: This is currently prefixed to the full URL
             var function = GetCacheKeyFunction(request);
             var key = function != null ? function.Invoke() : "";
-            var url = uri.ToString();
-
+            
             switch (options.Mode)
             {
                 case CacheMode.NoExpiration:

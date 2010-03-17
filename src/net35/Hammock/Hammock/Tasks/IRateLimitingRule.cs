@@ -7,6 +7,6 @@ namespace Hammock.Tasks
         double? LimitToPercentOfTotal { get; }
         RateLimitType RateLimitType { get; }
         Func<T> GetRateLimitStatus { get; set; }
-        Predicate<T> RateLimitPredicate { get; }
+        Predicate<T> RateLimitIf { get; }
     }
 }

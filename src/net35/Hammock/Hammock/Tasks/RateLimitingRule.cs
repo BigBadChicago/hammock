@@ -9,10 +9,10 @@ namespace Hammock.Tasks
     {
         private readonly RateLimitType _rateLimitType;
 
-        public RateLimitingRule(Predicate<T> predicate)
+        public RateLimitingRule(Predicate<T> rateLimitIf)
         {
             _rateLimitType = RateLimitType.ByPredicate;
-            RateLimitPredicate = predicate;
+            RateLimitIf = rateLimitIf;
         }
 
         public RateLimitingRule(double percentOfTotal)
@@ -21,10 +21,10 @@ namespace Hammock.Tasks
             LimitToPercentOfTotal = percentOfTotal;
         }
 
-        public RateLimitingRule(Func<T> getRateLimitStatus, Predicate<T> rateLimitPredicate)
+        public RateLimitingRule(Func<T> getRateLimitStatus, Predicate<T> rateLimitIf)
         {
             GetRateLimitStatus = getRateLimitStatus;
-            RateLimitPredicate = rateLimitPredicate;
+            RateLimitIf = rateLimitIf;
         }
 
         #region IRateLimitingRule Members
@@ -36,7 +36,7 @@ namespace Hammock.Tasks
         }
 
         public Func<T> GetRateLimitStatus { get; set; }
-        public Predicate<T> RateLimitPredicate { get; private set; }
+        public Predicate<T> RateLimitIf { get; private set; }
 
         #endregion
     }

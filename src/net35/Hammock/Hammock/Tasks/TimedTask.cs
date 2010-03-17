@@ -150,7 +150,7 @@ namespace Hammock.Tasks
                 return false;
             }
 
-            if (RateLimitingRule.RateLimitPredicate == null)
+            if (RateLimitingRule.RateLimitIf == null)
             {
                 throw new InvalidOperationException("Rule is set to use predicate, but no predicate is defined.");
             }
@@ -160,7 +160,7 @@ namespace Hammock.Tasks
             {
                 status = RateLimitingRule.GetRateLimitStatus();
             }
-            return !RateLimitingRule.RateLimitPredicate(status);
+            return !RateLimitingRule.RateLimitIf(status);
         }
     }
 }
