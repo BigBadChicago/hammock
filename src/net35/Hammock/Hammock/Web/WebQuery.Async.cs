@@ -12,7 +12,7 @@ namespace Hammock.Web
 {
     public partial class WebQuery
     {
-        protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url)
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url)
         {
             WebResponse = null;
 
@@ -26,10 +26,12 @@ namespace Hammock.Web
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
 
-            return request.BeginGetResponse(GetAsyncResponseCallback, state);
+            var inner = request.BeginGetResponse(GetAsyncResponseCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
         }
 
-        private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+        private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
                                                      string key, 
                                                      string url, 
                                                      WebRequest request)
@@ -54,11 +56,13 @@ namespace Hammock.Web
                 var args = new WebQueryRequestEventArgs(url);
                 OnQueryRequest(args);
 
-                return request.BeginGetRequestStream(GetAsyncResponseCallback, state);
+                var inner = request.BeginGetRequestStream(GetAsyncResponseCallback, state);
+                var result = new WebQueryAsyncResult { InnerResult = inner };
+                return result;
             }
         }
 
-        private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+        private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
                                                      string key, 
                                                      string url, 
                                                      DateTime absoluteExpiration, 
@@ -88,11 +92,13 @@ namespace Hammock.Web
                 var args = new WebQueryRequestEventArgs(url);
                 OnQueryRequest(args);
 
-                return request.BeginGetRequestStream(GetAsyncResponseCallback, state);
+                var inner = request.BeginGetRequestStream(GetAsyncResponseCallback, state);
+                var result = new WebQueryAsyncResult { InnerResult = inner };
+                return result;
             }
         }
 
-        private IAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
+        private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
                                                      string key, 
                                                      string url,
                                                      TimeSpan slidingExpiration, 
@@ -122,11 +128,13 @@ namespace Hammock.Web
                 var args = new WebQueryRequestEventArgs(url);
                 OnQueryRequest(args);
 
-                return request.BeginGetResponse(GetAsyncResponseCallback, state);
+                var inner = request.BeginGetResponse(GetAsyncResponseCallback, state);
+                var result = new WebQueryAsyncResult { InnerResult = inner };
+                return result;
             }
         }
 
-        protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
                                                                string url, 
                                                                string prefixKey, 
                                                                ICache cache)
@@ -137,15 +145,9 @@ namespace Hammock.Web
             var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, request);
-
-            /*
-	        ThreadPool.QueueUserWorkItem(work =>
-	            ExecuteGetAsyncAndCache(cache, key, url, request)
-	            );
-            */
         }
 
-        protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, 
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, 
                                                                string url, 
                                                                string prefixKey, 
                                                                ICache cache, 
@@ -157,15 +159,9 @@ namespace Hammock.Web
             var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, absoluteExpiration, request);
-
-            /*
-	        ThreadPool.QueueUserWorkItem(work =>
-	            ExecuteGetAsyncAndCacheWithExpiry(cache, key, url, absoluteExpiration, request)
-	            );
-            */
         }
 
-        protected virtual IAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
                                                                string url, 
                                                                string prefixKey,
                                                                ICache cache,
@@ -177,12 +173,6 @@ namespace Hammock.Web
             var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request);
-
-            /*
-	        ThreadPool.QueueUserWorkItem( work =>
-	            ExecuteGetAsyncAndCacheWithExpiry(cache, key, url, slidingExpiration, request)
-	            );
-            */
         }
         
         private static void GetAsyncResponseTimeout(object state, bool timedOut)
@@ -478,7 +468,7 @@ namespace Hammock.Web
                 store = null;
             }
 
-            // no cached response
+            // No cached response
             using (var stream = request.EndGetRequestStream(asyncResult))
             {
                 if (content != null)
@@ -550,7 +540,7 @@ namespace Hammock.Web
             }
         }
 
-        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url)
         {
             WebResponse = null;
 
@@ -562,12 +552,14 @@ namespace Hammock.Web
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
 
-            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
         }
 
-        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
-                                                             string url,
-                                                             IEnumerable<HttpPostParameter> parameters)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method,
+                                                                    string url,
+                                                                    IEnumerable<HttpPostParameter> parameters)
         {
             WebResponse = null;
 
@@ -579,13 +571,15 @@ namespace Hammock.Web
 
             OnQueryRequest(args);
 
-            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var result = new WebQueryAsyncResult {InnerResult = inner};
+            return result;
         }
 
-        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
-                                                             string url, 
-                                                             string prefixKey,
-                                                             ICache cache)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+                                                                    string url, 
+                                                                    string prefixKey,
+                                                                    ICache cache)
         {
             WebResponse = null;
 
@@ -606,14 +600,16 @@ namespace Hammock.Web
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
 
-            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
         }
 
-        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
-                                                             string url, 
-                                                             string prefixKey, 
-                                                             ICache cache, 
-                                                             DateTime absoluteExpiration)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+                                                                    string url, 
+                                                                    string prefixKey, 
+                                                                    ICache cache, 
+                                                                    DateTime absoluteExpiration)
         {
             WebResponse = null;
 
@@ -638,14 +634,16 @@ namespace Hammock.Web
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
 
-            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
         }
 
-        protected virtual IAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
-                                                             string url, 
-                                                             string prefixKey,
-                                                             ICache cache, 
-                                                             TimeSpan slidingExpiration)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
+                                                                    string url, 
+                                                                    string prefixKey,
+                                                                    ICache cache, 
+                                                                    TimeSpan slidingExpiration)
         {
             WebResponse = null;
 
@@ -670,12 +668,14 @@ namespace Hammock.Web
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
 
-            return request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
         }
 
-        public virtual IAsyncResult ExecuteStreamGetAsync(string url, 
-                                                          TimeSpan duration, 
-                                                          int resultCount)
+        public virtual WebQueryAsyncResult ExecuteStreamGetAsync(string url, 
+                                                                TimeSpan duration, 
+                                                                int resultCount)
         {
             WebResponse = null;
 
@@ -691,10 +691,17 @@ namespace Hammock.Web
                                              }
                             };
 
-            return request.BeginGetResponse(GetAsyncStreamCallback, state);
+            var inner = request.BeginGetResponse(GetAsyncStreamCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
         }
 
-        private object ResponseAsHttpWebResponse(out int statusCode, out string statusDescription, out string contentType, out long contentLength, out Uri responseUri, out System.Net.WebHeaderCollection headers)
+        private object ResponseAsHttpWebResponse(out int statusCode, 
+                                                 out string statusDescription, 
+                                                 out string contentType, 
+                                                 out long contentLength, 
+                                                 out Uri responseUri, 
+                                                 out System.Net.WebHeaderCollection headers)
         {
             var httpWebResponse = WebResponse != null && WebResponse is HttpWebResponse
                                       ? (HttpWebResponse) WebResponse
@@ -720,8 +727,12 @@ namespace Hammock.Web
             return httpWebResponse;
         }
 
-        // [DC]: Duplication is unfortunate but necessary. Use an interface / anonymous type?
-        private object ResponseAsMockHttpWebResponse(out int statusCode, out string statusDescription, out string contentType, out long contentLength, out Uri responseUri, out System.Net.WebHeaderCollection headers)
+        private object ResponseAsMockHttpWebResponse(out int statusCode, 
+                                                     out string statusDescription, 
+                                                     out string contentType, 
+                                                     out long contentLength, 
+                                                     out Uri responseUri, 
+                                                     out System.Net.WebHeaderCollection headers)
         {
             var httpWebResponse = WebResponse != null && WebResponse is MockHttpWebResponse
                                       ? (MockHttpWebResponse)WebResponse

@@ -10,5 +10,8 @@ namespace Hammock
 #endif
         IAsyncResult BeginRequest(RestRequest request, RestCallback callback);
         IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback);
+
+        RestResponse EndRequest(IAsyncResult result);
+        RestResponse<T> EndRequest<T>(IAsyncResult result);
     }
 }

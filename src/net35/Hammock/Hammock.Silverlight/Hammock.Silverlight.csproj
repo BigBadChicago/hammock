@@ -346,6 +346,9 @@
     <Compile Include="..\Hammock\Web\WebQuery.cs">
       <Link>Web\WebQuery.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Web\WebQueryAsyncResult.cs">
+      <Link>Web\WebQueryAsyncResult.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Web\WebQueryRequestEventArgs.cs">
       <Link>Web\WebQueryRequestEventArgs.cs</Link>
     </Compile>

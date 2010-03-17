@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
@@ -352,7 +353,17 @@ namespace Hammock
 
         public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback)
         {
-            return BeginRequest<T>(request, callback, null, null, false /* isInternal */);
+            return BeginRequest(request, callback, null, null, false /* isInternal */);
+        }
+
+        public RestResponse EndRequest(IAsyncResult result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public RestResponse<T> EndRequest<T>(IAsyncResult result)
+        {
+            throw new NotImplementedException();
         }
 
         private IAsyncResult BeginRequest(RestRequest request, 
@@ -363,6 +374,7 @@ namespace Hammock
         {
             if (!isInternal)
             {
+                // [DC]: Recursive call possible, only do this once
                 var uri = request.BuildEndpoint(this);
                 query = GetQueryFor(request, uri);
                 url = uri.ToString();
@@ -378,6 +390,15 @@ namespace Hammock
                                      ? retryPolicy.RetryCount
                                      : 0);
 
+            Func<WebQueryAsyncResult> beginRequest
+                = () => BeginRequestFunction(isInternal, 
+                        request, 
+                        query, 
+                        url, 
+                        callback);
+
+            var result = beginRequest.Invoke();
+
             WebQueryResult previous = null;
             query.QueryResponse += (sender, args) =>
                                        {
@@ -389,6 +410,8 @@ namespace Hammock
                                            {
                                                // [DC]: Query should already have exception applied
                                                var exception = query.Result.Exception;
+
+                                               // Known error retries
                                                foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
                                                {
                                                    if (exception == null)
@@ -398,14 +421,17 @@ namespace Hammock
                                                    retry |= condition.RetryIf(exception);
                                                }
 
+                                               // Generic unknown retries?
+                                               // todo
+
                                                if (retry)
                                                {
                                                    previous = current;
                                                    BeginRequest(request, callback, query, url, true);
-                                                   _remainingRetries--;
+                                                   Interlocked.Decrement(ref _remainingRetries);
                                                }
                                                else
-                                               {
+                                               {   
                                                    _remainingRetries = 0;
                                                }
                                            }
@@ -420,13 +446,23 @@ namespace Hammock
                                            if (_remainingRetries == 0)
                                            {
                                                var response = BuildResponseFromResult(request, query);
-                                               callback.Invoke(request, response);
+                                               result.IsCompleted = true;
+                                               if (callback != null)
+                                               {
+                                                   callback.Invoke(request, response);
+                                               }
+                                               result.Signal();
                                            }
                                        };
-            
+
+            return result;
+        }
+
+        private WebQueryAsyncResult BeginRequestFunction(bool isInternal, RestRequest request, WebQuery query, string url, RestCallback callback)
+        {
             if(!isInternal)
             {
-                IAsyncResult result;
+                WebQueryAsyncResult result;
                 if (BeginRequestWithTask(request, callback, query, url, out result))
                 {
                     return result;
@@ -471,6 +507,16 @@ namespace Hammock
                                      ? retryPolicy.RetryCount
                                      : 0);
 
+            Func<WebQueryAsyncResult> beginRequest
+                = () => BeginRequestFunction(
+                    isInternal, 
+                    request, 
+                    query, 
+                    url, 
+                    callback);
+
+            var result = beginRequest.Invoke();
+
             WebQueryResult previous = null;
             query.QueryResponse += (sender, args) =>
             {
@@ -494,8 +540,8 @@ namespace Hammock
                     if (retry)
                     {
                         previous = current;
-                        BeginRequest<T>(request, callback, query, url, true);
-                        _remainingRetries--;
+                        BeginRequest(request, callback, query, url, true);
+                        Interlocked.Decrement(ref _remainingRetries);
                     }
                     else
                     {
@@ -513,14 +559,24 @@ namespace Hammock
                 if (_remainingRetries == 0)
                 {
                     var response = BuildResponseFromResult<T>(request, query);
-                    callback.Invoke(request, response);
+                    result.IsCompleted = true;
+                    if(callback != null)
+                    {
+                        callback.Invoke(request, response);
+                    }
+                    result.Signal();
                 }
             };
 
+            return result;
+        }
+
+        private WebQueryAsyncResult BeginRequestFunction<T>(bool isInternal, RestRequest request, WebQuery query, string url, RestCallback<T> callback)
+        {
             if (!isInternal)
             {
-                IAsyncResult result;
-                if (BeginRequestWithTask<T>(request, callback, query, url, out result))
+                WebQueryAsyncResult result;
+                if (BeginRequestWithTask(request, callback, query, url, out result))
                 {
                     return result;
                 }
@@ -540,66 +596,11 @@ namespace Hammock
             return query.RequestAsync(url);
         }
 
-        private bool BeginRequestWithTask(RestRequest request, 
-                                          RestCallback callback, 
-                                          WebQuery query, 
-                                          string url, 
-                                          out IAsyncResult result)
-        {
-            var taskOptions = GetTaskOptions(request);
-            if (taskOptions == null)
-            {
-                result = null;
-                return false;
-            }
-
-            if (taskOptions.RepeatInterval <= TimeSpan.Zero)
-            {
-                result = null;
-                return false;
-            }
-
-#if !NETCF
-            if(!taskOptions.GetType().IsGenericType)
-            {
-#endif
-                // Tasks without rate limiting
-                _task = new TimedTask(taskOptions.DueTime,
-                                      taskOptions.RepeatInterval,
-                                      taskOptions.RepeatTimes,
-                                      taskOptions.ContinueOnError,
-                                      skip => BeginRequest(request, 
-                                                           callback,
-                                                           query, 
-                                                           url, 
-                                                           true));
-#if !NETCF
-            }
-            else
-            {
-                // Tasks with rate limiting
-                var task = BuildRateLimitingTask(request,
-                                                taskOptions,
-                                                callback,
-                                                query,
-                                                url);
-
-                _task = (TimedTask)task;
-            }
-#endif    
-            var action = new Action(
-                () => _task.Start()
-                );
-
-            result = action.BeginInvoke(ar => { /* No callback */ }, null);
-            return true;
-        }
-
-        private bool BeginRequestWithTask<T>(RestRequest request,
-                                          RestCallback<T> callback,
+        private bool BeginRequestWithTask(RestRequest request,
+                                          RestCallback callback,
                                           WebQuery query,
                                           string url,
-                                          out IAsyncResult result)
+                                          out WebQueryAsyncResult result)
         {
             var taskOptions = GetTaskOptions(request);
             if (taskOptions == null)
@@ -623,21 +624,21 @@ namespace Hammock
                                       taskOptions.RepeatInterval,
                                       taskOptions.RepeatTimes,
                                       taskOptions.ContinueOnError,
-                                      skip => BeginRequest<T>(request,
-                                                              callback,
-                                                              query,
-                                                              url,
-                                                              true));
+                                      skip => BeginRequest(request,
+                                                           callback,
+                                                           query,
+                                                           url,
+                                                           true));
 #if !NETCF
             }
             else
             {
                 // Tasks with rate limiting
-                var task = BuildRateLimitingTask<T>(request,
-                                                    taskOptions,
-                                                    callback,
-                                                    query,
-                                                    url);
+                var task = BuildRateLimitingTask(request,
+                                                 taskOptions,
+                                                 callback,
+                                                 query,
+                                                 url);
 
                 _task = (TimedTask) task;
             }
@@ -646,10 +647,70 @@ namespace Hammock
                 () => _task.Start()
                 );
 
-            result = action.BeginInvoke(ar =>
+            var inner = action.BeginInvoke(ar =>
                                             {
                                                 /* No callback */
                                             }, null);
+            result = new WebQueryAsyncResult { InnerResult = inner };
+            return true;
+        }
+
+        private bool BeginRequestWithTask<T>(RestRequest request,
+                                          RestCallback<T> callback,
+                                          WebQuery query,
+                                          string url,
+                                          out WebQueryAsyncResult result)
+        {
+            var taskOptions = GetTaskOptions(request);
+            if (taskOptions == null)
+            {
+                result = null;
+                return false;
+            }
+
+            if (taskOptions.RepeatInterval <= TimeSpan.Zero)
+            {
+                result = null;
+                return false;
+            }
+
+#if !NETCF
+            if (!taskOptions.GetType().IsGenericType)
+            {
+#endif
+                // Tasks without rate limiting
+                _task = new TimedTask(taskOptions.DueTime,
+                                      taskOptions.RepeatInterval,
+                                      taskOptions.RepeatTimes,
+                                      taskOptions.ContinueOnError,
+                                      skip => BeginRequest(request,
+                                                           callback,
+                                                           query,
+                                                           url,
+                                                           true));
+#if !NETCF
+            }
+            else
+            {
+                // Tasks with rate limiting
+                var task = BuildRateLimitingTask(request,
+                                                 taskOptions,
+                                                 callback,
+                                                 query,
+                                                 url);
+
+                _task = (TimedTask) task;
+            }
+#endif
+            var action = new Action(
+                () => _task.Start()
+                );
+
+            var inner = action.BeginInvoke(ar =>
+                                               {
+                                                   /* No callback */
+                                               }, null);
+            result = new WebQueryAsyncResult {InnerResult = inner};
             return true;
         }
 
@@ -671,7 +732,11 @@ namespace Hammock
                                             WebQuery query,
                                             string url)
         {
-            var taskAction = new Action<bool>(skip => BeginRequest<T>(request, callback, query, url, true));
+            var taskAction = new Action<bool>(skip => BeginRequest(request, 
+                                                                   callback, 
+                                                                   query, 
+                                                                   url, 
+                                                                   true));
 
             return BuildRateLimitingTaskImpl(taskOptions, taskAction);
         }
@@ -721,7 +786,7 @@ namespace Hammock
         private bool BeginRequestMultiPart(RestBase request,
                                            WebQuery query, 
                                            string url, 
-                                           out IAsyncResult result)
+                                           out WebQueryAsyncResult result)
         {
             var parameters = GetPostParameters(request);
             if (parameters == null || parameters.Count() == 0)
@@ -739,7 +804,7 @@ namespace Hammock
         private bool BeginRequestWithCache(RestBase request,
                                            WebQuery query, 
                                            string url, 
-                                           out IAsyncResult result)
+                                           out WebQueryAsyncResult result)
         {
             var cache = GetCache(request);
             if (Cache == null)

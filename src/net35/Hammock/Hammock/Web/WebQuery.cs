@@ -1248,7 +1248,7 @@ namespace Hammock.Web
             }
         }
 #endif
-        public virtual IAsyncResult RequestAsync(string url)
+        public virtual WebQueryAsyncResult RequestAsync(string url)
         {
             switch (Method)
             {
@@ -1265,7 +1265,7 @@ namespace Hammock.Web
             }
         }
 
-        public virtual IAsyncResult RequestAsync(string url, 
+        public virtual WebQueryAsyncResult RequestAsync(string url, 
                                                  string key, 
                                                  ICache cache)
         {
@@ -1286,7 +1286,7 @@ namespace Hammock.Web
             }
         }
 
-        public virtual IAsyncResult RequestAsync(string url,
+        public virtual WebQueryAsyncResult RequestAsync(string url,
                                                  string key, 
                                                  ICache cache, 
                                                  DateTime absoluteExpiration)
@@ -1308,7 +1308,7 @@ namespace Hammock.Web
             }
         }
 
-        public virtual IAsyncResult RequestAsync(string url, 
+        public virtual WebQueryAsyncResult RequestAsync(string url, 
                                                  string key, 
                                                  ICache cache, 
                                                  TimeSpan slidingExpiration)
@@ -1330,7 +1330,7 @@ namespace Hammock.Web
             }
         }
 
-        public virtual IAsyncResult RequestAsync(string url, IEnumerable<HttpPostParameter> parameters)
+        public virtual WebQueryAsyncResult RequestAsync(string url, IEnumerable<HttpPostParameter> parameters)
         {
             switch (Method)
             {

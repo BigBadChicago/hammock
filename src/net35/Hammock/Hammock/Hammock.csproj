@@ -182,6 +182,7 @@
     <Compile Include="Web\WebPair.cs" />
     <Compile Include="Web\WebPairCollection.cs" />
     <Compile Include="Web\WebQuery.Async.cs" />
+    <Compile Include="Web\WebQueryAsyncResult.cs" />
     <None Include="Attributes\Specialized\_Specialized.cd" />
     <None Include="Attributes\Validation\_Validation.cd" />
     <None Include="Authentication\OAuth\_OAuth.cd" />
