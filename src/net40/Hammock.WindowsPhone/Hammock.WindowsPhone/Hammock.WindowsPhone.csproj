@@ -256,14 +256,17 @@
     <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\IRateLimitingRule.cs">
       <Link>Tasks\IRateLimitingRule.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\ITaskOptions.cs">
+      <Link>Tasks\ITaskOptions.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\ITimedTask.cs">
       <Link>Tasks\ITimedTask.cs</Link>
     </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\RateLimitingRule.cs">
       <Link>Tasks\RateLimitingRule.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\RateLimitingType.cs">
-      <Link>Tasks\RateLimitingType.cs</Link>
+    <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\RateLimitType.cs">
+      <Link>Tasks\RateLimitType.cs</Link>
     </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Tasks\TaskOptions.cs">
       <Link>Tasks\TaskOptions.cs</Link>
@@ -301,14 +304,14 @@
     <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Mocks\IWebResponse.cs">
       <Link>Web\Mock\IWebResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Mocks\MockWebRequest.cs">
-      <Link>Web\Mock\MockWebRequest.cs</Link>
+    <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Mocks\MockHttpWebRequest.cs">
+      <Link>Web\Mock\MockHttpWebRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Mocks\MockHttpWebResponse.cs">
+      <Link>Web\Mock\MockHttpWebResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Mocks\MockWebRequestFactory.cs">
       <Link>Web\Mock\MockWebRequestFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Mocks\MockWebResponse.cs">
-      <Link>Web\Mock\MockWebResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Web\Pair.cs">
       <Link>Web\Pair.cs</Link>

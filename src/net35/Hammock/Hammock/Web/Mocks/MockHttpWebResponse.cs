@@ -4,10 +4,6 @@ using System.Net;
 using System.Text;
 using Hammock.Extensions;
 
-#if !NETCF
-using System.Text;
-#endif
-
 namespace Hammock.Web.Mocks
 {
     public class MockHttpWebResponse : WebResponse
