@@ -102,6 +102,7 @@
     <Compile Include="RestClientTests.Async.Mocks.cs" />
     <Compile Include="RestClientTests.Async.MultiPart.cs" />
     <Compile Include="RestClientTests.Async.OAuth.cs" />
+    <Compile Include="RestClientTests.Async.Retries.cs" />
     <Compile Include="RestClientTests.Mocks.cs" />
     <Compile Include="RestClientTests.Caching.cs" />
     <Compile Include="RestClientTests.MultiPart.cs" />

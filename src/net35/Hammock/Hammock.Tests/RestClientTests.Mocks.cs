@@ -64,6 +64,7 @@ namespace Hammock.Tests
         }
 
 	    [Test]
+        [Category("Mocks")]
         public void Can_request_with_mock_response_with_response_entity()
         {
             var settings = GetSerializerSettings();
