@@ -7,6 +7,7 @@ namespace Hammock.Tests
     partial class RestClientTests
 	{
         [Test]
+        [Category("Caching")]
         public void Can_make_basic_auth_request_with_caching_synchronously()
         {
             var client = new RestClient

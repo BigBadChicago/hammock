@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Hammock.Web;
 using NUnit.Framework;
 
 namespace Hammock.Tests
