@@ -603,6 +603,7 @@ namespace Hammock
                 // [DC]: Recursive call possible, only do this once
                 var uri = request.BuildEndpoint(this);
                 query = GetQueryFor(request, uri);
+                SetQueryMeta(request, query);
                 url = uri.ToString();
             }
             
@@ -725,6 +726,7 @@ namespace Hammock
             {
                 var uri = request.BuildEndpoint(this);
                 query = GetQueryFor(request, uri);
+                SetQueryMeta(request, query);
                 url = uri.ToString();
             }
 
@@ -1170,10 +1172,18 @@ namespace Hammock
 
         private void SetQueryMeta(RestRequest request, WebQuery query)
         {
-            // mocks
-
-            // [DC]: Trump duplicates by request over client value
-            query.Parameters.AddRange(Parameters);
+            // [DC]: Trump duplicates by request over client over info values
+            foreach (var parameter in Parameters)
+            {
+                if (query.Parameters[parameter.Name] != null)
+                {
+                    query.Parameters[parameter.Name].Value = parameter.Value;
+                }
+                else
+                {
+                    query.Parameters.Add(parameter);
+                }
+            }
             foreach(var parameter in request.Parameters)
             {
                 if(query.Parameters[parameter.Name] != null)
