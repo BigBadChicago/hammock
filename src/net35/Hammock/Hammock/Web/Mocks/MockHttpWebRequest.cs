@@ -72,19 +72,20 @@ namespace Hammock.Web.Mocks
 #endif
         public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
-            var result = new WebQueryAsyncResult
+            // [DC]: Mock POSTs never write to the request
+            return BeginGetResponse(callback, state);
+
+            /* var result = new WebQueryAsyncResult
                              {
                                  AsyncState = new MemoryStream(),
                                  IsCompleted = true,
                                  CompletedSynchronously = true
-                             };
-            return result;
+                             };*/
         }
 
         public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
         {
             var response = CreateResponse();
-
             var result = new WebQueryAsyncResult
                              {
                                  AsyncState = response,
