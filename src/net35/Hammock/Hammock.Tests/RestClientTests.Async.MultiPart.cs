@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Hammock.Web;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -7,8 +6,9 @@ namespace Hammock.Tests
     partial class RestClientTests
     {
         [Test]
+        [Category("Async")]
         [Category("MultiPart")]
-        public void Can_send_form_field_sequentially()
+        public void Can_send_form_field_asynchronously()
         {
             ServicePointManager.Expect100Continue = false;
 
@@ -27,32 +27,38 @@ namespace Hammock.Tests
 
             request.AddField("email", "bob@example.com");
 
-            var response = client.Request(request);
+            var asyncResult = client.BeginRequest(request);
+            var response = client.EndRequest(asyncResult);
             Assert.IsNotNull(response);
         }
 
         [Test]
         [Ignore("Makes a live update to a Twitter profile")]
+        [Category("Async")]
         [Category("MultiPart")]
-        public void Can_send_form_file_sequentially()
+        public void Can_send_form_file_asynchronously()
         {
+            ServicePointManager.Expect100Continue = false;
+
             var client = new RestClient
-                             {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1",
-                                 Credentials = BasicAuthForTwitter,
-                                 UserAgent = "Hammock"
-                             };
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                Credentials = BasicAuthForTwitter,
+                UserAgent = "Hammock"
+            };
 
             var request = new RestRequest
-                              {
-                                  Path = "account/update_profile_image.json"
-                              };
+            {
+                Path = "account/update_profile_image.json"
+            };
 
             request.AddFile("photo", "photo.jpg", "twitterProfilePhoto.jpg");
 
-            var response = client.Request(request);
+            var asyncResult = client.BeginRequest(request);
+            var response = client.EndRequest(asyncResult);
             Assert.IsNotNull(response);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
         }
     }
 }

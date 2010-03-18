@@ -63,6 +63,8 @@ namespace Hammock.Tests
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(result);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+            Assert.IsTrue(response.IsMock);
         }
     }
 }

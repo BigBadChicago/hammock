@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Net;
+
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
 
 namespace Hammock
 {
@@ -14,6 +19,9 @@ namespace Hammock
         public virtual string ContentType { get; set; }
         public virtual long ContentLength { get; set; }
         public virtual Uri ResponseUri { get; set; }
+        public virtual bool IsMock { get; set; }
+
+        public virtual NameValueCollection Headers { get; set; }
 
         public virtual bool IsFromCache
         {
@@ -21,6 +29,16 @@ namespace Hammock
             {
                 return StatusCode == 0 && StatusDescription == null && Content != null;
             }
+        }
+
+        public RestResponseBase()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            Headers = new NameValueCollection(0);
         }
     }
 
@@ -31,7 +49,6 @@ namespace Hammock
     {
         public virtual object ContentEntity { get; set; }
     }
-
 
 #if !Silverlight
     [Serializable]

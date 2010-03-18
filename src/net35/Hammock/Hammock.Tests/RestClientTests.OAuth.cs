@@ -23,6 +23,7 @@ namespace Hammock.Tests
         }
 
         [Test]
+        [Category("OAuth")]
         public void Can_get_oauth_request_token_sequentially()
         {
             var client = new RestClient

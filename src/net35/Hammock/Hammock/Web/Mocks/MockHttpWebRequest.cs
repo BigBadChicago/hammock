@@ -55,12 +55,12 @@ namespace Hammock.Web.Mocks
                 StatusDescription = ExpectStatusDescription,
                 Content = Content
             };
-#if !SILVERLIGHT
+
             foreach (var key in ExpectHeaders.AllKeys)
             {
-                response.Headers.Add(key, ExpectHeaders[key].Value);
+                response.MockHeaders.Add(key, ExpectHeaders[key].Value);
             }
-#endif
+
             return response;
         }
 

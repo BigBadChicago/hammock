@@ -14,7 +14,23 @@ namespace Hammock.Web.Mocks
         public virtual string Content { get; protected internal set; }
         public virtual HttpStatusCode StatusCode { get; protected internal set; }
         public virtual string StatusDescription { get; protected internal set; }
-        public virtual new System.Net.WebHeaderCollection Headers { get; private set; }
+
+        protected internal WebHeaderCollection MockHeaders { get; set; } 
+
+#if !SILVERLIGHT
+        public override System.Net.WebHeaderCollection Headers
+        {
+            get
+            {
+                var headers = new System.Net.WebHeaderCollection();
+                foreach(var key in MockHeaders.AllKeys)
+                {
+                    headers.Add(key, MockHeaders[key].Value);
+                }
+                return headers;
+            }
+        }
+#endif
 
         public override Stream GetResponseStream()
         {
@@ -54,7 +70,7 @@ namespace Hammock.Web.Mocks
             _requestUri = requestUri;
             _contentType = contentType;
 
-            Headers = new System.Net.WebHeaderCollection();
+            MockHeaders = new WebHeaderCollection(0);
         }
     }
 }

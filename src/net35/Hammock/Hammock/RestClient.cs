@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,6 +14,10 @@ using Hammock.Web.Mocks;
 using Hammock.Serialization;
 using Hammock.Tasks;
 using Hammock.Web;
+
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
 
 namespace Hammock
 {
@@ -228,7 +233,7 @@ namespace Hammock
                 foreach (var key in request.ExpectHeaders.AllKeys)
                 {
                     names.Append(key);
-                    values.Append(request.ExpectHeaders[key]);
+                    values.Append(request.ExpectHeaders[key].Value);
                     count++;
                     if (count < request.ExpectHeaders.Count)
                     {
@@ -456,12 +461,15 @@ namespace Hammock
             return webResult;
         }
 
-        private WebQueryAsyncResult CompleteWithMockWebResponse<T>(IAsyncResult result, IAsyncResult webResult, Pair<RestRequest, RestCallback<T>> tag)
+        private WebQueryAsyncResult CompleteWithMockWebResponse<T>(
+            IAsyncResult result, 
+            IAsyncResult webResult, 
+            Pair<RestRequest, 
+            RestCallback<T>> tag)
         {
             var webResponse = (WebResponse)webResult.AsyncState;
             var restRequest = tag.First;
-            var restResponse = new RestResponse<T>();
-
+            
             string content;
             using(var stream = webResponse.GetResponseStream())
             {
@@ -471,20 +479,31 @@ namespace Hammock
                 }
             }
 
-            restResponse.Content = content;
-            restResponse.ContentType = webResponse.ContentType;
-            restResponse.ContentLength = webResponse.ContentLength;
-            restResponse.StatusCode = restRequest.ExpectStatusCode.HasValue
-                                          ? restRequest.ExpectStatusCode.Value
-                                          : 0;
-            restResponse.StatusDescription = restRequest.ExpectStatusDescription;
-            restResponse.ResponseUri = webResponse.ResponseUri;
+            var restResponse = new RestResponse<T>
+                                   {
+                                       Content = content,
+                                       ContentType = webResponse.ContentType,
+                                       ContentLength = webResponse.ContentLength,
+                                       StatusCode = restRequest.ExpectStatusCode.HasValue
+                                                        ? restRequest.ExpectStatusCode.Value
+                                                        : 0,
+                                       StatusDescription = restRequest.ExpectStatusDescription,
+                                       ResponseUri = webResponse.ResponseUri,
+                                       IsMock = true
+                                   };
 
+            foreach (var key in webResponse.Headers.AllKeys)
+            {
+                restResponse.Headers.Add(key, webResponse.Headers[key]);
+            }
+            
             var deserializer = restRequest.Deserializer ?? Deserializer;
             if (deserializer != null && !restResponse.Content.IsNullOrBlank())
             {
                 restResponse.ContentEntity = deserializer.Deserialize<T>(restResponse.Content);
             }
+
+            TraceResponseWithMock(restResponse);
                     
             var parentResult = (WebQueryAsyncResult)result;
             parentResult.AsyncState = restResponse;
@@ -506,8 +525,7 @@ namespace Hammock
         {
             var webResponse = (WebResponse)webResult.AsyncState;
             var restRequest = tag.First;
-            var restResponse = new RestResponse();
-
+            
             string content;
             using (var stream = webResponse.GetResponseStream())
             {
@@ -517,20 +535,31 @@ namespace Hammock
                 }
             }
 
-            restResponse.Content = content;
-            restResponse.ContentType = webResponse.ContentType;
-            restResponse.ContentLength = webResponse.ContentLength;
-            restResponse.StatusCode = restRequest.ExpectStatusCode.HasValue
-                                          ? restRequest.ExpectStatusCode.Value
-                                          : 0;
-            restResponse.StatusDescription = restRequest.ExpectStatusDescription;
-            restResponse.ResponseUri = webResponse.ResponseUri;
+            var restResponse = new RestResponse
+                                   {
+                                       Content = content,
+                                       ContentType = webResponse.ContentType,
+                                       ContentLength = webResponse.ContentLength,
+                                       StatusCode = restRequest.ExpectStatusCode.HasValue
+                                                        ? restRequest.ExpectStatusCode.Value
+                                                        : 0,
+                                       StatusDescription = restRequest.ExpectStatusDescription,
+                                       ResponseUri = webResponse.ResponseUri,
+                                       IsMock = true
+                                   };
+
+            foreach(var key in webResponse.Headers.AllKeys)
+            {
+                restResponse.Headers.Add(key, webResponse.Headers[key]);
+            }
 
             var deserializer = restRequest.Deserializer ?? Deserializer;
             if (deserializer != null && !restResponse.Content.IsNullOrBlank() && restRequest.ResponseEntityType != null)
             {
                 restResponse.ContentEntity = deserializer.Deserialize(restResponse.Content, restRequest.ResponseEntityType);
             }
+
+            TraceResponseWithMock(restResponse);
 
             var parentResult = (WebQueryAsyncResult)result;
             parentResult.AsyncState = restResponse;
@@ -543,6 +572,24 @@ namespace Hammock
             }
             parentResult.Signal();
             return parentResult;
+        }
+
+        private static void TraceResponseWithMock(RestResponseBase restResponse)
+        {
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "RESPONSE: ", restResponse.StatusCode, " ", restResponse.StatusDescription)
+                );
+            Trace.WriteLineIf(restResponse.Headers.AllKeys.Count() > 0, "HEADERS:");
+            foreach (var trace in restResponse.Headers.AllKeys.Select(
+                key => String.Concat("\t", key, ": ", restResponse.Headers[key])))
+            {
+                Trace.WriteLine(trace);
+            }
+            Trace.WriteLine(String.Concat(
+                "BODY: ", restResponse.Content)
+                );
+#endif
         }
 
         private IAsyncResult BeginRequest(RestRequest request, 
@@ -1081,6 +1128,7 @@ namespace Hammock
                            ContentType = result.ResponseType,
                            ContentLength = result.ResponseLength,
                            ResponseUri = result.ResponseUri,
+                           IsMock = result.IsMock
                        };
 
             return response;
@@ -1096,6 +1144,7 @@ namespace Hammock
                 ContentType = result.ResponseType,
                 ContentLength = result.ResponseLength,
                 ResponseUri = result.ResponseUri,
+                IsMock = result.IsMock
             };
 
             return response;
