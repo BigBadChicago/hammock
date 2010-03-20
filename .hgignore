@@ -19,4 +19,4 @@ syntax: regexp
 /bin/
 /Bin/
 /_ReSharper.Hammock/
-glob:src/Hammock/Hammock.Tests/app.config
+glob:src/net35/Hammock.Tests/app.config

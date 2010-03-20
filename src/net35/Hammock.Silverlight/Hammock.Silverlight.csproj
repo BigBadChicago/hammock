@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\bin\net35\</OutputPath>
+    <OutputPath>..\..\..\bin\net35\</OutputPath>
     <DefineConstants>TRACE;DEBUG;SILVERLIGHT,Silverlight,SL</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\..\bin\net35\</OutputPath>
+    <OutputPath>..\..\..\bin\net35\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SILVERLIGHT3</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -39,7 +39,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Mono|AnyCPU' ">
-    <OutputPath>bin\Mono\</OutputPath>
+    <OutputPath>..\..\..\bin\mono\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL</DefineConstants>
     <Optimize>true</Optimize>
     <NoStdLib>true</NoStdLib>

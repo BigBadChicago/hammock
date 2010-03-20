@@ -25,7 +25,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\bin\net35\</OutputPath>
+    <OutputPath>..\..\..\bin\net35\</OutputPath>
     <DefineConstants>TRACE;DEBUG;PocketPC,Smartphone,NETCF</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -37,7 +37,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\..\bin\net35\</OutputPath>
+    <OutputPath>..\..\..\bin\net35\</OutputPath>
     <DefineConstants>TRACE;PocketPC,Smartphone,NETCF</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -50,7 +50,7 @@
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <OutputPath>bin\Mono\</OutputPath>
+    <OutputPath>..\..\..\bin\mono\</OutputPath>
     <DefineConstants>TRACE;PocketPC,Smartphone,NETCF</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
