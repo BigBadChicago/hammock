@@ -241,7 +241,7 @@ namespace Hammock.Authentication.OAuth
                 return;
             }
 
-            if(info.ClientUsername.IsNullOrBlank() || info.ClientPassword.IsNullOrBlank())
+            if(!info.ClientUsername.IsNullOrBlank() || !info.ClientPassword.IsNullOrBlank())
             {
                 // Not a protected resouce request
                 return;
