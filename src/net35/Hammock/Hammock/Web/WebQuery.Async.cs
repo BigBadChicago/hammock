@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -7,7 +8,9 @@ using System.Text;
 using System.Threading;
 using Hammock.Caching;
 using Hammock.Web.Mocks;
-
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
 namespace Hammock.Web
 {
     public partial class WebQuery
@@ -223,10 +226,9 @@ namespace Hammock.Web
                                                    request, request.Timeout,
                                                    true);
 #endif
-
-            using (var response = (HttpWebResponse)request.EndGetResponse(asyncResult))
+            try
             {
-                try
+                using (var response = (HttpWebResponse) request.EndGetResponse(asyncResult))
                 {
                     using (var stream = response.GetResponseStream())
                     {
@@ -266,14 +268,15 @@ namespace Hammock.Web
                         }
                     }
                 }
-                catch (WebException ex)
-                {
-                    var result = HandleWebException(ex);
-
-                    var responseArgs = new WebQueryResponseEventArgs(result);
-                    OnQueryResponse(responseArgs);
-                }
             }
+            catch (WebException ex)
+            {
+                var result = HandleWebException(ex);
+
+                var responseArgs = new WebQueryResponseEventArgs(result) {Exception = ex};
+                OnQueryResponse(responseArgs);
+            }
+            
         }
 
         private static WebRequest GetAsyncCacheStore(IAsyncResult asyncResult, out object store)
