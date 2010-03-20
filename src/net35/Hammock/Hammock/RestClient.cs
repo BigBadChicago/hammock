@@ -26,6 +26,11 @@ namespace Hammock
 #endif
     public class RestClient : RestBase, IRestClient
     {
+        private const string MockContentType = "mockContentType";
+        private const string MockScheme = "mockScheme";
+        private const string MockProtocol = "mock";
+        private const string MockStatusDescription = "mockStatusDescription";
+        private const string MockContent = "mockContent";
         public virtual string Authority { get; set; }
 
 #if !Silverlight
@@ -172,16 +177,16 @@ namespace Hammock
 #endif
         private string BuildMockRequestUrl(RestRequest request, WebQuery query, string url)
         {
-            WebRequest.RegisterPrefix("mock", new MockWebRequestFactory());
+            WebRequest.RegisterPrefix(MockProtocol, new MockWebRequestFactory());
             if (url.Contains("https"))
             {
-                url = url.Replace("https", "mock");
-                query.Parameters.Add("mockScheme", "https");
+                url = url.Replace("https", MockProtocol);
+                query.Parameters.Add(MockScheme, "https");
             }
             if (url.Contains("http"))
             {
-                url = url.Replace("http", "mock");
-                query.Parameters.Add("mockScheme", "http");
+                url = url.Replace("http", MockProtocol);
+                query.Parameters.Add(MockScheme, "http");
             }
 
             if (request.ExpectStatusCode.HasValue)
@@ -189,26 +194,26 @@ namespace Hammock
                 query.Parameters.Add("mockStatusCode", ((int)request.ExpectStatusCode.Value).ToString());
                 if (request.ExpectStatusDescription.IsNullOrBlank())
                 {
-                    query.Parameters.Add("mockStatusDescription", request.ExpectStatusCode.ToString());
+                    query.Parameters.Add(MockStatusDescription, request.ExpectStatusCode.ToString());
                 }
             }
             if (!request.ExpectStatusDescription.IsNullOrBlank())
             {
-                query.Parameters.Add("mockStatusDescription", request.ExpectStatusDescription);
+                query.Parameters.Add(MockStatusDescription, request.ExpectStatusDescription);
             }
 
             var entity = SerializeExpectEntity(request);
             if (entity != null)
             {
-                query.Parameters.Add("mockContent", entity.Content);
-                query.Parameters.Add("mockContentType", entity.ContentType);
+                query.Parameters.Add(MockContent, entity.Content);
+                query.Parameters.Add(MockContentType, entity.ContentType);
             }
             else
             {
                 if (!request.ExpectContent.IsNullOrBlank())
                 {
-                    query.Parameters.Add("mockContent", request.ExpectContent);
-                    query.Parameters.Add("mockContentType",
+                    query.Parameters.Add(MockContent, request.ExpectContent);
+                    query.Parameters.Add(MockContentType,
                                          !request.ExpectContentType.IsNullOrBlank()
                                              ? request.ExpectContentType
                                              : "text/html"
@@ -219,7 +224,7 @@ namespace Hammock
                     if (!request.ExpectContentType.IsNullOrBlank())
                     {
                         query.Parameters.Add(
-                            "mockContentType", request.ExpectContentType
+                            MockContentType, request.ExpectContentType
                             );
                     }
                 }
@@ -350,6 +355,12 @@ namespace Hammock
         {
             var options = request.TaskOptions ?? TaskOptions;
             return options;
+        }
+
+        private object GetTag(RestBase request)
+        {
+            var tag = request.Tag ?? Tag;
+            return tag;
         }
 
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
@@ -1106,6 +1117,7 @@ namespace Hammock
             var response = BuildBaseResponse(result);
 
             DeserializeEntityBody(result, request, response);
+            response.Tag = GetTag(request);
 
             return response;
         }
@@ -1116,6 +1128,7 @@ namespace Hammock
             var response = BuildBaseResponse<T>(result);
 
             DeserializeEntityBody(result, request, response);
+            response.Tag = GetTag(request);
 
             return response;
         }

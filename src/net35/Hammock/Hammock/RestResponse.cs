@@ -20,14 +20,16 @@ namespace Hammock
         public virtual long ContentLength { get; set; }
         public virtual Uri ResponseUri { get; set; }
         public virtual bool IsMock { get; set; }
-
+        public virtual object Tag { get; set; }
         public virtual NameValueCollection Headers { get; set; }
 
         public virtual bool IsFromCache
         {
             get
             {
-                return StatusCode == 0 && StatusDescription == null && Content != null;
+                return StatusCode == 0 && 
+                       StatusDescription == null && 
+                       Content != null;
             }
         }
 
