@@ -61,6 +61,9 @@ namespace Hammock.Web
             }
         }
 
+        // [DC]: Currently a Compat-only property
+        public string SourceUrl { get; set; }
+
         protected WebQuery(IWebQueryInfo info)
         {
             SetQueryMeta(info);

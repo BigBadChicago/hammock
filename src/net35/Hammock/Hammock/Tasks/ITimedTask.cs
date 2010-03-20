@@ -2,7 +2,7 @@ using System;
 
 namespace Hammock.Tasks
 {
-    internal interface ITimedTask : IDisposable
+    public interface ITimedTask : IDisposable
     {
         Action<bool> Action { get; }
         Exception Exception { get; }
@@ -15,7 +15,7 @@ namespace Hammock.Tasks
         void Stop();
     }
 
-    internal interface ITimedTask<T> : ITimedTask
+    public interface ITimedTask<T> : ITimedTask
     {
         bool RateLimited { get; }
         IRateLimitingRule<T> RateLimitingRule { get; }

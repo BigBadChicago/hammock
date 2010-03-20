@@ -23,7 +23,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>Bin\Debug</OutputPath>
+    <OutputPath>..\..\..\..\bin\net40\</OutputPath>
     <DefineConstants>TRACE;DEBUG;SILVERLIGHT,Silverlight,WindowsPhone</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -33,8 +33,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>Bin\Release</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <OutputPath>..\..\..\..\bin\net40\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,WindowsPhone</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -354,6 +354,9 @@
     </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Web\WebQuery.cs">
       <Link>Web\WebQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\net35\Hammock\Hammock\Web\WebQueryAsyncResult.cs">
+      <Link>Web\WebQueryAsyncResult.cs</Link>
     </Compile>
     <Compile Include="..\..\..\net35\Hammock\Hammock\Web\WebQueryRequestEventArgs.cs">
       <Link>Web\WebQueryRequestEventArgs.cs</Link>

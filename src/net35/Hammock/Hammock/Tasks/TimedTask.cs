@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace Hammock.Tasks
 {
-    internal class TimedTask : ITimedTask
+    public class TimedTask : ITimedTask
     {
         protected int Iterations;
         protected Timer Timer;
@@ -93,7 +93,7 @@ namespace Hammock.Tasks
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    internal class TimedTask<T> : TimedTask, ITimedTask<T>
+    public class TimedTask<T> : TimedTask, ITimedTask<T>
     {
         public TimedTask(TimeSpan due, 
                          TimeSpan interval, 

@@ -8,5 +8,6 @@ syntax: regexp
 /obj/
 /bin/
 /Bin/
+/bin/net35/
 /_ReSharper.Hammock/
 glob:src/Hammock/Hammock.Tests/app.config
