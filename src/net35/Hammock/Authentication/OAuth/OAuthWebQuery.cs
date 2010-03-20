@@ -243,7 +243,7 @@ namespace Hammock.Authentication.OAuth
 
             if(!info.ClientUsername.IsNullOrBlank() || !info.ClientPassword.IsNullOrBlank())
             {
-                // Not a protected resouce request
+                // Not a protected resource request
                 return;
             }
 
