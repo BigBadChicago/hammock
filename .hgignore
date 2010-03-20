@@ -3,11 +3,20 @@ syntax: glob
 *.pdb
 *.suo
 *.user
+bin/net35/*.*
+bin/net35/de/*.*
+bin/net35/fr/*.*
+bin/net35/es/*.*
+bin/net35/it/*.*
+bin/net35/ko/*.*
+bin/net35/ja/*.*
+bin/net35/zh-Hans/*.*
+bin/net35/zh-Hant/*.*
+bin/net40/*.*
 
 syntax: regexp
 /obj/
 /bin/
 /Bin/
-/bin/net35/
 /_ReSharper.Hammock/
 glob:src/Hammock/Hammock.Tests/app.config
