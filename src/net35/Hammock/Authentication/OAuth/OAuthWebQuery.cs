@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -16,11 +17,16 @@ namespace Hammock.Authentication.OAuth
 #endif
     public class OAuthWebQuery : WebQuery
     {
-        public string Realm { get; set; }
-        public OAuthParameterHandling ParameterHandling { get; private set; }
+        public virtual string Realm { get; set; }
+        public virtual OAuthParameterHandling ParameterHandling { get; private set; }
 
         public OAuthWebQuery(OAuthWebQueryInfo info)
             : base(info)
+        {
+            Initialize(info);
+        }
+
+        private void Initialize(OAuthWebQueryInfo info)
         {
             Method = info.WebMethod;
             ParameterHandling = info.ParameterHandling;
@@ -32,15 +38,40 @@ namespace Hammock.Authentication.OAuth
         protected override WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
             Uri uri;
+            url = AppendParameters(url, true);
             url = PreProcessPostParameters(url, out uri);
 
-            var request = (HttpWebRequest) WebRequest.Create(url);
+            var request = WebRequest.Create(url);
+            AuthenticateRequest(request);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             request.ContentType = "application/x-www-form-urlencoded";
 
-            SetRequestMeta(request);
-                
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                );
+#endif
+            // [DC] LSP violation necessary for "pure" mocks
+            if (request is HttpWebRequest)
+            {
+                SetRequestMeta((HttpWebRequest)request);
+            }
+            else
+            {
+                AppendHeaders(request);
+                if (!UserAgent.IsNullOrBlank())
+                {
+                    request.Headers["User-Agent"] = UserAgent;
+                }
+            }
+
             content = PostProcessPostParameters(request, uri);
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "BODY: ", Encoding.UTF8.GetString(content))
+                );
+#endif
+
 #if !SILVERLIGHT
             // [DC]: Silverlight sets this dynamically
             request.ContentLength = content.Length;
@@ -61,12 +92,55 @@ namespace Hammock.Authentication.OAuth
                     break;
             }
 
-            var request = (HttpWebRequest)WebRequest.Create(uri);
+            var request = WebRequest.Create(uri);
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
             AuthenticateRequest(request);
-            SetRequestMeta(request);
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                );
+#endif
+            // [DC] LSP violation necessary for "pure" mocks
+            if (request is HttpWebRequest)
+            {
+                SetRequestMeta((HttpWebRequest)request);
+            }
+            else
+            {
+                AppendHeaders(request);
+                if (!UserAgent.IsNullOrBlank())
+                {
+                    request.Headers["User-Agent"] = UserAgent;
+                }
+            }
 
             return request;
+        }
+
+        protected override string AppendParameters(string url)
+        {
+            return AppendParameters(url, false);
+        }
+
+        protected virtual string AppendParameters(string url, bool skipOAuth)
+        {
+            var parameters = 0;
+            foreach (var parameter in Parameters.Where(
+                parameter => !(parameter is HttpPostParameter) || Method == WebMethod.Post
+                             ))
+            {
+                if (skipOAuth && parameter.Name.StartsWith("oauth_"))
+                {
+                    continue;
+                }
+
+                // GET parameters in URL
+                url = url.Then(parameters > 0 || url.Contains("?") ? "&" : "?");
+                url = url.Then("{0}={1}".FormatWith(parameter.Name, parameter.Value.UrlEncode()));
+                parameters++;
+            }
+
+            return url;
         }
 
         private Uri GetAddressWithOAuthParameters(Uri address)
@@ -95,30 +169,29 @@ namespace Hammock.Authentication.OAuth
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
                     SetAuthorizationHeader(request, "Authorization");
+                    // Only use the POST parameters that exist in the body
+#if SILVERLIGHT
+                    var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
+#else
+                    var postParameters = new WebParameterCollection(HttpUtility.ParseQueryString(uri.Query));
+#endif
+                    // Append any leftover values to the POST body
+                    var nonAuthParameters = GetPostParametersValue(postParameters, true /* escapeParameters */);
+                    if (body.IsNullOrBlank())
+                    {
+                        body = nonAuthParameters;
+                    }
+                    else
+                    {
+                        if (!nonAuthParameters.IsNullOrBlank())
+                        {
+                            body += "&".Then(nonAuthParameters);
+                        }
+                    }
                     break;
                 case OAuthParameterHandling.UrlOrPostParameters:
-                    body = GetPostParametersValue(Parameters, false);
+                    body = GetPostParametersValue(Parameters, false /* escapeParameters */);
                     break;
-            }
-
-            // Only use the POST parameters that exist in the body
-#if SILVERLIGHT
-            var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
-#else
-            var postParameters = new WebParameterCollection(HttpUtility.ParseQueryString(uri.Query));
-#endif
-            // Append any leftover values to the POST body
-            var nonAuthParameters = GetPostParametersValue(postParameters, true);
-            if (body.IsNullOrBlank())
-            {
-                body = nonAuthParameters;
-            }
-            else
-            {
-                if (!nonAuthParameters.IsNullOrBlank())
-                {
-                    body += "&".Then(nonAuthParameters);
-                }
             }
 
             var content = Encoding.UTF8.GetBytes(body);
@@ -134,11 +207,12 @@ namespace Hammock.Authentication.OAuth
                 .Then(uri.Authority);
 #else
                 .Then(uri.Host);
+                if ((uri.Scheme.Equals("http") && uri.Port != 80) ||
+                    (uri.Scheme.Equals("https") && uri.Port != 443))
+                {
+                    url = url.Then(":" + uri.Port);
+                }
 #endif
-            if (uri.Port != 80)
-            {
-                url = url.Then(":" + uri.Port);
-            }
             url = url.Then(uri.AbsolutePath);
             return url;
         }
@@ -146,10 +220,13 @@ namespace Hammock.Authentication.OAuth
         private static string GetPostParametersValue(ICollection<WebPair> postParameters, bool escapeParameters)
         {
             var body = "";
-            var parameters = 0;
-            foreach (var postParameter in postParameters)
+            var count = 0;
+            var parameters = postParameters.Where(p => !p.Name.IsNullOrBlank() &&
+                                                       !p.Value.IsNullOrBlank()).ToList();
+
+            foreach (var postParameter in parameters)
             {
-                // client_auth method does not function when these are escaped
+                // [DC]: client_auth method does not function when these are escaped
                 var name = escapeParameters
                                ? OAuthTools.UrlEncode(postParameter.Name)
                                : postParameter.Name;
@@ -157,14 +234,13 @@ namespace Hammock.Authentication.OAuth
                                 ? OAuthTools.UrlEncode(postParameter.Value)
                                 : postParameter.Value;
 
-                body = body.Then("{0}={1}".FormatWith(name, value));
-
-                if (parameters < postParameters.Count - 1)
+                var token = "{0}={1}".FormatWith(name, value);
+                body = body.Then(token);
+                if (count < postParameters.Count)
                 {
                     body = body.Then("&");
                 }
-
-                parameters++;
+                count++;
             }
             return body;
         }
@@ -207,7 +283,9 @@ namespace Hammock.Authentication.OAuth
             var parameters = 0;
             foreach (var parameter in Parameters.Where(parameter => 
                                                        !parameter.Name.IsNullOrBlank() && 
-                                                       !parameter.Value.IsNullOrBlank()))
+                                                       !parameter.Value.IsNullOrBlank() &&
+                                                        parameter.Name.StartsWith("oauth_")
+                                                       ))
             {
                 parameters++;
                 var format = parameters < Parameters.Count ? "{0}=\"{1}\"," : "{0}=\"{1}\"";
@@ -256,7 +334,7 @@ namespace Hammock.Authentication.OAuth
                                 ClientUsername = info.ClientUsername,
                                 ClientPassword = info.ClientPassword,
                                 SignatureMethod = OAuthSignatureMethod.HmacSha1,
-                                ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                                ParameterHandling = ParameterHandling,
                                 CallbackUrl = info.Callback,
                                 Verifier = info.Verifier
                             };
