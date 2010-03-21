@@ -10,6 +10,10 @@ using Hammock.Web;
 using System.Web;
 #endif
 
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
+
 namespace Hammock.Authentication.OAuth
 {
 #if !SILVERLIGHT
@@ -68,7 +72,7 @@ namespace Hammock.Authentication.OAuth
             content = PostProcessPostParameters(request, uri);
 #if TRACE
             Trace.WriteLine(String.Concat(
-                "BODY: ", Encoding.UTF8.GetString(content))
+                "BODY: ", Encoding.UTF8.GetString(content, 0, content.Length))
                 );
 #endif
 
