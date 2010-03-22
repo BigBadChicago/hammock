@@ -1,0 +1,24 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" ctype="Workspace" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="d:\Projects\hammock\src\net35\Hammock\Caching\IDependencyCache.cs" ctype="Workbench">
+    <Files>
+      <File FileName="MyClass.cs" Line="22" Column="4" />
+      <File FileName="d:\Projects\hammock\src\net35\Hammock\Caching\IDependencyCache.cs" Line="15" Column="10" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="Hammock.Mono" expanded="True" selected="True">
+            <Node name="ExternalFiles">
+              <Option id="ShowAllFiles" value="True" />
+              <Option id="ShowVersionControlOverlays" value="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+</Properties>
