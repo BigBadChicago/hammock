@@ -1229,6 +1229,12 @@ namespace Hammock
                 return;
             }
 
+            if(request.Entity == null || request.RequestEntityType == null)
+            {
+                // Not enough information to serialize
+                return;
+            }
+
             var entityBody = serializer.Serialize(request.Entity, request.RequestEntityType);
             query.Entity = !entityBody.IsNullOrBlank()
                                ? new WebEntity
