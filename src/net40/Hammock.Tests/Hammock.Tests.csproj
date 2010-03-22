@@ -32,10 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\lib\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -48,70 +48,70 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Helpers\TestExtensions.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Helpers\TestExtensions.cs">
       <Link>Helpers\TestExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Helpers\TimeExtensions.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Helpers\TimeExtensions.cs">
       <Link>Helpers\TimeExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\OAuth\OAuthToolsTests.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\OAuth\OAuthToolsTests.cs">
       <Link>OAuth\OAuthToolsTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\OAuth\OAuthWorkflowTests.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\OAuth\OAuthWorkflowTests.cs">
       <Link>OAuth\OAuthWorkflowTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Postmark\Converters\NameValueCollectionConverter.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Postmark\Converters\NameValueCollectionConverter.cs">
       <Link>Postmark\Converters\NameValueCollectionConverter.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Postmark\Converters\UnicodeJsonStringConverter.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Postmark\Converters\UnicodeJsonStringConverter.cs">
       <Link>Postmark\Converters\UnicodeJsonStringConverter.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Postmark\PostmarkMessage.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkMessage.cs">
       <Link>Postmark\PostmarkMessage.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Postmark\PostmarkResponse.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkResponse.cs">
       <Link>Postmark\PostmarkResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\Postmark\PostmarkStatus.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkStatus.cs">
       <Link>Postmark\PostmarkStatus.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.Caching.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Caching.cs">
       <Link>RestClientTests.Async.Caching.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.cs">
       <Link>RestClientTests.Async.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.Mocks.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Mocks.cs">
       <Link>RestClientTests.Async.Mocks.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.MultiPart.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.MultiPart.cs">
       <Link>RestClientTests.Async.MultiPart.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.OAuth.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.OAuth.cs">
       <Link>RestClientTests.Async.OAuth.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.Retries.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Retries.cs">
       <Link>RestClientTests.Async.Retries.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Async.Tasks.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Tasks.cs">
       <Link>RestClientTests.Async.Tasks.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Caching.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Caching.cs">
       <Link>RestClientTests.Caching.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.cs">
       <Link>RestClientTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Mocks.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Mocks.cs">
       <Link>RestClientTests.Mocks.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.MultiPart.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.MultiPart.cs">
       <Link>RestClientTests.MultiPart.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.OAuth.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.OAuth.cs">
       <Link>RestClientTests.OAuth.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\net35\Hammock.Tests\RestClientTests.Retries.cs">
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Retries.cs">
       <Link>RestClientTests.Retries.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
