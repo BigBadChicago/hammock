@@ -18,6 +18,7 @@ using Hammock.Silverlight.Compat;
 
 #if SILVERLIGHT && !WindowsPhone
 using System.Windows.Browser;
+using System.Net.Browser;
 #endif
 
 namespace Hammock.Web
@@ -38,6 +39,16 @@ namespace Hammock.Web
         public virtual TimeSpan? RequestTimeout { get; set; }
         public virtual WebQueryResult Result { get; internal set; }
         public virtual bool KeepAlive { get; set; }
+
+#if SILVERLIGHT
+        public virtual bool HasElevatedPermissions { get; set; }
+
+        // [DC]: Headers to use when access isn't direct
+        public virtual string SilverlightAuthorizationHeader { get; set; }
+        public virtual string SilverlightMethodHeader { get; set; }
+        public virtual string SilverlightUserAgentHeader { get; set; }
+        public virtual string SilverlightAcceptHeader { get; set; }        
+#endif
         
 #if !Silverlight
         public virtual ServicePoint ServicePoint { get; set; }
@@ -63,6 +74,15 @@ namespace Hammock.Web
 
         // [DC]: Currently a Compat-only property
         public string SourceUrl { get; set; }
+
+        protected WebQuery() : this(null)
+        {
+#if SL3 || SL4
+            // [DC]: Opt-in to the networking stack so we can get headers for proxies
+            WebRequest.RegisterPrefix("http://", WebRequestCreator.ClientHttp);
+            WebRequest.RegisterPrefix("https://", WebRequestCreator.ClientHttp);
+#endif
+        }
 
         protected WebQuery(IWebQueryInfo info)
         {
@@ -184,7 +204,20 @@ namespace Hammock.Web
 
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
+#if SILVERLIGHT
+            var httpMethod = method == PostOrPut.Post ? "POST" : "PUT"; ;
+            if (HasElevatedPermissions)
+            {
+                request.Method = httpMethod;
+            }
+            else
+            {
+                request.Method = "POST";
+                request.Headers[SilverlightMethodHeader] = httpMethod;
+            }
+#else
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
+#endif
             request.ContentType = "application/x-www-form-urlencoded";
 #if TRACE
             Trace.WriteLine(String.Concat(
@@ -201,7 +234,12 @@ namespace Hammock.Web
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
+#if SILVERLIGHT
+                    // [DC] User-Agent is still restricted in elevated mode
+                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
+#else
                     request.Headers["User-Agent"] = UserAgent;
+#endif
                 }
             }
 
@@ -226,7 +264,20 @@ namespace Hammock.Web
 
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
+#if SILVERLIGHT
+            var httpMethod = method == PostOrPut.Post ? "POST" : "PUT"; ;
+            if (HasElevatedPermissions)
+            {
+                request.Method = httpMethod;
+            }
+            else
+            {
+                request.Method = "POST";
+                request.Headers[SilverlightMethodHeader] = httpMethod;
+            }
+#else
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
+#endif
             request.ContentType = Entity.ContentType;
 
             var entity = Entity.Content;
@@ -245,7 +296,12 @@ namespace Hammock.Web
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
+#if SILVERLIGHT
+                    // [DC] User-Agent is still restricted in elevated mode
+                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
+#else
                     request.Headers["User-Agent"] = UserAgent;
+#endif
                 }
             }
 #if TRACE
@@ -267,7 +323,20 @@ namespace Hammock.Web
             url = AppendParameters(url);
 
             var request = WebRequest.Create(url);
+#if SILVERLIGHT
+            var httpMethod = method == GetOrDelete.Get ? "GET" : "DELETE";
+            if (HasElevatedPermissions)
+            {
+                request.Method = httpMethod;
+            }
+            else
+            {
+                request.Method = "POST";
+                request.Headers[SilverlightMethodHeader] = httpMethod;
+            }
+#else
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
+#endif
             AuthenticateRequest(request);
 #if TRACE
             Trace.WriteLine(String.Concat(
@@ -284,7 +353,12 @@ namespace Hammock.Web
                 AppendHeaders(request);
                 if(!UserAgent.IsNullOrBlank())
                 {
+#if SILVERLIGHT
+                    // [DC] User-Agent is still restricted in elevated mode
+                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
+#else
                     request.Headers["User-Agent"] = UserAgent;
+#endif
                 }
             }
 
@@ -322,7 +396,8 @@ namespace Hammock.Web
 #if !SILVERLIGHT
                 request.UserAgent = UserAgent;
 #else
-                request.Headers["User-Agent"] = UserAgent;
+                // [DC]: User agent is still restricted in elevated permissions
+                request.Headers[SilverlightUserAgentHeader] = UserAgent;
 #endif
             }
 
@@ -332,18 +407,35 @@ namespace Hammock.Web
                 request.AutomaticDecompression = DecompressionMethods;
 #else
                 // TODO: Implement decompression on HttpWebResponse
-                // TODO: Implement decompression on HttpWebResponse
-                switch(DecompressionMethods)
+                if (HasElevatedPermissions)
                 {
-                    case DecompressionMethods.GZip:
-                        request.Accept = "gzip";
-                        break;
-                    case DecompressionMethods.Deflate:
-                        request.Accept = "deflate";
-                        break;
-                    case DecompressionMethods.GZip | DecompressionMethods.Deflate:
-                        request.Accept = "gzip,deflate";
-                        break;
+                    switch (DecompressionMethods)
+                    {
+                        case DecompressionMethods.GZip:
+                            request.Accept = "gzip";
+                            break;
+                        case DecompressionMethods.Deflate:
+                            request.Accept = "deflate";
+                            break;
+                        case DecompressionMethods.GZip | DecompressionMethods.Deflate:
+                            request.Accept = "gzip,deflate";
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (DecompressionMethods)
+                    {
+                        case DecompressionMethods.GZip:
+                            request.Headers[SilverlightAcceptHeader] = "gzip";
+                            break;
+                        case DecompressionMethods.Deflate:
+                            request.Headers[SilverlightAcceptHeader] = "deflate";
+                            break;
+                        case DecompressionMethods.GZip | DecompressionMethods.Deflate:
+                            request.Headers[SilverlightAcceptHeader] = "gzip,deflate";
+                            break;
+                    }
                 }
 #endif
             }
@@ -394,7 +486,42 @@ namespace Hammock.Web
                 {
                     if(request is HttpWebRequest)
                     {
-                        _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
+#if SILVERLIGHT
+                    if(header.Key.EqualsIgnoreCase("User-Agent"))
+                    {
+                        // [DC]: User-Agent is still restricted in elevated mode
+                        request.Headers[SilverlightUserAgentHeader] = UserAgent;
+                        continue;
+                    }
+
+                    if(header.Key.EqualsIgnoreCase("Accept"))
+                    {
+                        if (HasElevatedPermissions)
+                        {
+                            request.Headers[header.Key] = UserAgent;
+                        }
+                        else
+                        {
+                            request.Headers[SilverlightAcceptHeader] = UserAgent;
+                        }
+                        continue;
+                    }
+
+                    if(header.Key.EqualsIgnoreCase("Authorization"))
+                    {
+                        if (HasElevatedPermissions)
+                        {
+                            request.Headers[header.Key] = AuthorizationHeader;
+                        }
+                        else
+                        {
+                            request.Headers[SilverlightAuthorizationHeader] = AuthorizationHeader;
+                        }
+                        continue;
+                    }
+#endif
+
+                    _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
                     }
                     if(request is MockHttpWebRequest)
                     {
@@ -426,7 +553,7 @@ namespace Hammock.Web
 #endif
         }
 
-#if !Silverlight
+#if !SILVERLIGHT
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
             = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase)
                   {
@@ -446,18 +573,18 @@ namespace Hammock.Web
 #else
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
             = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase) {
-                      { "Accept",            (r, v) => r.Accept = v },
+                      { "Accept",            (r, v) => { /* Not supported here },
                       { "Connection",        (r, v) => { /* Set by Silverlight */ }},           
                       { "Content-Length",    (r, v) => { /* Set by Silverlight */ }},
                       { "Content-Type",      (r, v) => r.ContentType = v },
                       { "Expect",            (r, v) => { /* Set by Silverlight */ }},
-                      { "Date",              (r, v) => { /* Set by system */ }},
-                      { "Host",              (r, v) => { /* Set by system */ }},
-                      { "If-Modified-Since", (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
-                      { "Range",             (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
-                      { "Referer",           (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
-                      { "Transfer-Encoding", (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }},
-                      { "User-Agent",        (r, v) => { throw new NotSupportedException(/* r.AddRange() */); }}             
+                      { "Date",              (r, v) => { /* Set by Silverlight */ }},
+                      { "Host",              (r, v) => { /* Set by Silverlight */ }},
+                      { "If-Modified-Since", (r, v) => { /* Not supported */ }},
+                      { "Range",             (r, v) => { /* Not supported */ }},
+                      { "Referer",           (r, v) => { /* Not supported */ }},
+                      { "Transfer-Encoding", (r, v) => { /* Not supported */ }},
+                      { "User-Agent",        (r, v) => { /* Not supported here */  }}             
                   };
 #endif
 
@@ -601,6 +728,7 @@ namespace Hammock.Web
         }
 
         protected abstract void SetAuthorizationHeader(WebRequest request, string header);
+
         protected abstract void AuthenticateRequest(WebRequest request);
 
         private static string CreateCacheKey(string prefix, string url)

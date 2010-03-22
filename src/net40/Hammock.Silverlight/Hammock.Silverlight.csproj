@@ -3,22 +3,35 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CD569558-9092-466B-8670-EA1B151150E0}</ProjectGuid>
+    <ProjectGuid>{46AFFE9E-B0DF-4DE9-A1A3-1773E08DCB51}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Hammock</RootNamespace>
-    <AssemblyName>Hammock</AssemblyName>
+    <RootNamespace>Hammock.Silverlight</RootNamespace>
+    <AssemblyName>Hammock.Silverlight</AssemblyName>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <!-- This property group is only here to support building this project using the 
+       MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
+       to set the TargetFrameworkVersion to v3.5 -->
+  <PropertyGroup Condition="'$(MSBuildToolsVersion)' == '3.5'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\..\bin\net40\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT,Silverlight,SL,SL4</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -26,7 +39,9 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\..\bin\net40\</OutputPath>
-    <DefineConstants>TRACE;NET40</DefineConstants>
+    <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SL4</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -37,22 +52,29 @@
     <AssemblyOriginatorKeyFile>..\..\net35\Hammock\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Json, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Runtime.Serialization.Json, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.ServiceModel.Web" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
+    <Reference Include="System.Windows" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Windows.Browser" />
+    <Reference Include="System.Xml.Linq, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\net35\Hammock.Silverlight\Compat\DecompressionMethods.cs">
+      <Link>Compat\DecompressionMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock.Silverlight\Compat\NameValueCollection.cs">
+      <Link>Compat\NameValueCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock.Silverlight\Compat\Trace.cs">
+      <Link>Compat\Trace.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Attributes\INamedAttribute.cs">
       <Link>Attributes\INamedAttribute.cs</Link>
     </Compile>
@@ -119,9 +141,6 @@
     <Compile Include="..\..\net35\Hammock\Authentication\OAuth\OAuthWorkflow.cs">
       <Link>Authentication\OAuth\OAuthWorkflow.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Caching\AspNetCache.cs">
-      <Link>Caching\AspNetCache.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Caching\CacheFactory.cs">
       <Link>Caching\CacheFactory.cs</Link>
     </Compile>
@@ -133,9 +152,6 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Caching\ICache.cs">
       <Link>Caching\ICache.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Caching\IDependencyCache.cs">
-      <Link>Caching\IDependencyCache.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Caching\SimpleCache.cs">
       <Link>Caching\SimpleCache.cs</Link>
@@ -164,12 +180,6 @@
     <Compile Include="..\..\net35\Hammock\Extensions\RegexExtensions.cs">
       <Link>Extensions\RegexExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Extensions\SecurityExtensions.cs">
-      <Link>Extensions\SecurityExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Extensions\SerializationExtensions.cs">
-      <Link>Extensions\SerializationExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Extensions\SpecificationExtensions.cs">
       <Link>Extensions\SpecificationExtensions.cs</Link>
     </Compile>
@@ -185,11 +195,26 @@
     <Compile Include="..\..\net35\Hammock\Extensions\XmlExtensions.cs">
       <Link>Extensions\XmlExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\IRestClient.cs">
+      <Link>IRestClient.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Model\PropertyChangedBase.cs">
       <Link>Model\PropertyChangedBase.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Retries\ConnectionClosed.cs">
-      <Link>Retries\ConnectionClosed.cs</Link>
+    <Compile Include="..\..\net35\Hammock\RestBase.cs">
+      <Link>RestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\RestCallback.cs">
+      <Link>RestCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\RestClient.cs">
+      <Link>RestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\RestRequest.cs">
+      <Link>RestRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\RestResponse.cs">
+      <Link>RestResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Retries\IRetryCondition.cs">
       <Link>Retries\IRetryCondition.cs</Link>
@@ -203,20 +228,11 @@
     <Compile Include="..\..\net35\Hammock\Retries\RetryPolicy.cs">
       <Link>Retries\RetryPolicy.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Retries\Timeout.cs">
-      <Link>Retries\Timeout.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\HammockDataContractJsonSerializer.cs">
       <Link>Serialization\HammockDataContractJsonSerializer.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\HammockDataContractSerializer.cs">
       <Link>Serialization\HammockDataContractSerializer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Serialization\HammockJavaScriptSerializer.cs">
-      <Link>Serialization\HammockJavaScriptSerializer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Serialization\HammockXmlSerializer.cs">
-      <Link>Serialization\HammockXmlSerializer.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\IDeserializer.cs">
       <Link>Serialization\IDeserializer.cs</Link>
@@ -359,32 +375,55 @@
     <Compile Include="..\..\net35\Hammock\Web\WebQueryResult.cs">
       <Link>Web\WebQueryResult.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\IRestClient.cs">
-      <Link>IRestClient.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestBase.cs">
-      <Link>RestBase.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestCallback.cs">
-      <Link>RestCallback.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestClient.cs">
-      <Link>RestClient.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestRequest.cs">
-      <Link>RestRequest.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestResponse.cs">
-      <Link>RestResponse.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\net35\Hammock\Attributes\Specialized\_Specialized.cd">
+      <Link>Attributes\Specialized\_Specialized.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Attributes\Validation\_Validation.cd">
+      <Link>Attributes\Validation\_Validation.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Authentication\OAuth\_OAuth.cd">
+      <Link>Authentication\OAuth\_OAuth.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Authentication\_Authentication.cd">
+      <Link>Authentication\_Authentication.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Caching\_Caching.cd">
+      <Link>Caching\_Caching.cd</Link>
+    </None>
     <None Include="..\..\net35\Hammock\key.snk">
       <Link>key.snk</Link>
     </None>
+    <None Include="..\..\net35\Hammock\Model\_Model.cd">
+      <Link>Model\_Model.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Retries\_Retries.cd">
+      <Link>Retries\_Retries.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Tasks\_Tasks.cd">
+      <Link>Tasks\_Tasks.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Web\Mocks\_Mocks.cd">
+      <Link>Web\Mocks\_Mocks.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\Web\_Web.cd">
+      <Link>Web\_Web.cd</Link>
+    </None>
+    <None Include="..\..\net35\Hammock\_Hammock.cd">
+      <Link>_Hammock.cd</Link>
+    </None>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

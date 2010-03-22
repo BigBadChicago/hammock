@@ -35,7 +35,11 @@ namespace Hammock.Web
             }
         }
 
+#if SILVERLIGHT
         protected override void SetAuthorizationHeader(WebRequest request, string header)
+#else
+        protected override void SetAuthorizationHeader(WebRequest request, string header)
+#endif
         {
             if (!HasAuth)
             {
@@ -49,7 +53,14 @@ namespace Hammock.Web
             request.PreAuthenticate = true;
             request.Headers[header] = credentials;
 #else
-            request.Headers["X-Twitter-Auth"] = AuthorizationHeader;
+            if (HasElevatedPermissions)
+            {
+                request.Headers[header] = credentials;
+            }
+            else
+            {
+                request.Headers[SilverlightAuthorizationHeader] = AuthorizationHeader;
+            }
 #endif
         }
 

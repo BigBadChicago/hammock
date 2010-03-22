@@ -33,6 +33,10 @@ namespace Hammock
         private const string MockContent = "mockContent";
         public virtual string Authority { get; set; }
 
+#if SILVERLIGHT
+        public virtual bool HasElevatedPermissions { get; set; }
+#endif
+
 #if !Silverlight
         private bool _firstTry = true;
 #endif
@@ -1278,6 +1282,9 @@ namespace Hammock
                             ? credentials.GetQueryFor(uri.ToString(), request, info, method)
                             : new BasicAuthWebQuery(info);
 
+#if SILVERLIGHT
+            query.HasElevatedPermissions = HasElevatedPermissions;
+#endif
             return query;
         }
     }

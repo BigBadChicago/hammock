@@ -36,9 +36,6 @@ namespace Hammock.Authentication.OAuth
             ParameterHandling = info.ParameterHandling;
         }
 
-#if SILVERLIGHT
-        private string _authorizationHeader = "X-Twitter-Auth";
-#endif
         protected override WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
             Uri uri;
@@ -47,7 +44,20 @@ namespace Hammock.Authentication.OAuth
 
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
+#if SILVERLIGHT
+            var httpMethod = method == PostOrPut.Post ? "POST" : "PUT";;
+            if (HasElevatedPermissions)
+            {
+                request.Method = httpMethod;
+            }
+            else
+            {
+                request.Method = "POST";
+                request.Headers[SilverlightMethodHeader] = httpMethod;
+            }
+#else
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
+#endif
             request.ContentType = "application/x-www-form-urlencoded";
 
 #if TRACE
@@ -65,7 +75,12 @@ namespace Hammock.Authentication.OAuth
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
+#if SILVERLIGHT
+                    // [DC] User-Agent is still restricted in elevated mode
+                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
+#else
                     request.Headers["User-Agent"] = UserAgent;
+#endif
                 }
             }
 
@@ -97,7 +112,20 @@ namespace Hammock.Authentication.OAuth
             }
 
             var request = WebRequest.Create(uri);
+#if SILVERLIGHT
+            var httpMethod = method == GetOrDelete.Get ? "GET" : "DELETE";
+            if (HasElevatedPermissions)
+            {
+                request.Method = httpMethod;
+            }
+            else
+            {
+                request.Method = "POST";
+                request.Headers[SilverlightMethodHeader] = httpMethod;
+            }
+#else
             request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
+#endif
             AuthenticateRequest(request);
 #if TRACE
             Trace.WriteLine(String.Concat(
@@ -114,7 +142,12 @@ namespace Hammock.Authentication.OAuth
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
+#if SILVERLIGHT
+                    // [DC] User-Agent is still restricted in elevated mode
+                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
+#else
                     request.Headers["User-Agent"] = UserAgent;
+#endif
                 }
             }
 
@@ -264,6 +297,7 @@ namespace Hammock.Authentication.OAuth
             }
         }
 
+
         protected override void SetAuthorizationHeader(WebRequest request, string header)
         {
             var authorization = GetAuthorizationHeader();
@@ -272,7 +306,14 @@ namespace Hammock.Authentication.OAuth
 #if !SILVERLIGHT
             request.Headers["Authorization"] = AuthorizationHeader;
 #else
-            request.Headers[_authorizationHeader] = AuthorizationHeader;
+            if (HasElevatedPermissions)
+            {
+                request.Headers[header] = AuthorizationHeader;
+            }
+            else
+            {
+                request.Headers[SilverlightAuthorizationHeader] = AuthorizationHeader;
+            }
 #endif
         }
 
