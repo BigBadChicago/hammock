@@ -10,9 +10,19 @@ bin/net35/es/*.*
 bin/net35/it/*.*
 bin/net35/ko/*.*
 bin/net35/ja/*.*
+bin/net35/ru/*.*
 bin/net35/zh-Hans/*.*
 bin/net35/zh-Hant/*.*
 bin/net40/*.*
+bin/net40/de/*.*
+bin/net40/fr/*.*
+bin/net40/es/*.*
+bin/net40/it/*.*
+bin/net40/ko/*.*
+bin/net40/ja/*.*
+bin/net40/ru/*.*
+bin/net40/zh-Hans/*.*
+bin/net40/zh-Hant/*.*
 
 syntax: regexp
 /obj/
