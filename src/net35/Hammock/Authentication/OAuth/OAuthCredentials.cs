@@ -41,7 +41,9 @@ namespace Hammock.Authentication.OAuth
                                    CallbackUrl = CallbackUrl,
                                    ClientPassword = ClientPassword,
                                    ClientUsername = ClientUsername,
-                                   Verifier = Verifier
+                                   Verifier = Verifier, 
+                                   Token = Token, 
+                                   TokenSecret = TokenSecret
                                };
 
             switch(Type)
