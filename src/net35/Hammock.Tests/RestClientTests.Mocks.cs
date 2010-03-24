@@ -70,8 +70,6 @@ namespace Hammock.Tests
             var settings = GetSerializerSettings();
             var serializer = new HammockJsonDotNetSerializer(settings);
 
-            // Add IsMock to result
-           
             var client = new RestClient
                              {
                                  Authority = "http://api.postmarkapp.com",
@@ -94,6 +92,7 @@ namespace Hammock.Tests
             var response = client.Request<PostmarkResponse>(request);
             Assert.IsNotNull(response.ContentEntity);
             Assert.IsTrue(response.ContentEntity.Status == PostmarkStatus.Success);
+	        Assert.IsTrue(response.IsMock);
         }
 	}
 }
