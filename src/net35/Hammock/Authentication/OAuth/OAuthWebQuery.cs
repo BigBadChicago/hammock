@@ -384,9 +384,16 @@ namespace Hammock.Authentication.OAuth
                                 Verifier = info.Verifier
                             };
 
+            // [DC]: Add any non-oauth parameters back into the signature hash
             var parameters = new WebParameterCollection();
+            var nonAuthParameters = Parameters.Where(p => !p.Name.StartsWith("oauth_"));
+            parameters.AddRange(nonAuthParameters);
+            
             Info = oauth.BuildProtectedResourceInfo(Method, parameters, url);
+
+            // [DC]: Add any non-oauth parameters back into parameter bag
             Parameters = ParseInfoParameters();
+            Parameters.AddRange(nonAuthParameters);
         }
     }
 }

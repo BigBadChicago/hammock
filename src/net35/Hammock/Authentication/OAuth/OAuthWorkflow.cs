@@ -274,6 +274,7 @@ namespace Hammock.Authentication.OAuth
                                TokenSecret = TokenSecret
                            };
 
+            
             return info;
         }
 

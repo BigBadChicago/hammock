@@ -92,6 +92,11 @@ namespace Hammock.Web
             AddCollection(collection);
         }
 
+        public virtual void AddRange(IEnumerable<WebPair> collection)
+        {
+            AddCollection(collection);
+        }
+
         public virtual void Sort(Comparison<WebPair> comparison)
         {
             var sorted = new List<WebPair>(_parameters);
