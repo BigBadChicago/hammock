@@ -86,6 +86,37 @@ namespace Hammock.Tests
                 Method = WebMethod.Post
             };
 
+            request.AddParameter("status", string.Format("OAuth Post at {0}. tweet tweet", DateTime.Now.ToShortTimeString()));
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to post successfully");
+        }
+
+        [Test]
+        [Category("OAuth")]
+        public void Can_make_oauth_request_post_with_post_parameters_set_on_client()
+        {
+            if (_ignoreTestsThatPostToTwitter)
+            {
+                Assert.Ignore("This test makes a live update - enable in app.config to run this test");
+            }
+            ServicePointManager.Expect100Continue = false;
+
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Credentials = OAuthForTwitterProtectedResource,
+                Path = "/statuses/update.xml",
+                Method = WebMethod.Post
+            };
+
             client.AddParameter("status", string.Format("OAuth Post at {0}. tweet tweet", DateTime.Now.ToShortTimeString()));
 
             var response = client.Request(request);
