@@ -1,10 +1,10 @@
 ﻿<!--This is the MSBuild script for TeamCity
     It builds the windows dll and runs the primary unit tests-->
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <Configuration>Debug</Configuration>
     </PropertyGroup>
-    <!--
+   
     <PropertyGroup>
         <TestSetupFile></TestSetupFile>
     </PropertyGroup>
@@ -16,14 +16,14 @@
     </Target>
     <Target Name="BuildTestProject" DependsOnTargets="Build">
         <MSBuild Projects="$(MSBuildProjectDirectory)\Hammock.Tests\Hammock.Tests.csproj"/>
-    </Target>-->
-    <Target Name="Build">
+    </Target>
+    <Target Name="Build" DependsOnTargets="CopyTestSetup">
         <MSBuild Projects="$(MSBuildProjectDirectory)\Hammock\Hammock.csproj"/>
     </Target>
-    <!--<Target Name="CopyTestSetup">
+    <Target Name="CopyTestSetup">
         <Message Text="Copying test setup file..."/>
         <Exec Command ="copy $(TestSetupFile) $(MSBuildProjectDirectory)\Hammock.Tests\app.config" />
-    </Target>-->
+    </Target>
 </Project>
 
 

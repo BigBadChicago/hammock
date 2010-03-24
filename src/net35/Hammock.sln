@@ -17,6 +17,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Extras", "Hammock.Extras\Hammock.Extras.csproj", "{3BB0DC97-ECE3-4AC8-B2D0-E4C14D600179}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{D3CCC041-59CC-438B-9781-78F1F1D7272E}"
+	ProjectSection(SolutionItems) = preProject
+		BuildWindowsAndRunTests.proj = BuildWindowsAndRunTests.proj
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
