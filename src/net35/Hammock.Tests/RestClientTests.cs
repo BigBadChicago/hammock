@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.Net;
 using Hammock.Authentication;
@@ -24,6 +25,10 @@ namespace Hammock.Tests
 
         private string _consumerKey;
         private string _consumerSecret;
+        private string _accessToken;
+        private string _tokenSecret;
+
+        private bool _ignoreTestsThatPostToTwitter = true; 
 
         [SetUp]
         public void SetUp()
@@ -37,6 +42,23 @@ namespace Hammock.Tests
 
             _consumerKey = ConfigurationManager.AppSettings["OAuthConsumerKey"];
             _consumerSecret = ConfigurationManager.AppSettings["OAuthConsumerSecret"];
+
+            _accessToken = ConfigurationManager.AppSettings["OAuthAccessToken"];
+            _tokenSecret = ConfigurationManager.AppSettings["OAuthTokenSecret"];
+
+            var ignore = ConfigurationManager.AppSettings["IgnoreStatusUpdateTests"];
+            //old school for compact fwk
+            try
+            {
+                if (!string.IsNullOrEmpty(ignore))
+                {
+                    _ignoreTestsThatPostToTwitter = bool.Parse(ignore);
+                }
+            }
+            catch (FormatException)
+            {
+               Console.WriteLine( "Couldn't parse IgnoreStatusUpdateTests setting value '{0}' as a boolean value.", ignore);
+            }
         }
 
         public IWebCredentials BasicAuthForTwitter
@@ -168,9 +190,12 @@ namespace Hammock.Tests
         }
 
         [Test]
-        [Ignore("This test makes a live update")]
         public void Can_make_basic_auth_request_post_with_post_parameters_synchronously()
         {
+            if (_ignoreTestsThatPostToTwitter)
+            {
+                Assert.Ignore("This test makes a live update - enable in app.config to run this test");
+            }
             ServicePointManager.Expect100Continue = false;
 
             var client = new RestClient

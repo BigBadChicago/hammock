@@ -31,3 +31,4 @@ syntax: regexp
 /_ReSharper.Hammock/
 glob:src/net35/Hammock.Tests/app.config
 glob:bin/mono/*.*
+glob:*.orig
