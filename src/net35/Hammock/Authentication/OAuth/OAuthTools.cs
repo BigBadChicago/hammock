@@ -130,10 +130,6 @@ namespace Hammock.Authentication.OAuth
         public static string NormalizeRequestParameters(WebParameterCollection parameters)
         {
             var copy = SortParametersExcludingSignature(parameters);
-            foreach (var param in copy)
-            {
-                param.Value = UrlEncodeParameterString(param.Value);
-            }
             var concatenated = copy.Concatenate("=", "&");
             return concatenated;
         }
