@@ -1131,10 +1131,6 @@ namespace Hammock.Web
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
 
-#if !SILVERLIGHT
-            //request.PreAuthenticate = true;
-            //request.AllowWriteStreamBuffering = true;
-#endif
             request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 
@@ -1561,7 +1557,6 @@ namespace Hammock.Web
         public static string QuickGet(string url, IDictionary<string, string> headers, string username, string password)
         {
             var request = WebRequest.Create(url);
-            request.PreAuthenticate = true;
             if(!username.IsNullOrBlank() && !password.IsNullOrBlank())
             {
                 request.Headers["Authorization"] = WebExtensions.ToBasicAuthorizationHeader(username, password);    

@@ -50,7 +50,6 @@ namespace Hammock.Web
             AuthorizationHeader = header;
 
 #if !SILVERLIGHT
-            request.PreAuthenticate = true;
             request.Headers[header] = credentials;
 #else
             if (HasElevatedPermissions)
