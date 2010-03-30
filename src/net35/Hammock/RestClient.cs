@@ -1137,34 +1137,35 @@ namespace Hammock
             return response;
         }
 
+        private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
+                (response, result) =>
+                {
+                    response.RequestDate = result.RequestDate;
+                    response.ResponseDate = result.ResponseDate;
+                    response.StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode;
+                    response.StatusDescription = result.ResponseHttpStatusDescription;
+                    response.Content = result.Response;
+                    response.ContentType = result.ResponseType;
+                    response.ContentLength = result.ResponseLength;
+                    response.ResponseUri = result.ResponseUri;
+                    response.IsMock = result.IsMock;
+                    return response;
+                };
+
         private static RestResponse BuildBaseResponse(WebQueryResult result)
         {
-            var response = new RestResponse
-                       {
-                           StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode,
-                           StatusDescription = result.ResponseHttpStatusDescription,
-                           Content = result.Response,
-                           ContentType = result.ResponseType,
-                           ContentLength = result.ResponseLength,
-                           ResponseUri = result.ResponseUri,
-                           IsMock = result.IsMock
-                       };
+            var response = new RestResponse();
+
+            _baseSetter.Invoke(response, result);
 
             return response;
         }
 
         private static RestResponse<T> BuildBaseResponse<T>(WebQueryResult result)
         {
-            var response = new RestResponse<T>
-            {
-                StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode,
-                StatusDescription = result.ResponseHttpStatusDescription,
-                Content = result.Response,
-                ContentType = result.ResponseType,
-                ContentLength = result.ResponseLength,
-                ResponseUri = result.ResponseUri,
-                IsMock = result.IsMock
-            };
+            var response = new RestResponse<T>();
+
+            _baseSetter.Invoke(response, result);
 
             return response;
         }

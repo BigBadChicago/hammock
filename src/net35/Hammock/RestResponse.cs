@@ -13,6 +13,9 @@ namespace Hammock
 #endif
     public class RestResponseBase
     {
+        public virtual DateTime? RequestDate { get; set; }
+        public virtual DateTime? ResponseDate { get; set; }
+
         public virtual HttpStatusCode StatusCode { get; set; }
         public virtual string StatusDescription { get; set; }
         public virtual string Content { get; set; }
