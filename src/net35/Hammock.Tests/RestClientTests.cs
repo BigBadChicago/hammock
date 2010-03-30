@@ -312,6 +312,19 @@ namespace Hammock.Tests
             Assert.IsNotNull(response.ContentEntity);
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
+
+        [Test]
+        public void Can_use_request_with_no_client_authority()
+        {
+            var client = new RestClient();
+
+            var request = new RestRequest();
+            request.Path = "http://api.twitter.com/statuses/public_timeline.json";
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+        }
     }
 }
 

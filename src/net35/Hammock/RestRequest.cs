@@ -72,9 +72,10 @@ namespace Hammock
             var versionPath = VersionPath.IsNullOrBlank()
                                   ? client.VersionPath.IsNullOrBlank() ? "" : client.VersionPath
                                   : VersionPath;
+            var hasAuthority = client.Authority.IsNullOrBlank();
 
-            sb.Append(client.Authority.IsNullOrBlank() ? "" : client.Authority);
-            sb.Append(client.Authority.EndsWith("/") ? "" : "/");
+            sb.Append(hasAuthority ? "" : client.Authority);
+            sb.Append(hasAuthority ? "" : client.Authority.EndsWith("/") ? "" : "/");
             sb.Append(versionPath.IsNullOrBlank() ? "" : versionPath);
             if(!versionPath.IsNullOrBlank())
             {
