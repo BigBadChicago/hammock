@@ -1180,6 +1180,7 @@ namespace Hammock
                     response.ContentType = result.ResponseType;
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
+                    response.InnerException = result.Exception;
                     return response;
                 };
 
