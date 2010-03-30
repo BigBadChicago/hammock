@@ -38,7 +38,6 @@ namespace Hammock.Web
         public DecompressionMethods DecompressionMethods { get; set; }
         public virtual TimeSpan? RequestTimeout { get; set; }
         public virtual WebQueryResult Result { get; internal set; }
-        public virtual bool KeepAlive { get; set; }
 
 #if SILVERLIGHT
         public virtual bool HasElevatedPermissions { get; set; }
@@ -52,6 +51,7 @@ namespace Hammock.Web
         
 #if !Silverlight
         public virtual ServicePoint ServicePoint { get; set; }
+        public virtual bool KeepAlive { get; set; }
 #endif
         private WebResponse _webResponse;
         public virtual WebResponse WebResponse
@@ -166,6 +166,9 @@ namespace Hammock.Web
         {
             Result.RequestDate = DateTime.UtcNow;
             Result.RequestUri = new Uri(e.Request);
+#if !SILVERLIGHT
+            Result.RequestKeptAlive = KeepAlive;
+#endif
         }
 
 #if !SILVERLIGHT
