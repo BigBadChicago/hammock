@@ -317,9 +317,10 @@ namespace Hammock.Tests
         public void Can_use_request_with_no_client_authority()
         {
             var client = new RestClient();
-
-            var request = new RestRequest();
-            request.Path = "http://api.twitter.com/statuses/public_timeline.json";
+            var request = new RestRequest
+                              {
+                                  Path = "http://api.twitter.com/statuses/public_timeline.json"
+                              };
 
             var response = client.Request(request);
             Assert.IsNotNull(response);

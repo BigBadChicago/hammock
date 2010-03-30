@@ -1168,6 +1168,7 @@ namespace Hammock
         private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
                 (response, result) =>
                 {
+                    response.InnerResponse = result.WebResponse;
                     response.RequestMethod = result.RequestHttpMethod;
                     response.RequestDate = result.RequestDate;
                     response.ResponseDate = result.ResponseDate;

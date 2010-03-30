@@ -13,6 +13,7 @@ namespace Hammock
 #endif
     public class RestResponseBase
     {
+        public virtual WebResponse InnerResponse { get; set; }
         public virtual DateTime? RequestDate { get; set; }
         public virtual DateTime? ResponseDate { get; set; }
         public virtual string RequestMethod { get; set; }

@@ -9,6 +9,7 @@ namespace Hammock.Web
     public class WebQueryResult
     {
         // Set by WebQuery
+        public virtual WebResponse WebResponse { get; set; }
         public virtual Uri RequestUri { get; set; }
         public virtual string RequestHttpMethod { get; set; }
         public virtual DateTime? RequestDate { get; set; }
