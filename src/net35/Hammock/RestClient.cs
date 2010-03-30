@@ -1169,10 +1169,12 @@ namespace Hammock
                 (response, result) =>
                 {
                     response.InnerResponse = result.WebResponse;
-                    response.RequestMethod = result.RequestHttpMethod;
+                    response.InnerException = result.Exception;
                     response.RequestDate = result.RequestDate;
-                    response.ResponseDate = result.ResponseDate;
                     response.RequestUri = result.RequestUri;
+                    response.RequestMethod = result.RequestHttpMethod;
+                    response.RequestKeptAlive = result.RequestKeptAlive;
+                    response.ResponseDate = result.ResponseDate;
                     response.ResponseUri = result.ResponseUri;
                     response.StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode;
                     response.StatusDescription = result.ResponseHttpStatusDescription;
@@ -1180,7 +1182,6 @@ namespace Hammock
                     response.ContentType = result.ResponseType;
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
-                    response.InnerException = result.Exception;
                     return response;
                 };
 
