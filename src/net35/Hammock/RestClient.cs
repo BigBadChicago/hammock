@@ -58,8 +58,23 @@ namespace Hammock
             return BuildResponseFromResult<T>(request, query);
         }
 
+        public RestResponse Request()
+        {
+            var query = RequestImpl(null);
+
+            return BuildResponseFromResult(null, query);
+        }
+
+        public RestResponse<T> Request<T>()
+        {
+            var query = RequestImpl(null);
+
+            return BuildResponseFromResult<T>(null, query);
+        }
+
         private WebQuery RequestImpl(RestRequest request)
         {
+            request = request ?? new RestRequest();
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
             SetQueryMeta(request, query);
@@ -377,6 +392,11 @@ namespace Hammock
             return BeginRequest(request, callback, null, null, false /* isInternal */);
         }
 
+        public IAsyncResult BeginRequest(RestCallback callback)
+        {
+            return BeginRequest(null, callback, null, null, false /* isInternal */);
+        }
+
         public IAsyncResult BeginRequest(RestRequest request)
         {
             return BeginRequest(request, null);
@@ -385,6 +405,11 @@ namespace Hammock
         public IAsyncResult BeginRequest<T>(RestRequest request)
         {
             return BeginRequest<T>(request, null);
+        }
+
+        public IAsyncResult BeginRequest<T>(RestCallback<T> callback)
+        {
+            return BeginRequest(null, callback);
         }
 
         // Pattern: http://msdn.microsoft.com/en-us/library/ms228963.aspx
@@ -607,12 +632,15 @@ namespace Hammock
 #endif
         }
 
+
+        // TODO BeginRequest and BeginRequest<T> have too much duplication
         private IAsyncResult BeginRequest(RestRequest request, 
                                           RestCallback callback,
                                           WebQuery query,
                                           string url,
                                           bool isInternal)
         {
+            request = request ?? new RestRequest();
             if (!isInternal)
             {
                 // [DC]: Recursive call possible, only do this once
@@ -729,14 +757,13 @@ namespace Hammock
         
             return result;
         }
-
-        // [DC]: Should look for further code sharing with non-generic
         private IAsyncResult BeginRequest<T>(RestRequest request,
                                              RestCallback<T> callback,
                                              WebQuery query,
                                              string url,
                                              bool isInternal)
         {
+            request = request ?? new RestRequest();
             if (!isInternal)
             {
                 var uri = request.BuildEndpoint(this);
@@ -1117,6 +1144,7 @@ namespace Hammock
         
         private RestResponse BuildResponseFromResult(RestRequest request, WebQuery query)
         {
+            request = request ?? new RestRequest();
             var result = query.Result;
             var response = BuildBaseResponse(result);
 
@@ -1125,9 +1153,9 @@ namespace Hammock
 
             return response;
         }
-
         private RestResponse<T> BuildResponseFromResult<T>(RestBase request, WebQuery query)
         {
+            request = request ?? new RestRequest();
             var result = query.Result;
             var response = BuildBaseResponse<T>(result);
 
@@ -1140,14 +1168,16 @@ namespace Hammock
         private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
                 (response, result) =>
                 {
+                    response.RequestMethod = result.RequestHttpMethod;
                     response.RequestDate = result.RequestDate;
                     response.ResponseDate = result.ResponseDate;
+                    response.RequestUri = result.RequestUri;
+                    response.ResponseUri = result.ResponseUri;
                     response.StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode;
                     response.StatusDescription = result.ResponseHttpStatusDescription;
                     response.Content = result.Response;
                     response.ContentType = result.ResponseType;
                     response.ContentLength = result.ResponseLength;
-                    response.ResponseUri = result.ResponseUri;
                     response.IsMock = result.IsMock;
                     return response;
                 };
@@ -1178,7 +1208,6 @@ namespace Hammock
                 response.ContentEntity = deserializer.Deserialize(result.Response, request.ResponseEntityType);
             }
         }
-
         private void DeserializeEntityBody<T>(WebQueryResult result, RestBase request, RestResponse<T> response)
         {
             var deserializer = request.Deserializer ?? Deserializer;

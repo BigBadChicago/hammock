@@ -15,12 +15,13 @@ namespace Hammock
     {
         public virtual DateTime? RequestDate { get; set; }
         public virtual DateTime? ResponseDate { get; set; }
-
+        public virtual string RequestMethod { get; set; }
         public virtual HttpStatusCode StatusCode { get; set; }
         public virtual string StatusDescription { get; set; }
         public virtual string Content { get; set; }
         public virtual string ContentType { get; set; }
         public virtual long ContentLength { get; set; }
+        public virtual Uri RequestUri { get; set; }
         public virtual Uri ResponseUri { get; set; }
         public virtual bool IsMock { get; set; }
         public virtual object Tag { get; set; }
