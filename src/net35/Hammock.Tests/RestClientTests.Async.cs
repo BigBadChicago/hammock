@@ -117,7 +117,7 @@ namespace Hammock.Tests
             };
 
             var asyncResult = client.BeginRequest(callback);
-            var response = client.EndRequest(asyncResult);
+            var response = client.EndRequest<TwitterRateLimitStatus>(asyncResult);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.ContentEntity);
