@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
+using Hammock.Extensions;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -36,7 +37,7 @@ namespace Hammock
             get
             {
                 return StatusCode == 0 && 
-                       StatusDescription == null && 
+                       StatusDescription.IsNullOrBlank() && 
                        Content != null;
             }
         }
