@@ -9,11 +9,16 @@ namespace Hammock.Retries
 #endif
     public class RetryPolicy
     {
-        protected internal ICollection<IRetryCondition> RetryConditions { get; set; }
+        public virtual ICollection<IRetryCondition> RetryConditions { get; set; }
         
         public virtual int RetryCount { get; set; }
         
         public RetryPolicy()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
         {
             RetryConditions = new List<IRetryCondition>(0);
         }
