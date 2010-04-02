@@ -1253,6 +1253,7 @@ namespace Hammock
             query.Method = GetWebMethod(request);
             query.Proxy = GetProxy(request);
             query.RequestTimeout = GetTimeout(request);
+            query.DecompressionMethods = request.DecompressionMethods | DecompressionMethods;
             
             SerializeEntityBody(query, request);
         }
