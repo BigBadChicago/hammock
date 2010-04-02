@@ -25,6 +25,7 @@ namespace Hammock.Web.Mocks
         public const string MockContentType = "mockContentType";
         public const string MockHeaderNames = "mockHeaderNames";
         public const string MockHeaderValues = "mockHeaderValues";
+        public const string MockHttpMethod = "mockHttpMethod";
 
         public WebRequest Create(Uri uri)
         {
@@ -73,11 +74,18 @@ namespace Hammock.Web.Mocks
                     ? ":" + uri.Port
                     : "");
 
-            uri = new Uri("{0}://{1}{2}{3}".FormatWithInvariantCulture
-                              (scheme, authority, uri.AbsolutePath, uriQuery)
-                              );
+            var built = "{0}://{1}{2}{3}".FormatWithInvariantCulture(
+                scheme, authority, uri.AbsolutePath, uriQuery
+                );
 
-            var request = new MockHttpWebRequest(uri);
+            Uri mockUri;
+            var request = Uri.TryCreate(built, UriKind.RelativeOrAbsolute, out mockUri)
+                              ? new MockHttpWebRequest(mockUri)
+                              : new MockHttpWebRequest(
+                                  new Uri(uri.ToString().Replace(
+                                      "mock", scheme)
+                                      )
+                                  );
 
             int statusCodeValue;
 #if !NETCF
@@ -92,7 +100,6 @@ namespace Hammock.Web.Mocks
                 statusCodeValue = 0;
             }
 #endif
-
             if (!statusCode.IsNullOrBlank()) request.ExpectStatusCode = (HttpStatusCode)statusCodeValue;
             if (!statusDescription.IsNullOrBlank()) request.ExpectStatusDescription = statusDescription;
             if (!content.IsNullOrBlank()) request.Content = content;

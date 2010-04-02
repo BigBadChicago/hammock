@@ -16,14 +16,14 @@ namespace Hammock
     public class RestRequest  : RestBase
     {
         private object _entity;
+        private object _expectEntity;
 
         protected internal virtual Web.WebHeaderCollection ExpectHeaders { get; set; }
         public virtual HttpStatusCode? ExpectStatusCode { get; set; }
         public virtual string ExpectStatusDescription { get; set; }
         public virtual string ExpectContent { get; set; }
         public virtual string ExpectContentType { get; set; }
-        public virtual object ExpectEntity { get; set; }
-
+        
         public RestRequest()
         {
             Initialize();
@@ -53,6 +53,29 @@ namespace Hammock
                 // [DC] Automatically posts an entity unless put is declared
                 RequestEntityType = _entity.GetType();
                 if(_entity != null && (Method != WebMethod.Post && Method != WebMethod.Put))
+                {
+                    Method = WebMethod.Post;
+                }
+            }
+        }
+
+        public virtual object ExpectEntity
+        {
+            get
+            {
+                return _expectEntity;
+            }
+            set
+            {
+                if (_expectEntity != null && _expectEntity.Equals(value))
+                {
+                    return;
+                }
+
+                _expectEntity = value;
+                OnPropertyChanged("ExpectEntity");
+
+                if (_expectEntity != null && (Method != WebMethod.Post && Method != WebMethod.Put))
                 {
                     Method = WebMethod.Post;
                 }

@@ -200,6 +200,7 @@ namespace Hammock
             if (url.Contains("https"))
             {
                 url = url.Replace("https", MockProtocol);
+
                 query.Parameters.Add(MockScheme, "https");
             }
             if (url.Contains("http"))
