@@ -14,19 +14,19 @@ namespace Hammock.Tests
                              {
                                  Authority = "http://api.twitter.com",
                                  VersionPath = "1",
-                                 Cache = CacheFactory.AspNetCache,
-                                 CacheKeyFunction = () => _twitterUsername,
-                                 CacheOptions = new CacheOptions
-                                                    {
-                                                        Duration = 10.Minutes(),
-                                                        Mode = CacheMode.AbsoluteExpiration
-                                                    }
                              };
 
             var request = new RestRequest
                               {
                                   Credentials = BasicAuthForTwitter,
                                   Path = "statuses/home_timeline.json",
+                                  Cache = CacheFactory.AspNetCache,
+                                  CacheKeyFunction = () => _twitterUsername,
+                                  CacheOptions = new CacheOptions
+                                  {
+                                      Duration = 10.Minutes(),
+                                      Mode = CacheMode.AbsoluteExpiration
+                                  }
                               };
 
             var first = client.Request(request);

@@ -158,7 +158,7 @@ namespace Hammock
         private bool RequestWithCache(RestBase request, WebQuery query, string url, out WebException exception)
         {
             var cache = GetCache(request);
-            if (Cache == null)
+            if (cache == null)
             {
                 exception = null;
                 return false;
@@ -840,7 +840,10 @@ namespace Hammock
             return result;
         }
 
-        private void CompleteWithQuery<T>(WebQuery query, RestRequest request, RestCallback<T> callback, WebQueryAsyncResult result)
+        private void CompleteWithQuery<T>(WebQuery query, 
+                                          RestRequest request, 
+                                          RestCallback<T> callback, 
+                                          WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult<T>(request, query);
             result.AsyncState = response;
@@ -1106,7 +1109,7 @@ namespace Hammock
                                            out WebQueryAsyncResult result)
         {
             var cache = GetCache(request);
-            if (Cache == null)
+            if (cache == null)
             {
                 result = null;
                 return false;
