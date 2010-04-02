@@ -158,7 +158,7 @@ namespace Hammock.Tests
             {
                 Credentials = OAuthForTwitterClientAuth,
                 Path = "access_token",
-                Method = WebMethod.Post
+                Method = WebMethod.Get // Will force a POST
             };
              
             var response = client.Request(request);

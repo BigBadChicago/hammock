@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using Hammock.Web;
+
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
 
 namespace Hammock.Authentication.OAuth
 {
@@ -57,6 +62,8 @@ namespace Hammock.Authentication.OAuth
                     oauth = workflow.BuildAccessTokenInfo(method, request.Parameters);
                     break;
                 case OAuthType.ClientAuthentication:
+                    request.Method = WebMethod.Post;
+                    method = WebMethod.Post;
                     workflow.AccessTokenUrl = url;
                     oauth = workflow.BuildClientAuthAccessTokenInfo(method, request.Parameters);
                     break;
