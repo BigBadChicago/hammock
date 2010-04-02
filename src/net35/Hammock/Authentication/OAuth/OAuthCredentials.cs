@@ -56,11 +56,12 @@ namespace Hammock.Authentication.OAuth
                     workflow.AccessTokenUrl = url;
                     oauth = workflow.BuildAccessTokenInfo(method, request.Parameters);
                     break;
+                case OAuthType.ClientAuthentication:
+                    workflow.AccessTokenUrl = url;
+                    oauth = workflow.BuildClientAuthAccessTokenInfo(method, request.Parameters);
+                    break;
                 case OAuthType.ProtectedResource:
                     oauth = workflow.BuildProtectedResourceInfo(method, request.Parameters, url);
-                    break;
-                case OAuthType.ClientAuthentication:
-                    oauth = workflow.BuildClientAuthAccessTokenInfo(method, request.Parameters);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

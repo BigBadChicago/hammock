@@ -43,6 +43,24 @@ namespace Hammock.Tests
             }
         }
 
+        public IWebCredentials OAuthForTwitterClientAuth
+        {
+            get
+            {
+                var credentials = new OAuthCredentials
+                                      {
+                                          Type = OAuthType.ClientAuthentication,
+                                          SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                                          ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                                          ConsumerKey = _consumerKey,
+                                          ConsumerSecret = _consumerSecret,
+                                          ClientUsername = _twitterUsername,
+                                          ClientPassword = _twitterPassword,
+                                      };
+                return credentials;
+            }
+        }
+
         [Test]
         [Category("OAuth")]
         public void Can_get_oauth_request_token_sequentially()
@@ -101,6 +119,7 @@ namespace Hammock.Tests
             {
                 Assert.Ignore("This test makes a live update - enable in app.config to run this test");
             }
+
             ServicePointManager.Expect100Continue = false;
 
             var client = new RestClient
@@ -124,5 +143,27 @@ namespace Hammock.Tests
             Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to post successfully");
         }
 
+        [Test]
+        [Category("OAuth")]
+        public void Can_get_tokens_with_xauth()
+        {
+            ServicePointManager.Expect100Continue = false;
+
+            var client = new RestClient
+            {
+                Authority = "https://api.twitter.com/oauth"
+            };
+
+            var request = new RestRequest
+            {
+                Credentials = OAuthForTwitterClientAuth,
+                Path = "access_token",
+                Method = WebMethod.Post
+            };
+             
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
