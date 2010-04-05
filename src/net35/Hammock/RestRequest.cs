@@ -74,11 +74,6 @@ namespace Hammock
 
                 _expectEntity = value;
                 OnPropertyChanged("ExpectEntity");
-
-                if (_expectEntity != null && (Method != WebMethod.Post && Method != WebMethod.Put))
-                {
-                    Method = WebMethod.Post;
-                }
             }
         }
 
