@@ -31,6 +31,8 @@ namespace Hammock
         private const string MockProtocol = "mock";
         private const string MockStatusDescription = "mockStatusDescription";
         private const string MockContent = "mockContent";
+        private const string MockHttpMethod = "mockHttpMethod";
+
         public virtual string Authority { get; set; }
 
 #if SILVERLIGHT
@@ -42,6 +44,13 @@ namespace Hammock
 #endif
         private int _remainingRetries;
         private TimedTask _task;
+
+        static RestClient()
+        {
+            WebRequest.RegisterPrefix(
+                MockProtocol, new MockWebRequestFactory()
+                );
+        }
 
 #if !Silverlight
         public virtual RestResponse Request(RestRequest request)
@@ -194,9 +203,10 @@ namespace Hammock
             return true;
         }
 #endif
-        private string BuildMockRequestUrl(RestRequest request, WebQuery query, string url)
+        private string BuildMockRequestUrl(RestRequest request, 
+                                           WebQuery query, 
+                                           string url)
         {
-            WebRequest.RegisterPrefix(MockProtocol, new MockWebRequestFactory());
             if (url.Contains("https"))
             {
                 url = url.Replace("https", MockProtocol);
@@ -222,11 +232,16 @@ namespace Hammock
                 query.Parameters.Add(MockStatusDescription, request.ExpectStatusDescription);
             }
 
+            query.Parameters.Add(
+                MockHttpMethod, request.Method.ToString().ToUpperInvariant()
+                );
+
             var entity = SerializeExpectEntity(request);
             if (entity != null)
             {
                 query.Parameters.Add(MockContent, entity.Content);
                 query.Parameters.Add(MockContentType, entity.ContentType);
+                query.Entity = entity; // Used with POSTs
             }
             else
             {
@@ -270,6 +285,7 @@ namespace Hammock
                 query.Parameters.Add("mockHeaderNames", names.ToString());
                 query.Parameters.Add("mockHeaderValues", values.ToString());
             }
+
             return url;
         }
 

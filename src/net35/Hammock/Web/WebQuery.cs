@@ -297,6 +297,7 @@ namespace Hammock.Web
             }
             else
             {
+                entity = null; // Mock POSTs don't use entities
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
@@ -314,11 +315,19 @@ namespace Hammock.Web
                 );
 #endif
 
-            content = Entity.ContentEncoding.GetBytes(entity);
+            if (entity != null)
+            {
+                content = Entity.ContentEncoding.GetBytes(entity);
 #if !Silverlight
-            // [DC]: This is set by Silverlight
-            request.ContentLength = content.Length;
+                // [DC]: This is set by Silverlight
+                request.ContentLength = content.Length;
 #endif
+            }
+            else
+            {
+                content = new MemoryStream().ToArray();
+            }
+
             return request;
         }
 

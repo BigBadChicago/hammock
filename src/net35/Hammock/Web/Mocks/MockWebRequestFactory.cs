@@ -16,7 +16,7 @@ using System.Windows.Browser;
 
 namespace Hammock.Web.Mocks
 {
-    public class MockWebRequestFactory : IWebRequestCreate
+    internal class MockWebRequestFactory : IWebRequestCreate
     {
         public const string MockScheme = "mockScheme";
         public const string MockStatusCode = "mockStatusCode";
@@ -57,7 +57,8 @@ namespace Hammock.Web.Mocks
                     MockContent,
                     MockContentType,
                     MockHeaderNames,
-                    MockHeaderValues
+                    MockHeaderValues,
+                    MockHttpMethod
                     ))
                 {
                     continue;
@@ -79,13 +80,13 @@ namespace Hammock.Web.Mocks
                 );
 
             Uri mockUri;
-            var request = Uri.TryCreate(built, UriKind.RelativeOrAbsolute, out mockUri)
-                              ? new MockHttpWebRequest(mockUri)
-                              : new MockHttpWebRequest(
-                                  new Uri(uri.ToString().Replace(
-                                      "mock", scheme)
-                                      )
-                                  );
+            var request = Uri.TryCreate(
+                built, UriKind.RelativeOrAbsolute, out mockUri
+                ) ? new MockHttpWebRequest(mockUri)
+                  : new MockHttpWebRequest(
+                    new Uri(uri.ToString().Replace(
+                              "mock", scheme))
+                              );
 
             int statusCodeValue;
 #if !NETCF

@@ -32,3 +32,4 @@ syntax: regexp
 glob:src/net35/Hammock.Tests/app.config
 glob:bin/mono/*.*
 glob:*.orig
+glob:src/net35/Hammock.Tests/App.config
