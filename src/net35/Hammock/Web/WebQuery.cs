@@ -31,7 +31,21 @@ namespace Hammock.Web
         public virtual string UserAgent { get; protected internal set; }
         public virtual WebHeaderCollection Headers { get; protected set; }
         public virtual WebParameterCollection Parameters { get; protected set; }
-        protected internal virtual WebEntity Entity { get; set; }
+
+        private WebEntity _entity;
+        protected internal virtual WebEntity Entity
+        {
+            get
+            {
+                return _entity;
+            }
+            set
+            {
+                _entity = value;
+                HasEntity = _entity != null;
+            }
+        }
+        
         public virtual WebMethod Method { get; set; }
         public virtual string Proxy { get; set; }
         public virtual string AuthorizationHeader { get; protected set; }
@@ -72,8 +86,7 @@ namespace Hammock.Web
             }
         }
 
-        // [DC]: Currently a Compat-only property
-        public string SourceUrl { get; set; }
+        public virtual bool HasEntity { get; set; }
 
         protected WebQuery() : this(null)
         {
@@ -197,7 +210,7 @@ namespace Hammock.Web
 #endif
         protected virtual WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
-            return Entity == null
+            return !HasEntity
                        ? BuildPostOrPutFormWebRequest(method, url, out content)
                        : BuildPostOrPutEntityWebRequest(method, url, out content);
         }
@@ -282,9 +295,7 @@ namespace Hammock.Web
 #else
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 #endif
-            request.ContentType = Entity.ContentType;
-
-            var entity = Entity.Content;
+            
 #if TRACE
             Trace.WriteLine(String.Concat(
                 "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
@@ -297,7 +308,6 @@ namespace Hammock.Web
             }
             else
             {
-                entity = null; // Mock POSTs don't use entities
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
@@ -309,15 +319,23 @@ namespace Hammock.Web
 #endif
                 }
             }
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "BODY: ", entity)
-                );
-#endif
 
-            if (entity != null)
+            if (Entity != null)
             {
+                var entity = Entity != null
+                             ? Entity.Content
+                             : null;
+
                 content = Entity.ContentEncoding.GetBytes(entity);
+                request.ContentType = Entity != null
+                                          ? Entity.ContentType
+                                          : null;
+#if TRACE
+                Trace.WriteLine(String.Concat(
+                    "BODY: ", entity)
+                    );
+#endif
+                
 #if !Silverlight
                 // [DC]: This is set by Silverlight
                 request.ContentLength = content.Length;

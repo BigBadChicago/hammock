@@ -236,12 +236,12 @@ namespace Hammock
                 MockHttpMethod, request.Method.ToString().ToUpper()
                 );
 
-            var entity = SerializeExpectEntity(request);
-            if (entity != null)
+            var expectEntity = SerializeExpectEntity(request);
+            if (expectEntity != null)
             {
-                query.Parameters.Add(MockContent, entity.Content);
-                query.Parameters.Add(MockContentType, entity.ContentType);
-                query.Entity = entity; // Used with POSTs
+                query.Parameters.Add(MockContent, expectEntity.Content);
+                query.Parameters.Add(MockContentType, expectEntity.ContentType);
+                query.HasEntity = true; // Used with POSTs
             }
             else
             {

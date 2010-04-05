@@ -10,7 +10,7 @@ namespace Hammock.Tests
 	{
         [Test]
         [Category("Mocks")]
-        public void Can_request_with_mock_response_with_request_entity()
+        public void Can_request_mock_response_with_request_entity()
         {
             var settings = GetSerializerSettings();
 
@@ -65,7 +65,7 @@ namespace Hammock.Tests
 
 	    [Test]
         [Category("Mocks")]
-        public void Can_request_mock_response_with_response_entity()
+        public void Can_request_mock_response_without_request_entity()
         {
             var settings = GetSerializerSettings();
             var serializer = new HammockJsonDotNetSerializer(settings);
@@ -90,7 +90,7 @@ namespace Hammock.Tests
             request.ExpectEntity = success;
 
             var response = client.Request<PostmarkResponse>(request);
-            Assert.IsNotNull(response.ContentEntity, "Entity was null");
+            Assert.IsNotNull(response.ContentEntity, "Response expected entity was null");
             Assert.IsTrue(response.ContentEntity.Status == PostmarkStatus.Success);
 	        Assert.IsTrue(response.IsMock);
         }
