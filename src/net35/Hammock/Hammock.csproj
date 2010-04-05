@@ -157,9 +157,13 @@
     <Compile Include="RestCallback.cs" />
     <Compile Include="Retries\ConnectionClosed.cs" />
     <Compile Include="Retries\IRetryCondition.cs" />
+    <Compile Include="Retries\IRetryCustomCondition.cs" />
     <Compile Include="Retries\NetworkError.cs" />
+    <Compile Include="Retries\RetryCondition.cs" />
+    <Compile Include="Retries\RetryCustomCondition.cs" />
     <Compile Include="Retries\RetryErrorCondition.cs" />
     <Compile Include="Retries\RetryPolicy.cs" />
+    <Compile Include="Retries\RetryResultCondition.cs" />
     <Compile Include="Retries\Timeout.cs" />
     <Compile Include="Serialization\HammockDataContractJsonSerializer.cs" />
     <Compile Include="Serialization\IDeserializer.cs" />

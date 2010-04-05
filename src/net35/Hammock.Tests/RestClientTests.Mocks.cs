@@ -2,6 +2,7 @@
 using System.Net;
 using Hammock.Extras;
 using Hammock.Tests.Postmark;
+using Hammock.Web;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -40,6 +41,8 @@ namespace Hammock.Tests
             client.AddHeader("X-Postmark-Server-Token", _postmarkServerToken);
             client.AddHeader("User-Agent", "Hammock");
 
+            client.AddParameter("parameter", "inTheUrl");
+
             var request = new RestRequest
             {
                 Path = "email",
@@ -75,8 +78,11 @@ namespace Hammock.Tests
                                  Authority = "http://api.postmarkapp.com",
                                  Path = "email",
                                  Serializer = serializer,
-                                 Deserializer = serializer
+                                 Deserializer = serializer,
+                                 Method = WebMethod.Post
                              };
+
+            client.AddParameter("parameter", "inTheUrl");
 
             var success = new PostmarkResponse
                                  {

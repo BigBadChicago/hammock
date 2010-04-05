@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using Hammock.Authentication;
@@ -114,18 +115,10 @@ namespace Hammock
                 query.Result.Exception = exception;
                 query.Result.PreviousResult = previous;
                 var current = query.Result;
-               
-                var retry = false;
+
                 if(retryPolicy != null)
                 {
-                    foreach(RetryErrorCondition condition in retryPolicy.RetryConditions)
-                    {
-                        if(exception == null)
-                        {
-                            continue;
-                        }
-                        retry |= condition.RetryIf(exception);
-                    }
+                    var retry = ShouldRetry(retryPolicy, exception, current);
 
                     if(retry)
                     {
@@ -147,6 +140,64 @@ namespace Hammock
 
             _firstTry = _remainingRetries == 0;
             return query;
+        }
+
+        private static bool ShouldRetry(RetryPolicy retryPolicy, 
+                                        WebException exception, 
+                                        WebQueryResult current)
+        {
+            var retry = false;
+            foreach(var condition in retryPolicy.RetryConditions.OfType<RetryErrorCondition>())
+            {
+                if(exception == null)
+                {
+                    continue;
+                }
+                retry |= condition.RetryIf(exception);
+            }
+
+            foreach (var condition in retryPolicy.RetryConditions.OfType<RetryResultCondition>())
+            {
+                if (current == null)
+                {
+                    continue;
+                }
+                retry |= condition.RetryIf(current);
+            }
+
+            foreach (var condition in retryPolicy.RetryConditions.OfType<IRetryCustomCondition>())
+            {
+                var innerType = condition.GetDeclaredTypeForGeneric(typeof(IRetryCondition<>));
+                if(innerType == null)
+                {
+                    continue;
+                }
+
+                var retryType = typeof(RetryCustomCondition<>).MakeGenericType(innerType);
+                if(retryType == null)
+                {
+                    continue;
+                }
+                
+                var func = condition.GetValue("ConditionFunction") as MulticastDelegate;
+                if(func == null)
+                {
+                    continue;
+                }
+
+                // Call the function to find the retry evaluator
+                var t = func.DynamicInvoke(null);
+
+                // Invoke the retry predicate and pass the evaluator
+                var p = condition.GetValue("RetryIf");
+                var r = p.GetType().InvokeMember("Invoke", 
+                    BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Instance, 
+                    null, p, new[] { t });
+
+                retry |= (bool)r;
+            }
+
+            return retry;
         }
 
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
@@ -692,24 +743,11 @@ namespace Hammock
                 query.Result.PreviousResult = previous;
                 var current = query.Result;
 
-                var retry = false;
                 if (retryPolicy != null)
                 {
                     // [DC]: Query should already have exception applied
                     var exception = query.Result.Exception;
-
-                    // Known error retries
-                    foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
-                    {
-                        if (exception == null)
-                        {
-                            continue;
-                        }
-                        retry |= condition.RetryIf(exception);
-                    }
-
-                    // Generic unknown retries?
-                    // todo
+                    var retry = ShouldRetry(retryPolicy, exception, current);
 
                     if (retry)
                     {
@@ -815,19 +853,11 @@ namespace Hammock
                 query.Result.PreviousResult = previous;
                 var current = query.Result;
 
-                var retry = false;
                 if (retryPolicy != null)
                 {
                     // [DC]: Query should already have exception applied
                     var exception = query.Result.Exception;
-                    foreach (RetryErrorCondition condition in retryPolicy.RetryConditions)
-                    {
-                        if (exception == null)
-                        {
-                            continue;
-                        }
-                        retry |= condition.RetryIf(exception);
-                    }
+                    var retry = ShouldRetry(retryPolicy, exception, current);
 
                     if (retry)
                     {
