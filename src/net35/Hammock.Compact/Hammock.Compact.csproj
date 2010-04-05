@@ -224,14 +224,23 @@
     <Compile Include="..\Hammock\Retries\IRetryCondition.cs">
       <Link>Retries\IRetryCondition.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Retries\IRetryCustomCondition.cs">
+      <Link>Retries\IRetryCustomCondition.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Retries\NetworkError.cs">
       <Link>Retries\NetworkError.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\RetryCustomCondition.cs">
+      <Link>Retries\RetryCustomCondition.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Retries\RetryErrorCondition.cs">
       <Link>Retries\RetryErrorCondition.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Retries\RetryPolicy.cs">
       <Link>Retries\RetryPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\Hammock\Retries\RetryResultCondition.cs">
+      <Link>Retries\RetryResultCondition.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Retries\Timeout.cs">
       <Link>Retries\Timeout.cs</Link>

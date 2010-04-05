@@ -142,64 +142,6 @@ namespace Hammock
             return query;
         }
 
-        private static bool ShouldRetry(RetryPolicy retryPolicy, 
-                                        WebException exception, 
-                                        WebQueryResult current)
-        {
-            var retry = false;
-            foreach(var condition in retryPolicy.RetryConditions.OfType<RetryErrorCondition>())
-            {
-                if(exception == null)
-                {
-                    continue;
-                }
-                retry |= condition.RetryIf(exception);
-            }
-
-            foreach (var condition in retryPolicy.RetryConditions.OfType<RetryResultCondition>())
-            {
-                if (current == null)
-                {
-                    continue;
-                }
-                retry |= condition.RetryIf(current);
-            }
-
-            foreach (var condition in retryPolicy.RetryConditions.OfType<IRetryCustomCondition>())
-            {
-                var innerType = condition.GetDeclaredTypeForGeneric(typeof(IRetryCondition<>));
-                if(innerType == null)
-                {
-                    continue;
-                }
-
-                var retryType = typeof(RetryCustomCondition<>).MakeGenericType(innerType);
-                if(retryType == null)
-                {
-                    continue;
-                }
-                
-                var func = condition.GetValue("ConditionFunction") as MulticastDelegate;
-                if(func == null)
-                {
-                    continue;
-                }
-
-                // Call the function to find the retry evaluator
-                var t = func.DynamicInvoke(null);
-
-                // Invoke the retry predicate and pass the evaluator
-                var p = condition.GetValue("RetryIf");
-                var r = p.GetType().InvokeMember("Invoke", 
-                    BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Instance, 
-                    null, p, new[] { t });
-
-                retry |= (bool)r;
-            }
-
-            return retry;
-        }
-
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
         {
             var parameters = GetPostParameters(request);
@@ -254,6 +196,69 @@ namespace Hammock
             return true;
         }
 #endif
+        private static bool ShouldRetry(RetryPolicy retryPolicy,
+                                        WebException exception,
+                                        WebQueryResult current)
+        {
+            var retry = false;
+            foreach (var condition in retryPolicy.RetryConditions.OfType<RetryErrorCondition>())
+            {
+                if (exception == null)
+                {
+                    continue;
+                }
+                retry |= condition.RetryIf(exception);
+            }
+
+            foreach (var condition in retryPolicy.RetryConditions.OfType<RetryResultCondition>())
+            {
+                if (current == null)
+                {
+                    continue;
+                }
+                retry |= condition.RetryIf(current);
+            }
+
+            foreach (var condition in retryPolicy.RetryConditions.OfType<IRetryCustomCondition>())
+            {
+                var innerType = condition.GetDeclaredTypeForGeneric(typeof(IRetryCondition<>));
+                if (innerType == null)
+                {
+                    continue;
+                }
+
+                var retryType = typeof(RetryCustomCondition<>).MakeGenericType(innerType);
+                if (retryType == null)
+                {
+                    continue;
+                }
+
+                var func = condition.GetValue("ConditionFunction") as MulticastDelegate;
+                if (func == null)
+                {
+                    continue;
+                }
+
+                // Call the function to find the retry evaluator
+#if !Smartphone
+                var t = func.DynamicInvoke(null);
+#else
+                var del = func.GetInvocationList().FirstOrDefault();
+                var t = del.Method.Invoke(func, null);
+#endif
+
+                // Invoke the retry predicate and pass the evaluator
+                var p = condition.GetValue("RetryIf");
+                var r = p.GetType().InvokeMember("Invoke",
+                    BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Instance,
+                    null, p, new[] { t });
+
+                retry |= (bool)r;
+            }
+
+            return retry;
+        }
+
         private string BuildMockRequestUrl(RestRequest request, 
                                            WebQuery query, 
                                            string url)
