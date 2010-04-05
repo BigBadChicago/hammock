@@ -233,7 +233,7 @@ namespace Hammock
             }
 
             query.Parameters.Add(
-                MockHttpMethod, request.Method.ToString().ToUpperInvariant()
+                MockHttpMethod, request.Method.ToString().ToUpper()
                 );
 
             var entity = SerializeExpectEntity(request);
