@@ -2,7 +2,6 @@
 
 namespace Hammock.Tasks
 {
-#if !NETCF
 #if !SILVERLIGHT
     [Serializable]
 #endif
@@ -14,7 +13,6 @@ namespace Hammock.Tasks
         public virtual Predicate<T> RateLimitingPredicate { get; set; }
         public virtual Func<T> GetRateLimitStatus { get; set; }
     }
-#endif
 
 #if !SILVERLIGHT
     [Serializable]
