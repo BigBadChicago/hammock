@@ -97,7 +97,7 @@ namespace Hammock
                 _firstTry = false;
             }
 
-            WebQueryResult previous = null;
+           
             while (_remainingRetries > 0)
             {
                 var url = uri.ToString();
@@ -114,7 +114,6 @@ namespace Hammock
                 }
 
                 query.Result.Exception = exception;
-                query.Result.PreviousResult = previous;
                 var current = query.Result;
 
                 if(retryPolicy != null)
@@ -123,8 +122,11 @@ namespace Hammock
 
                     if(retry)
                     {
-                        previous = current;
                         _remainingRetries--;
+                        if ( _remainingRetries > 0 )
+                        {
+                            query.Result = new WebQueryResult { PreviousResult = current };
+                        }
                     }
                     else
                     {
@@ -136,7 +138,7 @@ namespace Hammock
                     _remainingRetries = 0;
                 }
 
-                query.Result = current;
+                
             }
 
             _firstTry = _remainingRetries == 0;

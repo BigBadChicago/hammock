@@ -8,6 +8,8 @@ namespace Hammock.Web
 #endif
     public class WebQueryResult
     {
+        private WebQueryResult _previousResult; 
+
         // Set by WebQuery
         public virtual DateTime? RequestDate { get; set; }
         public virtual Uri RequestUri { get; set; }
@@ -26,7 +28,18 @@ namespace Hammock.Web
         public virtual bool IsMock { get; set; }
 
         // Set by RestClient
-        public virtual WebQueryResult PreviousResult { get; set; }
+        public virtual WebQueryResult PreviousResult
+        {
+            get { return _previousResult; }
+            set
+            {
+                if ( ReferenceEquals(this, value))
+                {
+                    throw new InvalidOperationException("Result can't be its own previous result");
+                }
+                _previousResult = value; 
+            }
+        }
         public virtual WebException Exception { get; set; }
         public virtual bool WasRateLimited { get; set; }
     }
