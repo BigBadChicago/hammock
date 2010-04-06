@@ -81,5 +81,11 @@ namespace Hammock
             var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, "application/octet-stream");
             PostParameters.Add(parameter);
         }
+
+        public void AddFile(string name, string fileName, string filePath, string contentType)
+        {
+            var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, contentType);
+            PostParameters.Add(parameter);
+        }
     }
 }

@@ -1060,10 +1060,7 @@ namespace Hammock
                 () => _task.Start()
                 );
 
-            var inner = action.BeginInvoke(ar =>
-                                               {
-                                                   /* No callback */
-                                               }, null);
+            var inner = action.BeginInvoke(ar => { /* No callback */ }, null);
             result = new WebQueryAsyncResult {InnerResult = inner};
             return true;
         }

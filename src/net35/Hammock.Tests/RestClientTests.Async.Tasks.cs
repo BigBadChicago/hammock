@@ -73,7 +73,7 @@ namespace Hammock.Tests
         [Category("Tasks")]
         public void Can_initiate_recurring_task_with_rate_limiting_rule()
         {
-            const int repeatTimes = 2;
+            const int repeatTimes = 3;
             var taskOptions = new TaskOptions<TwitterRateLimitStatus>
                                   {
                                       RepeatTimes = repeatTimes,
@@ -82,7 +82,6 @@ namespace Hammock.Tests
                                       RateLimitPercent = 10.0
                                   };
 
-            var block = new AutoResetEvent(false);
             var settings = GetSerializerSettings();
             var serializer = new HammockJsonDotNetSerializer(settings);
 
@@ -114,13 +113,11 @@ namespace Hammock.Tests
                                                 if (repeatCount == repeatTimes)
                                                 {
                                                     success = true;
-                                                    block.Set();
                                                 }
                                             });
             Assert.IsNotNull(async);
             async.AsyncWaitHandle.WaitOne();
-
-            block.WaitOne(60.Seconds());
+            
             Assert.IsTrue(success, "Task manifest did not complete");
         }
     }
