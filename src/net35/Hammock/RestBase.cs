@@ -8,6 +8,7 @@ using Hammock.Retries;
 using Hammock.Serialization;
 using Hammock.Tasks;
 using Hammock.Web;
+using Hammock.Streaming;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -54,6 +55,7 @@ namespace Hammock
         public virtual CacheOptions CacheOptions { get; set; }
         public virtual RetryPolicy RetryPolicy { get; set; }
         public virtual TaskOptions TaskOptions { get; set; }
+        public virtual StreamOptions StreamOptions { get; set; }
         public virtual Func<string> CacheKeyFunction { get; set; }
         public virtual DecompressionMethods DecompressionMethods { get; set; }
         public virtual IWebQueryInfo Info { get; set; }

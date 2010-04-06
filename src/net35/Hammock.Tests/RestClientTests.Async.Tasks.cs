@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Hammock.Extras;
+﻿using Hammock.Extras;
 using Hammock.Tasks;
 using Hammock.Tests.Helpers;
 using Newtonsoft.Json;

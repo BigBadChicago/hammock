@@ -171,6 +171,7 @@
     <Compile Include="Serialization\HammockJavaScriptSerializer.cs" />
     <Compile Include="Serialization\HammockXmlSerializer.cs" />
     <Compile Include="Serialization\Utf8Serializer.cs" />
+    <Compile Include="Streaming\StreamOptions.cs" />
     <Compile Include="Tasks\IRateLimitingRule.cs" />
     <Compile Include="Tasks\ITaskOptions.cs" />
     <Compile Include="Tasks\ITimedTask.cs" />

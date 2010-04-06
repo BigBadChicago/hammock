@@ -322,14 +322,10 @@ namespace Hammock.Web
 
             if (Entity != null)
             {
-                var entity = Entity != null
-                             ? Entity.Content
-                             : null;
+                var entity = Entity.Content;
 
                 content = Entity.ContentEncoding.GetBytes(entity);
-                request.ContentType = Entity != null
-                                          ? Entity.ContentType
-                                          : null;
+                request.ContentType = Entity.ContentType;
 #if TRACE
                 Trace.WriteLine(String.Concat(
                     "BODY: ", entity)
@@ -921,103 +917,8 @@ namespace Hammock.Web
         }
 
 #if !SILVERLIGHT
-        public virtual void ExecuteStreamGet(string url, TimeSpan duration, int resultCount)
-        {
-            WebResponse = null;
 
-            var request = BuildGetOrDeleteWebRequest(GetOrDelete.Get, url);
-
-            var requestArgs = new WebQueryRequestEventArgs(url);
-            OnQueryRequest(requestArgs);
-
-            Stream stream = null;
-            WebResponse response = null;
-
-            try
-            {
-                response = request.GetResponse();
-
-                using (stream = response.GetResponseStream())
-                {
-                    // [DC]: cannot refactor this block to common method; will cause wc/hwr to hang
-                    var count = 0;
-                    var results = new List<string>();
-                    var start = DateTime.UtcNow;
-
-                    using (var reader = new StreamReader(stream))
-                    {
-                        string line;
-
-                        while ((line = reader.ReadLine()).Length > 0)
-                        {
-                            if (line.Equals(Environment.NewLine))
-                            {
-                                // Keep-Alive
-                                continue;
-                            }
-
-                            if (line.Equals("<html>"))
-                            {
-                                // We're looking at a 401 or similar; construct error result?
-                                return;
-                            }
-
-                            results.Add(line);
-                            count++;
-
-                            if (count < resultCount)
-                            {
-                                // Result buffer
-                                continue;
-                            }
-
-                            var sb = new StringBuilder();
-                            foreach (var result in results)
-                            {
-                                sb.AppendLine(result);
-                            }
-
-                            var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
-                            OnQueryResponse(responseArgs);
-
-                            count = 0;
-
-                            var now = DateTime.UtcNow;
-                            if (duration == TimeSpan.Zero || now.Subtract(start) < duration)
-                            {
-                                continue;
-                            }
-
-                            // Time elapsed
-                            request.Abort();
-                            return;
-                        }
-
-                        // Stream dried up
-                    }
-
-                    request.Abort();
-                }
-            }
-            catch (WebException ex)
-            {
-                if (ex.Response is HttpWebResponse)
-                {
-                    response = ex.Response;
-                }
-            }
-            finally
-            {
-                if (stream != null)
-                {
-                    stream.Close();
-                    stream.Dispose();
-                }
-
-                WebResponse = response;
-            }
-        }
-
+        // TODO Turf this method after using it to build an async post method
         public virtual void ExecuteStreamPost(PostOrPut method, string url, TimeSpan duration, int resultCount)
         {
             WebResponse = null;
@@ -1032,70 +933,81 @@ namespace Hammock.Web
             {
                 using (stream = request.GetRequestStream())
                 {
-                    stream.Write(content, 0, content.Length);
-                    stream.Close();
-
-                    var response = request.GetResponse();
-                    WebResponse = response;
-                    
-                    using (var responseStream = response.GetResponseStream())
+                    if(stream != null)
                     {
-                        // [DC]: cannot refactor this block to common method; will cause hwr to hang
-                        var count = 0;
-                        var results = new List<string>();
-                        var start = DateTime.UtcNow;
+                        _isStreaming = true;
 
-                        using (var reader = new StreamReader(responseStream))
+                        stream.Write(content, 0, content.Length);
+                        stream.Close();
+
+                        var response = request.GetResponse();
+                        WebResponse = response;
+
+                        using (var responseStream = response.GetResponseStream())
                         {
-                            string line;
+                            // [DC]: cannot refactor this block to common method; will cause hwr to hang
+                            var count = 0;
+                            var results = new List<string>();
+                            var start = DateTime.UtcNow;
 
-                            while ((line = reader.ReadLine()).Length > 0)
+                            using (var reader = new StreamReader(responseStream))
                             {
-                                if (line.Equals(Environment.NewLine))
-                                {
-                                    // Keep-Alive
-                                    continue;
-                                }
+                                string line;
 
-                                if (line.Equals("<html>"))
+                                while ((line = reader.ReadLine()).Length > 0)
                                 {
-                                    // We're looking at a 401 or similar; construct error result?
+                                    if (line.Equals(Environment.NewLine))
+                                    {
+                                        // Keep-Alive
+                                        continue;
+                                    }
+
+                                    if (line.Equals("<html>"))
+                                    {
+                                        // We're looking at a 401 or similar; construct error result?
+                                        EndStreaming(request);
+                                        return;
+                                    }
+
+                                    results.Add(line);
+                                    count++;
+
+                                    if (count < resultCount)
+                                    {
+                                        // Result buffer
+                                        continue;
+                                    }
+
+                                    var sb = new StringBuilder();
+                                    foreach (var result in results)
+                                    {
+                                        sb.AppendLine(result);
+                                    }
+
+                                    var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
+                                    OnQueryResponse(responseArgs);
+                                    results.Clear();
+
+                                    count = 0;
+
+                                    var now = DateTime.UtcNow;
+                                    if (now.Subtract(start) < duration)
+                                    {
+                                        continue;
+                                    }
+
+                                    // Time elapsed
+                                    _isStreaming = true;
+                                    request.Abort();
                                     return;
                                 }
 
-                                results.Add(line);
-                                count++;
-
-                                if (count < resultCount)
-                                {
-                                    // Result buffer
-                                    continue;
-                                }
-
-                                var sb = new StringBuilder();
-                                foreach (var result in results)
-                                {
-                                    sb.AppendLine(result);
-                                }
-
-                                var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
-                                OnQueryResponse(responseArgs);
-
-                                count = 0;
-
-                                var now = DateTime.UtcNow;
-                                if (now.Subtract(start) < duration)
-                                {
-                                    continue;
-                                }
-
-                                // Time elapsed
-                                request.Abort();
-                                return;
+                                // Stream dried up
                             }
-
-                            // Stream dried up
                         }
+
+                        _isStreaming = false;
+                        request.Abort();
                     }
                 }
             }

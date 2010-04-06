@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -316,6 +315,15 @@ namespace Hammock.Web
             return request;
         }
 
+        private bool _isStreaming = false;
+        public virtual bool IsStreaming
+        {
+            get
+            {
+                return _isStreaming;
+            }
+        }
+
         private void GetAsyncStreamCallback(IAsyncResult asyncResult)
         {
             var state = asyncResult.AsyncState as Pair<WebRequest, Pair<TimeSpan, int>>;
@@ -341,6 +349,8 @@ namespace Hammock.Web
                     {
                         if (stream != null)
                         {
+                            _isStreaming = true;
+
                             var count = 0;
                             var results = new List<string>();
                             var start = DateTime.UtcNow;
@@ -360,6 +370,7 @@ namespace Hammock.Web
                                     if (line.Equals("<html>"))
                                     {
                                         // We're looking at a 401 or similar; construct error result?
+                                        EndStreaming(request);
                                         return;
                                     }
 
@@ -380,6 +391,7 @@ namespace Hammock.Web
 
                                     var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
                                     OnQueryResponse(responseArgs);
+                                    results.Clear();
 
                                     count = 0;
 
@@ -390,13 +402,13 @@ namespace Hammock.Web
                                     }
 
                                     // Time elapsed
-                                    request.Abort();
+                                    EndStreaming(request);
                                     return;
                                 }
 
                                 // Stream dried up
                             }
-                            request.Abort();
+                            EndStreaming(request);
                         }
                     }
                 }
@@ -418,6 +430,14 @@ namespace Hammock.Web
 
                 WebResponse = response;
             }
+        }
+
+        private void EndStreaming(WebRequest request)
+        {
+            _isStreaming = false;
+            var endArgs = new WebQueryResponseEventArgs("END STREAMING");
+            OnQueryResponse(endArgs);
+            request.Abort();
         }
 
         protected virtual void PostAsyncRequestCallback(IAsyncResult asyncResult)
@@ -753,6 +773,9 @@ namespace Hammock.Web
                                                  Second = resultCount
                                              }
                             };
+
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
 
             var inner = request.BeginGetResponse(GetAsyncStreamCallback, state);
             var result = new WebQueryAsyncResult { InnerResult = inner };

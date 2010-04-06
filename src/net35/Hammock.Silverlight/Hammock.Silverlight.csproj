@@ -259,6 +259,9 @@
     <Compile Include="..\Hammock\Specifications\OrSpecification.cs">
       <Link>Specifications\OrSpecification.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Streaming\StreamOptions.cs">
+      <Link>Streaming\StreamOptions.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Tasks\IRateLimitingRule.cs">
       <Link>Tasks\IRateLimitingRule.cs</Link>
     </Compile>

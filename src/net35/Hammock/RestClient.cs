@@ -15,6 +15,7 @@ using Hammock.Web.Mocks;
 using Hammock.Serialization;
 using Hammock.Tasks;
 using Hammock.Web;
+using Hammock.Streaming;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -449,6 +450,12 @@ namespace Hammock
             return options;
         }
 
+        private StreamOptions GetStreamOptions(RestBase request)
+        {
+            var options = request.StreamOptions ?? StreamOptions;
+            return options;
+        }
+
         private object GetTag(RestBase request)
         {
             var tag = request.Tag ?? Tag;
@@ -705,7 +712,6 @@ namespace Hammock
 #endif
         }
 
-
         // TODO BeginRequest and BeginRequest<T> have too much duplication
         private IAsyncResult BeginRequest(RestRequest request, 
                                           RestCallback callback,
@@ -733,14 +739,137 @@ namespace Hammock
                                      ? retryPolicy.RetryCount
                                      : 0);
 
-            Func<WebQueryAsyncResult> beginRequest
-                = () => BeginRequestFunction(isInternal, 
-                        request, 
-                        query, 
-                        url, 
-                        callback);
+            Func<WebQueryAsyncResult> beginRequest;
+            WebQueryAsyncResult result;
 
-            var result = beginRequest.Invoke();
+            var streamOptions = GetStreamOptions(request);
+            if (streamOptions != null)
+            {
+#if !SILVERLIGHT
+                query.KeepAlive = true;
+#endif
+                var duration = streamOptions.Duration.HasValue
+                                   ? streamOptions.Duration.Value
+                                   : TimeSpan.Zero;
+
+                var resultCount = streamOptions.ResultsPerCallback.HasValue
+                                      ? streamOptions.ResultsPerCallback.Value
+                                      : 10;
+
+                beginRequest = () => BeginRequestStreamFunction(
+                   request, query, url, callback, duration, resultCount
+                   );
+
+                result = beginRequest.Invoke();
+            }
+            else
+            {
+                beginRequest
+               = () => BeginRequestFunction(isInternal,
+                       request,
+                       query,
+                       url,
+                       callback);
+
+                result = beginRequest.Invoke();
+            }
+
+            WebQueryResult previous = null;
+            query.QueryResponse += (sender, args) =>
+            {
+                query.Result.PreviousResult = previous;
+                var current = query.Result;
+
+                if (retryPolicy != null)
+                {
+                    // [DC]: Query should already have exception applied
+                    var exception = query.Result.Exception;
+                    var retry = ShouldRetry(retryPolicy, exception, current);
+
+                    if (retry)
+                    {
+                        previous = current;
+                        BeginRequest(request, callback, query, url, true);
+                        Interlocked.Decrement(ref _remainingRetries);
+                    }
+                    else
+                    {
+                        _remainingRetries = 0;
+                    }
+                }
+                else
+                {
+                    _remainingRetries = 0;
+                }
+
+                query.Result = current;
+
+                // [DC]: Callback is for a final result, not a retry
+                if (_remainingRetries == 0)
+                {
+                    CompleteWithQuery(query, request, callback, result);
+                }
+            };
+
+            return result;
+        }
+        private IAsyncResult BeginRequest<T>(RestRequest request,
+                                             RestCallback<T> callback,
+                                             WebQuery query,
+                                             string url,
+                                             bool isInternal)
+        {
+            request = request ?? new RestRequest();
+            if (!isInternal)
+            {
+                var uri = request.BuildEndpoint(this);
+                query = GetQueryFor(request, uri);
+                SetQueryMeta(request, query);
+                url = uri.ToString();
+            }
+
+            if (RequestExpectsMock(request))
+            {
+                url = BuildMockRequestUrl(request, query, url);
+            }
+
+            var retryPolicy = GetRetryPolicy(request);
+            _remainingRetries = (retryPolicy != null
+                                     ? retryPolicy.RetryCount
+                                     : 0);
+
+            Func<WebQueryAsyncResult> beginRequest;
+            WebQueryAsyncResult result;
+
+            var streamOptions = GetStreamOptions(request);
+            if(streamOptions != null)
+            {
+#if !SILVERLIGHT
+                query.KeepAlive = true;
+#endif
+
+                var duration = streamOptions.Duration.HasValue
+                                   ? streamOptions.Duration.Value
+                                   : TimeSpan.Zero;
+
+                var resultCount = streamOptions.ResultsPerCallback.HasValue
+                                      ? streamOptions.ResultsPerCallback.Value
+                                      : 10;
+
+                beginRequest = () => BeginRequestStreamFunction(
+                   request, query, url, callback, duration, resultCount
+                   );
+
+                result = beginRequest.Invoke();
+            }
+            else
+            {
+                beginRequest = () => BeginRequestFunction(
+                   isInternal, request, query, url, callback
+                   );
+
+                result = beginRequest.Invoke();
+            }
 
             WebQueryResult previous = null;
             query.QueryResponse += (sender, args) =>
@@ -810,83 +939,9 @@ namespace Hammock
             }
 
             result.Tag = new Pair<RestRequest, RestCallback>
-                             {
-                                 First = request,
-                                 Second = callback
-                             };
-        
-            return result;
-        }
-        private IAsyncResult BeginRequest<T>(RestRequest request,
-                                             RestCallback<T> callback,
-                                             WebQuery query,
-                                             string url,
-                                             bool isInternal)
-        {
-            request = request ?? new RestRequest();
-            if (!isInternal)
             {
-                var uri = request.BuildEndpoint(this);
-                query = GetQueryFor(request, uri);
-                SetQueryMeta(request, query);
-                url = uri.ToString();
-            }
-
-            if (RequestExpectsMock(request))
-            {
-                url = BuildMockRequestUrl(request, query, url);
-            }
-
-            var retryPolicy = GetRetryPolicy(request);
-            _remainingRetries = (retryPolicy != null
-                                     ? retryPolicy.RetryCount
-                                     : 0);
-
-            Func<WebQueryAsyncResult> beginRequest
-                = () => BeginRequestFunction(
-                    isInternal, 
-                    request, 
-                    query, 
-                    url, 
-                    callback);
-
-            var result = beginRequest.Invoke();
-
-            WebQueryResult previous = null;
-            query.QueryResponse += (sender, args) =>
-            {
-                query.Result.PreviousResult = previous;
-                var current = query.Result;
-
-                if (retryPolicy != null)
-                {
-                    // [DC]: Query should already have exception applied
-                    var exception = query.Result.Exception;
-                    var retry = ShouldRetry(retryPolicy, exception, current);
-
-                    if (retry)
-                    {
-                        previous = current;
-                        BeginRequest(request, callback, query, url, true);
-                        Interlocked.Decrement(ref _remainingRetries);
-                    }
-                    else
-                    {
-                        _remainingRetries = 0;
-                    }
-                }
-                else
-                {
-                    _remainingRetries = 0;
-                }
-
-                query.Result = current;
-
-                // [DC]: Callback is for a final result, not a retry
-                if (_remainingRetries == 0)
-                {
-                    CompleteWithQuery(query, request, callback, result);
-                }
+                First = request,
+                Second = callback
             };
 
             return result;
@@ -898,28 +953,48 @@ namespace Hammock
                                           WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult<T>(request, query);
+            if (query.IsStreaming)
+            {
+                return;
+            }
+
+            var wasStreaming = response.Content.Equals("END STREAMING");
+            
             result.AsyncState = response;
             result.IsCompleted = true;
-            if(callback != null)
+            if (callback != null && !wasStreaming)
             {
                 callback.Invoke(request, response);
             }
             result.Signal();
         }
-
-        private void CompleteWithQuery(WebQuery query, RestRequest request, RestCallback callback, WebQueryAsyncResult result)
+        private void CompleteWithQuery(WebQuery query, 
+                                       RestRequest request, 
+                                       RestCallback callback, 
+                                       WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult(request, query);
+            if (query.IsStreaming)
+            {
+                return;
+            }
+
+            var wasStreaming = response.Content.Equals("END STREAMING");
+
             result.AsyncState = response;
             result.IsCompleted = true;
-            if (callback != null)
+            if (callback != null && !wasStreaming)
             {
                 callback.Invoke(request, response);
             }
             result.Signal();
         }
 
-        private WebQueryAsyncResult BeginRequestFunction<T>(bool isInternal, RestRequest request, WebQuery query, string url, RestCallback<T> callback)
+        private WebQueryAsyncResult BeginRequestFunction<T>(bool isInternal, 
+                                                            RestRequest request, 
+                                                            WebQuery query, 
+                                                            string url, 
+                                                            RestCallback<T> callback)
         {
             WebQueryAsyncResult result;
             if (!isInternal)
@@ -943,6 +1018,38 @@ namespace Hammock
             }
 
             result.Tag = new Pair<RestRequest, RestCallback<T>>
+            {
+                First = request,
+                Second = callback
+            };
+            return result;
+        }
+
+        private static WebQueryAsyncResult BeginRequestStreamFunction<T>(RestRequest request,
+                                                                         WebQuery query,
+                                                                         string url,
+                                                                         RestCallback<T> callback,
+                                                                         TimeSpan duration,
+                                                                         int resultsPerCallback)
+        {
+            var result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
+            result.Tag = new Pair<RestRequest, RestCallback<T>>
+            {
+                First = request,
+                Second = callback
+            };
+            return result;
+        }
+
+        private static WebQueryAsyncResult BeginRequestStreamFunction(RestRequest request,
+                                                                      WebQuery query,
+                                                                      string url,
+                                                                      RestCallback callback,
+                                                                      TimeSpan duration,
+                                                                      int resultsPerCallback)
+        {
+            var result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
+            result.Tag = new Pair<RestRequest, RestCallback>
             {
                 First = request,
                 Second = callback
