@@ -1077,20 +1077,19 @@ namespace Hammock.Web
             request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 
-            // [DC]: This will need to be refactored for large uploads
-            var contents = BuildMultiPartFormRequestParameters(boundary, parameters);
-            var payload = contents.ToString();
-
 #if TRACE
             Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
-            Trace.WriteLine("BODY: " + payload);
 #endif
-
+            // [DC]: This will need to be refactored for larger uploads
+            var contents = BuildMultiPartFormRequestParameters(boundary, parameters);
+            var payload = contents.ToString();
+            
 #if !Smartphone
-            bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(payload);
+            var encoding = Encoding.GetEncoding("iso-8859-1");
 #else
-            bytes = Encoding.GetEncoding(1252).GetBytes(payload);
+            var encoding =  Encoding.GetEncoding(1252);
 #endif
+            bytes = encoding.GetBytes(payload);
 
 #if !SILVERLIGHT
             request.ContentLength = bytes.Length;
@@ -1108,6 +1107,9 @@ namespace Hammock.Web
             foreach (var parameter in parameters)
             {
                 contents.AppendLine(header);
+#if TRACE
+                Trace.WriteLine(header);
+#endif
                 switch (parameter.Type)
                 {
                     case HttpPostParameterType.File:
@@ -1132,24 +1134,42 @@ namespace Hammock.Web
 #else
                             var fileData = Encoding.GetEncoding(1252).GetString(fileBytes, 0, fileBytes.Length);
 #endif
+                            var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
+
                             contents.AppendLine(fileHeader);
-                            contents.AppendLine("Content-Type: {0}".FormatWith(parameter.ContentType.ToLower()));
+                            contents.AppendLine(fileLine);
                             contents.AppendLine();
                             contents.AppendLine(fileData);
+
+#if TRACE
+                            Trace.WriteLine(fileHeader);
+                            Trace.WriteLine(fileLine);
+                            Trace.WriteLine("");
+                            Trace.WriteLine("[FILE DATA]");
+#endif
 
                             break;
                         }
                     case HttpPostParameterType.Field:
                         {
-                            contents.AppendLine("Content-Disposition: form-data; name=\"{0}\"".FormatWith(parameter.Name));
+                            var fieldLine = "Content-Disposition: form-data; name=\"{0}\"".FormatWith(parameter.Name);
+                            contents.AppendLine(fieldLine);
                             contents.AppendLine();
                             contents.AppendLine(parameter.Value);
+#if TRACE
+                            Trace.WriteLine(fieldLine);
+                            Trace.WriteLine("");
+                            Trace.WriteLine(parameter.Value);
+#endif
                             break;
                         }
                 }
             }
 
             contents.AppendLine(footer);
+#if TRACE
+            Trace.WriteLine(footer);
+#endif
             return contents;
         }
 
