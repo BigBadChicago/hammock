@@ -7,6 +7,7 @@ namespace Hammock.Tests
     partial class RestClientTests
     {
         [Test]
+        [Timeout(30000)]
         [Category("Streaming")]
         public void Can_stream_with_get()
         {
