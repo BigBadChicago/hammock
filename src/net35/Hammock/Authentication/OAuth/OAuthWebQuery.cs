@@ -273,11 +273,11 @@ namespace Hammock.Authentication.OAuth
 
                 var token = "{0}={1}".FormatWith(name, value);
                 body = body.Then(token);
+                count++;
                 if (count < postParameters.Count)
                 {
                     body = body.Then("&");
                 }
-                count++;
             }
             return body;
         }
