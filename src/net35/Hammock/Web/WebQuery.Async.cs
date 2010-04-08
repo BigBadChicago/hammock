@@ -554,6 +554,7 @@ namespace Hammock.Web
                 if (content != null)
                 {
                     stream.Write(content, 0, content.Length);
+                    stream.Flush();
                 }
                 stream.Close();
 

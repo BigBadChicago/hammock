@@ -1147,7 +1147,6 @@ namespace Hammock.Web
                             Trace.WriteLine("");
                             Trace.WriteLine("[FILE DATA]");
 #endif
-
                             break;
                         }
                     case HttpPostParameterType.Field:
