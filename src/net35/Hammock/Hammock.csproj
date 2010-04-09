@@ -73,8 +73,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentication\IWebCredentials.cs" />
-    <Compile Include="Extensions\FileExtensions.cs" />
-    <Compile Include="Extensions\FormatExtensions.cs" />
     <Compile Include="Extensions\OAuthExtensions.cs" />
     <Compile Include="Web\Mocks\IMockable.cs" />
     <Compile Include="Authentication\OAuth\OAuthToken.cs" />
@@ -83,14 +81,11 @@
     <Compile Include="Authentication\OAuth\OAuthSignatureMethod.cs" />
     <Compile Include="Authentication\OAuth\OAuthTools.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
-    <Compile Include="Extensions\MathExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
-    <Compile Include="Extensions\SecurityExtensions.cs" />
     <Compile Include="Extensions\SpecificationExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TimeExtensions.cs" />
     <Compile Include="Extensions\WebExtensions.cs" />
-    <Compile Include="Extensions\XmlExtensions.cs" />
     <Compile Include="IRestClient.cs" />
     <Compile Include="RestClient.cs" />
     <Compile Include="RestRequest.cs" />
@@ -114,8 +109,6 @@
     <Compile Include="Caching\CacheFactory.cs" />
     <Compile Include="Caching\ICache.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="Extensions\RegexExtensions.cs" />
-    <Compile Include="Extensions\SerializationExtensions.cs" />
     <Compile Include="Web\HttpPostParameter.cs" />
     <Compile Include="Web\HttpPostParameterType.cs" />
     <Compile Include="Web\Mocks\IWebResponse.cs" />
@@ -153,6 +146,7 @@
     <Compile Include="Caching\CacheOptions.cs" />
     <Compile Include="Caching\IDependencyCache.cs" />
     <Compile Include="Caching\SimpleCache.cs" />
+    <Compile Include="Extensions\FormatExtensions.cs" />
     <Compile Include="RestBase.cs" />
     <Compile Include="RestCallback.cs" />
     <Compile Include="Retries\ConnectionClosed.cs" />

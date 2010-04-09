@@ -12,13 +12,6 @@ namespace Hammock.Extensions
             return attributes.ToEnumerable<T>();
         }
 
-        public static bool HasCustomAttribute<T>(this PropertyInfo info, bool inherit)
-            where T : class
-        {
-            var attributes = info.GetCustomAttributes(typeof (T), inherit);
-            return attributes.Length > 0;
-        }
-
         public static object GetValue(this object instance, string property)
         {
             var info = instance.GetType().GetProperty(property);

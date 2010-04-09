@@ -16,13 +16,7 @@ namespace Hammock.Extensions
 
         public static string HashWith(this string input, HashAlgorithm algorithm)
         {
-            var data = Encoding
-#if !SILVERLIGHT
-                .ASCII
-#else
-                .UTF8
-#endif
-                .GetBytes(input);
+            var data = Encoding.UTF8.GetBytes(input);
             var hash = algorithm.ComputeHash(data);
             return Convert.ToBase64String(hash);
         }

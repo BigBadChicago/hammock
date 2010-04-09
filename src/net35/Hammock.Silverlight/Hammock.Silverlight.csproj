@@ -148,14 +148,8 @@
     <Compile Include="..\Hammock\Extensions\CollectionExtensions.cs">
       <Link>Extensions\CollectionExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Extensions\FileExtensions.cs">
-      <Link>Extensions\FileExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Extensions\FormatExtensions.cs">
       <Link>Extensions\FormatExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Extensions\MathExtensions.cs">
-      <Link>Extensions\MathExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Extensions\OAuthExtensions.cs">
       <Link>Extensions\OAuthExtensions.cs</Link>
@@ -165,9 +159,6 @@
     </Compile>
     <Compile Include="..\Hammock\Extensions\ReflectionExtensions.cs">
       <Link>Extensions\ReflectionExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Extensions\RegexExtensions.cs">
-      <Link>Extensions\RegexExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\Extensions\SpecificationExtensions.cs">
       <Link>Extensions\SpecificationExtensions.cs</Link>
@@ -180,9 +171,6 @@
     </Compile>
     <Compile Include="..\Hammock\Extensions\WebExtensions.cs">
       <Link>Extensions\WebExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Hammock\Extensions\XmlExtensions.cs">
-      <Link>Extensions\XmlExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Hammock\IRestClient.cs">
       <Link>IRestClient.cs</Link>
