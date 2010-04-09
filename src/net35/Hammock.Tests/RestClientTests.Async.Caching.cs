@@ -28,6 +28,7 @@ namespace Hammock.Tests
                               {
                                   Credentials = BasicAuthForTwitter,
                                   Path = "statuses/home_timeline.json",
+                                  CacheKeyFunction = () => _twitterUsername + "asynctest"
                               };
 
             var firstResult = client.BeginRequest(request);
