@@ -167,6 +167,7 @@ namespace Hammock.Tests
 
         [Test]
         [Category("OAuth")]
+        [Ignore("Our consumer key is not currently approved for xauth")]
         public void Can_get_tokens_with_xauth()
         {
             ServicePointManager.Expect100Continue = false;
