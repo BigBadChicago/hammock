@@ -211,7 +211,7 @@ namespace Hammock.Tests.OAuth
         public void Can_url_encode_with_uppercase_hexadecimals()
         {
             const string expected = "What%20century%20is%20this%3F";
-            var actual = OAuthTools.UrlEncode("What century is this?");
+            var actual = OAuthTools.UrlEncodeRelaxed("What century is this?");
 
             Assert.AreEqual(expected, actual);
             Console.WriteLine(actual);

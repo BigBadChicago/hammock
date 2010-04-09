@@ -39,7 +39,9 @@ namespace Hammock.Authentication.OAuth
         protected override WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
             Uri uri;
-            url = AppendParameters(url, true);
+
+            // [DC]: Prior to this call, there should be no parameter encoding
+            url = AppendParameters(url, true, true); // Uses OAuthTools
             url = PreProcessPostParameters(url, out uri);
 
             var request = WebRequest.Create(url);
@@ -156,10 +158,11 @@ namespace Hammock.Authentication.OAuth
 
         protected override string AppendParameters(string url)
         {
-            return AppendParameters(url, false);
+            //  Base behavior
+            return AppendParameters(url, true /* escape */, false /* skipOAuth */);
         }
 
-        protected virtual string AppendParameters(string url, bool skipOAuth)
+        protected virtual string AppendParameters(string url, bool escape, bool skipOAuth)
         {
             var parameters = 0;
             foreach (var parameter in Parameters.Where(
@@ -171,9 +174,13 @@ namespace Hammock.Authentication.OAuth
                     continue;
                 }
 
+                var value = escape
+                                ? OAuthTools.UrlEncodeStrict(parameter.Value)
+                                : parameter.Value;
+
                 // GET parameters in URL
                 url = url.Then(parameters > 0 || url.Contains("?") ? "&" : "?");
-                url = url.Then("{0}={1}".FormatWith(parameter.Name, parameter.Value.UrlEncode()));
+                url = url.Then("{0}={1}".FormatWith(parameter.Name, value));
                 parameters++;
             }
 
@@ -206,11 +213,15 @@ namespace Hammock.Authentication.OAuth
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
                     SetAuthorizationHeader(request, "Authorization");
+
+                    // [DC]: Avoid escaping side effect of URI
+                    var query = uri.Query.UrlDecode();
+
                     // Only use the POST parameters that exist in the body
 #if SILVERLIGHT
-                    var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
+                    var postParameters = new WebParameterCollection(query.ParseQueryString());
 #else
-                    var postParameters = new WebParameterCollection(HttpUtility.ParseQueryString(uri.Query));
+                    var postParameters = new WebParameterCollection(HttpUtility.ParseQueryString(query));
 #endif
                     // Append any leftover values to the POST body
                     var nonAuthParameters = GetPostParametersValue(postParameters, true /* escapeParameters */);
@@ -265,10 +276,10 @@ namespace Hammock.Authentication.OAuth
             {
                 // [DC]: client_auth method does not function when these are escaped
                 var name = escapeParameters
-                               ? OAuthTools.UrlEncode(postParameter.Name)
+                               ? OAuthTools.UrlEncodeStrict(postParameter.Name)
                                : postParameter.Name;
                 var value = escapeParameters
-                                ? OAuthTools.UrlEncode(postParameter.Value)
+                                ? OAuthTools.UrlEncodeStrict(postParameter.Value)
                                 : postParameter.Value;
 
                 var token = "{0}={1}".FormatWith(name, value);
@@ -322,7 +333,7 @@ namespace Hammock.Authentication.OAuth
             var sb = new StringBuilder("OAuth ");
             if (!Realm.IsNullOrBlank())
             {
-                sb.Append("realm=\"{0}\",".FormatWith(OAuthTools.UrlEncode(Realm)));
+                sb.Append("realm=\"{0}\",".FormatWith(OAuthTools.UrlEncodeRelaxed(Realm)));
             }
 
             var parameters = 0;
@@ -389,6 +400,7 @@ namespace Hammock.Authentication.OAuth
             var nonAuthParameters = Parameters.Where(p => !p.Name.StartsWith("oauth_"));
             parameters.AddRange(nonAuthParameters);
             
+            // [DC]: Don't escape parameters again when calcing the signature
             Info = oauth.BuildProtectedResourceInfo(Method, parameters, url);
 
             // [DC]: Add any non-oauth parameters back into parameter bag

@@ -126,7 +126,7 @@ namespace Hammock.Tests
                 Method = WebMethod.Post
             };
 
-            request.AddParameter("status", string.Format("OAuth Post at {0}. tweet tweet", DateTime.Now.ToShortTimeString()));
+            request.AddParameter("status", "something #requiring #encoding @!!!"); //"string.Format("OAuth Post at {0}. tweet tweet", DateTime.Now.ToShortTimeString()));
 
             var response = client.Request(request);
             Assert.IsNotNull(response);

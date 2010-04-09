@@ -92,7 +92,7 @@ namespace Hammock.Authentication.OAuth
         /// </summary>
         /// <param name="value"></param>
         /// <seealso cref="http://oauth.net/core/1.0#encoding_parameters" />
-        public static string UrlEncode(string value)
+        public static string UrlEncodeRelaxed(string value)
         {
             return Uri.EscapeDataString(value);
         }
@@ -104,7 +104,7 @@ namespace Hammock.Authentication.OAuth
         /// </summary>
         /// <param name="value"></param>
         /// <seealso cref="http://oauth.net/core/1.0#encoding_parameters" />
-        public static string UrlEncodeParameterString(string value)
+        public static string UrlEncodeStrict(string value)
         {
             // [JD]: We need to escape the apostrophe as well or the signature will fail
             var original = value;
@@ -145,7 +145,7 @@ namespace Hammock.Authentication.OAuth
             var exclusions = copy.Where(n => n.Name.EqualsIgnoreCase("oauth_signature"));
 
             copy.RemoveAll(exclusions);
-            copy.ForEach(p => p.Value = UrlEncode(p.Value)); // values are effectively double-encoded
+            copy.ForEach(p => p.Value = UrlEncodeStrict(p.Value));
             copy.Sort((x, y) => x.Name.Equals(y.Name) ? x.Value.CompareTo(y.Value) : x.Name.CompareTo(y.Name));
             return copy;
         }
@@ -188,6 +188,7 @@ namespace Hammock.Authentication.OAuth
         /// <param name="method">The request's HTTP method type</param>
         /// <param name="url">The request URL</param>
         /// <param name="parameters">The request's parameters</param>
+        /// <param name="escape"></param>
         /// <returns>A signature base string</returns>
         public static string ConcatenateRequestElements(WebMethod method, string url, WebParameterCollection parameters)
         {
@@ -195,8 +196,8 @@ namespace Hammock.Authentication.OAuth
 
             // separating &'s are not URL encoded
             var requestMethod = method.ToUpper().Then("&");
-            var requestUrl = UrlEncode(ConstructRequestUrl(url.AsUri())).Then("&");
-            var requestParameters = UrlEncode(NormalizeRequestParameters(parameters));
+            var requestUrl = UrlEncodeRelaxed(ConstructRequestUrl(url.AsUri())).Then("&");
+            var requestParameters = UrlEncodeRelaxed(NormalizeRequestParameters(parameters));
 
             sb.Append(requestMethod);
             sb.Append(requestUrl);
@@ -238,8 +239,8 @@ namespace Hammock.Authentication.OAuth
                 tokenSecret = String.Empty;
             }
 
-            consumerSecret = UrlEncode(consumerSecret);
-            tokenSecret = UrlEncode(tokenSecret);
+            consumerSecret = UrlEncodeRelaxed(consumerSecret);
+            tokenSecret = UrlEncodeRelaxed(tokenSecret);
 
             string signature;
             switch (signatureMethod)
@@ -258,7 +259,7 @@ namespace Hammock.Authentication.OAuth
                     throw new NotImplementedException("Only HMAC-SHA1 is currently supported.");
             }
 
-            return UrlEncode(signature);
+            return UrlEncodeRelaxed(signature);
         }
     }
 }

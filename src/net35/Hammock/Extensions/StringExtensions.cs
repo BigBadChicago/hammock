@@ -72,11 +72,7 @@ namespace Hammock.Extensions
 
         public static string UrlDecode(this string value)
         {
-#if !SILVERLIGHT
-            return HttpUtility.UrlDecode(value);
-#else
             return Uri.UnescapeDataString(value);
-#endif
         }
 
         public static Uri AsUri(this string value)

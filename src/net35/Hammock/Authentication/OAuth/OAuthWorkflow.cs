@@ -12,9 +12,9 @@ namespace Hammock.Authentication.OAuth
     /// A class to encapsulate OAuth authentication flow.
     /// <seealso cref="http://oauth.net/core/1.0#anchor9"/>
     /// </summary>
-    public partial class OAuthWorkflow
+    public class OAuthWorkflow
     {
-        public string OAUTH_VERSION = "1.0";
+        public string Version = "1.0";
         public string ConsumerKey { get; set; }
         public string ConsumerSecret { get; set; }
         public string Token { get; set; }
@@ -94,8 +94,8 @@ namespace Hammock.Authentication.OAuth
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
-                               Version = OAUTH_VERSION,
-                               Callback = OAuthTools.UrlEncode(CallbackUrl ?? ""),
+                               Version = Version,
+                               Callback = OAuthTools.UrlEncodeRelaxed(CallbackUrl ?? ""),
                                UserAgent = "Hammock",
                                TokenSecret = TokenSecret,
                                ConsumerSecret = ConsumerSecret
@@ -152,7 +152,7 @@ namespace Hammock.Authentication.OAuth
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
-                               Version = OAUTH_VERSION,
+                               Version = Version,
                                Callback = CallbackUrl,
                                UserAgent = "Hammock",
                                TokenSecret = TokenSecret,
@@ -200,7 +200,7 @@ namespace Hammock.Authentication.OAuth
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
-                               Version = OAUTH_VERSION,
+                               Version = Version,
                                UserAgent = "Hammock",
                                TokenSecret = TokenSecret,
                                ConsumerSecret = ConsumerSecret
@@ -209,12 +209,8 @@ namespace Hammock.Authentication.OAuth
             return info;
         }
 
-        public OAuthWebQueryInfo BuildProtectedResourceInfo(WebMethod method, string url)
-        {
-            return BuildProtectedResourceInfo(method, null, url);
-        }
-
-        public OAuthWebQueryInfo BuildProtectedResourceInfo(WebMethod method, WebParameterCollection parameters,
+        public OAuthWebQueryInfo BuildProtectedResourceInfo(WebMethod method, 
+                                                            WebParameterCollection parameters,
                                                             string url)
         {
             ValidateProtectedResourceState();
@@ -235,7 +231,6 @@ namespace Hammock.Authentication.OAuth
 #if !SILVERLIGHT
             foreach (var parameter in urlParameters.AllKeys)
 #else
-    // todo can we just use keys instead of allkeys?
             foreach (var parameter in urlParameters.Keys)
 #endif
             {
@@ -253,9 +248,17 @@ namespace Hammock.Authentication.OAuth
             var timestamp = OAuthTools.GetTimestamp();
             var nonce = OAuthTools.GetNonce();
 
-            AddAuthParameters(parameters, timestamp, nonce);
+            // [DC] Make a copy of the parameters so that the signature double-encode isn't used
+            var copy = new WebParameterCollection();
+            foreach(var parameter in parameters)
+            {
+                copy.Add(new WebPair(parameter.Name, parameter.Value));
+            }
 
-            var signatureBase = OAuthTools.ConcatenateRequestElements(method, url, parameters);
+            AddAuthParameters(copy, timestamp, nonce);
+
+            // [DC] Escape parameters at this point; do not escape again if recalculating
+            var signatureBase = OAuthTools.ConcatenateRequestElements(method, url, copy);
             var signature = OAuthTools.GetSignature(SignatureMethod, signatureBase, ConsumerSecret, TokenSecret);
 
             var info = new OAuthWebQueryInfo
@@ -268,7 +271,7 @@ namespace Hammock.Authentication.OAuth
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
-                               Version = OAUTH_VERSION,
+                               Version = Version,
                                UserAgent = "Hammock",
                                ConsumerSecret = ConsumerSecret,
                                TokenSecret = TokenSecret
@@ -373,7 +376,7 @@ namespace Hammock.Authentication.OAuth
                                          new WebPair("oauth_nonce", nonce),
                                          new WebPair("oauth_signature_method", SignatureMethod.ToRequestValue()),
                                          new WebPair("oauth_timestamp", timestamp),
-                                         new WebPair("oauth_version", OAUTH_VERSION)
+                                         new WebPair("oauth_version", Version)
                                      };
 
             if (!Token.IsNullOrBlank())
@@ -408,7 +411,7 @@ namespace Hammock.Authentication.OAuth
                                          new WebPair("oauth_signature_method", SignatureMethod.ToRequestValue()),
                                          new WebPair("oauth_timestamp", timestamp),
                                          new WebPair("oauth_nonce", nonce),
-                                         new WebPair("oauth_version", OAUTH_VERSION)
+                                         new WebPair("oauth_version", Version)
                                      };
 
             foreach (var authParameter in authParameters)
