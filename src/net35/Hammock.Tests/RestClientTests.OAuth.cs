@@ -82,7 +82,29 @@ namespace Hammock.Tests
 
         [Test]
         [Category("OAuth")]
-        public void Can_make_oauth_request_post_with_post_parameters_synchronously()
+        public void Can_make_oauth_get_request()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com/",
+                VersionPath = "1",
+                Credentials = OAuthForTwitterProtectedResource,
+            };
+
+            var request = new RestRequest
+            {
+                Path = "account/verify_credentials.xml"
+            };
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+            Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to post successfully");
+        }
+
+        [Test]
+        [Category("OAuth")]
+        public void Can_make_oauth_post_requests_with_post_parameters_synchronously()
         {
             if (_ignoreTestsThatPostToTwitter)
             {

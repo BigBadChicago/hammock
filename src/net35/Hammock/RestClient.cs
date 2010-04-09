@@ -440,6 +440,12 @@ namespace Hammock
             return method;
         }
 
+        private byte[] GetPostContent(RestBase request)
+        {
+            var content = request.PostContent ?? PostContent;
+            return content;
+        }
+
         private RetryPolicy GetRetryPolicy(RestBase request)
         {
             var policy = request.RetryPolicy ?? RetryPolicy;
@@ -1415,6 +1421,7 @@ namespace Hammock
             query.Proxy = GetProxy(request);
             query.RequestTimeout = GetTimeout(request);
             query.DecompressionMethods = request.DecompressionMethods | DecompressionMethods;
+            query.PostContent = GetPostContent(request);
             
             SerializeEntityBody(query, request);
         }

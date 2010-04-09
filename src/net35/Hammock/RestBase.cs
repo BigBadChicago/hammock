@@ -23,9 +23,26 @@ namespace Hammock
 #endif
     public abstract class RestBase : PropertyChangedBase 
     {
+        private byte[] _postContent;
+
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
         protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }
+        protected virtual internal byte[] PostContent
+        {
+            get
+            {
+                return _postContent;
+            }
+            set
+            {
+                _postContent = value;
+                if (value != null && (Method != WebMethod.Post && Method != WebMethod.Put))
+                {
+                    Method = WebMethod.Post;
+                }
+            }
+        }
 
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
@@ -88,6 +105,25 @@ namespace Hammock
         {
             var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, contentType);
             PostParameters.Add(parameter);
+        }
+
+        public void AddPostContent(byte[] content)
+        {
+            if (PostContent == null)
+            {
+                PostContent = content;
+            }
+            else
+            {
+                var original = PostContent.Length;
+                var current = content.Length;
+
+                var final = new byte[current + original];
+                Array.Copy(PostContent, 0, final, 0, original);
+                Array.Copy(content, 0, final, original, current);
+
+                PostContent = final;
+            }
         }
     }
 }

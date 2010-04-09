@@ -87,6 +87,7 @@ namespace Hammock.Web
         }
 
         public virtual bool HasEntity { get; set; }
+        public virtual byte[] PostContent { get; set; }
 
         protected WebQuery() : this(null)
         {
@@ -241,36 +242,19 @@ namespace Hammock.Web
                 "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
                 );
 #endif
-            // [DC] LSP violation necessary for "pure" mocks
-            if (request is HttpWebRequest)
-            {
-                SetRequestMeta((HttpWebRequest)request);
-            }
-            else
-            {
-                AppendHeaders(request);
-                if (!UserAgent.IsNullOrBlank())
-                {
-#if SILVERLIGHT
-                    // [DC] User-Agent is still restricted in elevated mode
-                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
-#else
-                    request.Headers["User-Agent"] = UserAgent;
-#endif
-                }
-            }
+            HandleRequestMeta(request);
+
+            var encoding = Encoding.UTF8;
+            content = PostContent ?? encoding.GetBytes(parameters);
 
 #if TRACE
             Trace.WriteLine(String.Concat(
-                "BODY: ",parameters)
+                "BODY: ", content)
                 );
 #endif
 
 #if !SILVERLIGHT
-            content = Encoding.ASCII.GetBytes(parameters);
             request.ContentLength = content.Length;
-#else       
-            content = Encoding.UTF8.GetBytes(parameters);
 #endif
             return request;
         }
@@ -301,24 +285,8 @@ namespace Hammock.Web
                 "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
                 );
 #endif
-            // [DC] LSP violation necessary for "pure" mocks
-            if (request is HttpWebRequest)
-            {
-                SetRequestMeta((HttpWebRequest)request);
-            }
-            else
-            {
-                AppendHeaders(request);
-                if (!UserAgent.IsNullOrBlank())
-                {
-#if SILVERLIGHT
-                    // [DC] User-Agent is still restricted in elevated mode
-                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
-#else
-                    request.Headers["User-Agent"] = UserAgent;
-#endif
-                }
-            }
+
+            HandleRequestMeta(request);
 
             if (Entity != null)
             {
@@ -370,15 +338,23 @@ namespace Hammock.Web
                 "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
                 );
 #endif
+            
+            HandleRequestMeta(request);
+
+            return request;
+        }
+
+        private void HandleRequestMeta(WebRequest request)
+        {
             // [DC] LSP violation necessary for "pure" mocks
-            if(request is HttpWebRequest)
-            {   
+            if (request is HttpWebRequest)
+            {
                 SetRequestMeta((HttpWebRequest)request);
             }
             else
             {
                 AppendHeaders(request);
-                if(!UserAgent.IsNullOrBlank())
+                if (!UserAgent.IsNullOrBlank())
                 {
 #if SILVERLIGHT
                     // [DC] User-Agent is still restricted in elevated mode
@@ -388,8 +364,6 @@ namespace Hammock.Web
 #endif
                 }
             }
-
-            return request;
         }
 
         protected virtual void SetRequestMeta(HttpWebRequest request)
@@ -1080,15 +1054,17 @@ namespace Hammock.Web
 #if TRACE
             Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
 #endif
-            // [DC]: This will need to be refactored for larger uploads
-            var contents = BuildMultiPartFormRequestParameters(boundary, parameters);
-            var payload = contents.ToString();
-            
+            HandleRequestMeta(request);
+
 #if !Smartphone
             var encoding = Encoding.GetEncoding("iso-8859-1");
 #else
             var encoding =  Encoding.GetEncoding(1252);
 #endif
+            // [DC]: This will need to be refactored for larger uploads
+            var contents = BuildMultiPartFormRequestParameters(encoding, boundary, parameters);
+            var payload = contents.ToString();
+            
             bytes = encoding.GetBytes(payload);
 
 #if !SILVERLIGHT
@@ -1097,8 +1073,7 @@ namespace Hammock.Web
             return request;
         }
 
-        protected static StringBuilder BuildMultiPartFormRequestParameters(string boundary,
-                                                                           IEnumerable<HttpPostParameter> parameters)
+        protected static StringBuilder BuildMultiPartFormRequestParameters(Encoding encoding, string boundary, IEnumerable<HttpPostParameter> parameters)
         {
             var header = string.Format("--{0}", boundary);
             var footer = string.Format("--{0}--", boundary);
@@ -1130,9 +1105,9 @@ namespace Hammock.Web
                             const string fileMask = "Content-Disposition: file; name=\"{0}\"; filename=\"{1}\"";
                             var fileHeader = fileMask.FormatWith(parameter.Name, parameter.FileName);
 #if !Smartphone
-                            var fileData = Encoding.GetEncoding("iso-8859-1").GetString(fileBytes, 0, fileBytes.Length);
+                            var fileData = encoding.GetString(fileBytes, 0, fileBytes.Length);
 #else
-                            var fileData = Encoding.GetEncoding(1252).GetString(fileBytes, 0, fileBytes.Length);
+                            var fileData = encoding.GetString(fileBytes, 0, fileBytes.Length);
 #endif
                             var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
 
@@ -1145,7 +1120,7 @@ namespace Hammock.Web
                             Trace.WriteLine(fileHeader);
                             Trace.WriteLine(fileLine);
                             Trace.WriteLine("");
-                            Trace.WriteLine("[FILE DATA]");
+                            Trace.WriteLine(String.Concat("[FILE DATA][", encoding, "]"));
 #endif
                             break;
                         }
