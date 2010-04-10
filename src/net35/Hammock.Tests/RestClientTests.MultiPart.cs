@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Hammock.Authentication.Basic;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -52,6 +53,34 @@ namespace Hammock.Tests
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+        }
+
+        [Test]
+        [Ignore("Makes a live update to a Twitter profile")]
+        [Category("MultiPart")]
+        public void Can_post_picture_and_text_to_yfrog()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://yfrog.com/api",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "upload"
+            };
+
+            request.AddFile("media", "failwhale", "twitterProfilePhoto.jpg", "image/jpeg");
+       
+            request.AddField("username", _twitterUsername.ToLower() );
+            request.AddField("password", _twitterPassword);
+            request.AddField("message", "Bazinga!");
+            
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK); 
         }
     }
 }
