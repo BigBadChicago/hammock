@@ -77,8 +77,8 @@ namespace Hammock.Tests
                                   {
                                       RepeatTimes = repeatTimes,
                                       RepeatInterval = 2.Seconds(),
-                                      RateLimitingRule = new RateLimitingRule<TwitterRateLimitStatus>(50.0),
-                                      RateLimitPercent = 10.0
+                                      RateLimitType = RateLimitType.ByPredicate,
+                                      RateLimitingPredicate = s => false
                                   };
 
             var settings = GetSerializerSettings();
@@ -105,8 +105,7 @@ namespace Hammock.Tests
             var async = client.BeginRequest(request,
                                             (req, resp) =>
                                             {
-                                                var rateLimit = resp.ContentEntity as TwitterRateLimitStatus;
-                                                Assert.IsNotNull(rateLimit);
+                                                Assert.IsTrue(resp.SkippedDueToRateLimitingRule);
                                                 repeatCount++;
 
                                                 if (repeatCount == repeatTimes)

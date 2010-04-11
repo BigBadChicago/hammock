@@ -748,7 +748,7 @@ namespace Hammock
                                      : 0);
 
             Func<WebQueryAsyncResult> beginRequest;
-            WebQueryAsyncResult result;
+            WebQueryAsyncResult asyncResult;
 
             var streamOptions = GetStreamOptions(request);
             if (streamOptions != null)
@@ -768,7 +768,7 @@ namespace Hammock
                    request, query, url, callback, duration, resultCount
                    );
 
-                result = beginRequest.Invoke();
+                asyncResult = beginRequest.Invoke();
             }
             else
             {
@@ -779,7 +779,7 @@ namespace Hammock
                        url,
                        callback);
 
-                result = beginRequest.Invoke();
+                asyncResult = beginRequest.Invoke();
             }
 
             WebQueryResult previous = null;
@@ -815,11 +815,11 @@ namespace Hammock
                 // [DC]: Callback is for a final result, not a retry
                 if (_remainingRetries == 0)
                 {
-                    CompleteWithQuery(query, request, callback, result);
+                    CompleteWithQuery(query, request, callback, asyncResult);
                 }
             };
 
-            return result;
+            return asyncResult;
         }
         private IAsyncResult BeginRequest<T>(RestRequest request,
                                              RestCallback<T> callback,
@@ -847,7 +847,7 @@ namespace Hammock
                                      : 0);
 
             Func<WebQueryAsyncResult> beginRequest;
-            WebQueryAsyncResult result;
+            WebQueryAsyncResult asyncResult;
 
             var streamOptions = GetStreamOptions(request);
             if(streamOptions != null)
@@ -868,7 +868,7 @@ namespace Hammock
                    request, query, url, callback, duration, resultCount
                    );
 
-                result = beginRequest.Invoke();
+                asyncResult = beginRequest.Invoke();
             }
             else
             {
@@ -876,7 +876,7 @@ namespace Hammock
                    isInternal, request, query, url, callback
                    );
 
-                result = beginRequest.Invoke();
+                asyncResult = beginRequest.Invoke();
             }
 
             WebQueryResult previous = null;
@@ -912,11 +912,11 @@ namespace Hammock
                 // [DC]: Callback is for a final result, not a retry
                 if (_remainingRetries == 0)
                 {
-                    CompleteWithQuery(query, request, callback, result);
+                    CompleteWithQuery(query, request, callback, asyncResult);
                 }
             };
 
-            return result;
+            return asyncResult;
         }
 
         private WebQueryAsyncResult BeginRequestFunction(bool isInternal,
@@ -1069,18 +1069,18 @@ namespace Hammock
                                           RestCallback callback,
                                           WebQuery query,
                                           string url,
-                                          out WebQueryAsyncResult result)
+                                          out WebQueryAsyncResult asyncResult)
         {
             var taskOptions = GetTaskOptions(request);
             if (taskOptions == null)
             {
-                result = null;
+                asyncResult = null;
                 return false;
             }
 
             if (taskOptions.RepeatInterval <= TimeSpan.Zero)
             {
-                result = null;
+                asyncResult = null;
                 return false;
             }
 
@@ -1120,7 +1120,7 @@ namespace Hammock
                                             {
                                                 /* No callback */
                                             }, null);
-            result = new WebQueryAsyncResult { InnerResult = inner };
+            asyncResult = new WebQueryAsyncResult { InnerResult = inner };
             return true;
         }
 
@@ -1128,18 +1128,18 @@ namespace Hammock
                                           RestCallback<T> callback,
                                           WebQuery query,
                                           string url,
-                                          out WebQueryAsyncResult result)
+                                          out WebQueryAsyncResult asyncResult)
         {
             var taskOptions = GetTaskOptions(request);
             if (taskOptions == null)
             {
-                result = null;
+                asyncResult = null;
                 return false;
             }
 
             if (taskOptions.RepeatInterval <= TimeSpan.Zero)
             {
-                result = null;
+                asyncResult = null;
                 return false;
             }
 
@@ -1176,7 +1176,7 @@ namespace Hammock
                 );
 
             var inner = action.BeginInvoke(ar => { /* No callback */ }, null);
-            result = new WebQueryAsyncResult {InnerResult = inner};
+            
             return true;
         }
 
@@ -1187,7 +1187,17 @@ namespace Hammock
                                             WebQuery query,
                                             string url)
         {
-            var taskAction = new Action<bool>(skip => BeginRequest(request, callback, query, url, true));
+            var taskAction = new Action<bool>(skip =>
+                                                  {
+                                                      if (!skip)
+                                                      {
+                                                          BeginRequest(request, callback, query, url, true);
+                                                      }
+                                                      else
+                                                      {
+                                                          callback(request, new RestResponse{SkippedDueToRateLimitingRule = true});
+                                                      }
+                                                  } );
 
             return BuildRateLimitingTaskImpl(taskOptions, taskAction);
         }
@@ -1225,7 +1235,7 @@ namespace Hammock
                         );
                     break;
                 case RateLimitType.ByPredicate:
-                    var rateLimitingPredicate = taskOptions.GetValue("RateLimitIf");
+                    var rateLimitingPredicate = taskOptions.GetValue("RateLimitingPredicate");
                     taskRule = Activator.CreateInstance(
                         rateType, rateLimitingPredicate
                         );

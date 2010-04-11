@@ -30,7 +30,7 @@ namespace Hammock
         public virtual bool IsMock { get; set; }
         public virtual object Tag { get; set; }
         public virtual NameValueCollection Headers { get; set; }
-
+        public virtual bool SkippedDueToRateLimitingRule { get; set; }
         public virtual bool IsFromCache
         {
             get
