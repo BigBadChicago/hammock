@@ -975,7 +975,15 @@ namespace Hammock
             {
                 callback.Invoke(request, response);
             }
-            result.Signal();
+            //recurring tasks are only signalled when cancelled 
+            //or when they reach their iteration limit
+            lock(_timedTasksLock)
+            {
+                if (!_tasks.ContainsKey(request))
+                {
+                    result.Signal();        
+                }
+            }
         }
         private void CompleteWithQuery(WebQuery query, 
                                        RestRequest request, 
@@ -996,7 +1004,15 @@ namespace Hammock
             {
                 callback.Invoke(request, response);
             }
-            result.Signal();
+            //recurring tasks are only signalled when cancelled 
+            //or when they reach their iteration limit
+            lock (_timedTasksLock)
+            {
+                if (!_tasks.ContainsKey(request))
+                {
+                    result.Signal();
+                }
+            }
         }
 
         private WebQueryAsyncResult BeginRequestFunction<T>(bool isInternal, 
