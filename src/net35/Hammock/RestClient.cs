@@ -45,7 +45,8 @@ namespace Hammock
         private bool _firstTry = true;
 #endif
         private int _remainingRetries;
-        private TimedTask _task;
+        private readonly object _timedTasksLock = new object();
+        private readonly Dictionary<RestRequest,TimedTask> _tasks = new Dictionary<RestRequest, TimedTask>();
 
         static RestClient()
         {
@@ -1083,13 +1084,14 @@ namespace Hammock
                 asyncResult = null;
                 return false;
             }
-
+            
+            TimedTask task; 
 #if !NETCF
             if (!taskOptions.GetType().IsGenericType)
             {
 #endif
                 // Tasks without rate limiting
-                _task = new TimedTask(taskOptions.DueTime,
+                task = new TimedTask(taskOptions.DueTime,
                                       taskOptions.RepeatInterval,
                                       taskOptions.RepeatTimes,
                                       taskOptions.ContinueOnError,
@@ -1098,30 +1100,55 @@ namespace Hammock
                                                            query,
                                                            url,
                                                            true));
+               
 #if !NETCF
             }
             else
             {
                 // Tasks with rate limiting
-                var task = BuildRateLimitingTask(request,
+                task = (TimedTask) BuildRateLimitingTask(request,
                                                  taskOptions,
                                                  callback,
                                                  query,
                                                  url);
-
-                _task = (TimedTask) task;
             }
 #endif
-            var action = new Action(
-                () => _task.Start()
-                );
 
-            var inner = action.BeginInvoke(ar =>
-                                            {
-                                                /* No callback */
-                                            }, null);
+            RegisterTimedTaskForRequest(request, task);
+
+            Action action = task.Start;
+
+            var inner = action.BeginInvoke(ar =>{/* No callback */}, null);
+            
             asyncResult = new WebQueryAsyncResult { InnerResult = inner };
+            task.AsyncResult = asyncResult;
             return true;
+        }
+
+        private void RegisterTimedTaskForRequest(RestRequest request, TimedTask task)
+        {
+            lock (_timedTasksLock)
+            {
+                if ( _tasks.ContainsKey(request))
+                {
+                    throw new InvalidOperationException("Task already has a registered timed task");
+                }
+                task.Stopped += (s, e) => UnregisterTimedTaskForRequest(request);
+                _tasks.Add(request, task);
+            }
+        }
+
+        private void UnregisterTimedTaskForRequest(RestRequest request)
+        {
+            lock(_timedTasksLock)
+            {
+                if ( _tasks.ContainsKey(request))
+                {
+                    var task = _tasks[request];
+                    _tasks.Remove(request);
+                    task.Dispose();
+                }
+            }
         }
 
         private bool BeginRequestWithTask<T>(RestRequest request,
@@ -1143,12 +1170,13 @@ namespace Hammock
                 return false;
             }
 
+            TimedTask task; 
 #if !NETCF
             if (!taskOptions.GetType().IsGenericType)
             {
 #endif
                 // Tasks without rate limiting
-                _task = new TimedTask(taskOptions.DueTime,
+                task = new TimedTask(taskOptions.DueTime,
                                       taskOptions.RepeatInterval,
                                       taskOptions.RepeatTimes,
                                       taskOptions.ContinueOnError,
@@ -1162,21 +1190,23 @@ namespace Hammock
             else
             {
                 // Tasks with rate limiting
-                var task = BuildRateLimitingTask(request,
+                task = (TimedTask)BuildRateLimitingTask(request,
                                                  taskOptions,
                                                  callback,
                                                  query,
                                                  url);
 
-                _task = (TimedTask) task;
             }
 #endif
-            var action = new Action(
-                () => _task.Start()
-                );
+            lock (_timedTasksLock)
+            {
+                _tasks[request] = task;
+            }
+            var action = new Action(task.Start);
 
             var inner = action.BeginInvoke(ar => { /* No callback */ }, null);
-            
+            asyncResult = new WebQueryAsyncResult { InnerResult = inner };
+            task.AsyncResult = asyncResult;
             return true;
         }
 
@@ -1226,23 +1256,29 @@ namespace Hammock
             var rateLimitingType = (RateLimitType)taskOptions.GetValue("RateLimitType");
                 
             object taskRule;
+            var getRateLimitStatus = taskOptions.GetValue("GetRateLimitStatus");
             switch(rateLimitingType)
             {
                 case RateLimitType.ByPercent:
                     var rateLimitingPercent = taskOptions.GetValue("RateLimitPercent");
-                    taskRule = Activator.CreateInstance(
-                        rateType, rateLimitingPercent
-                        );
+                    if (getRateLimitStatus != null)
+                    {
+                        taskRule = Activator.CreateInstance(rateType, getRateLimitStatus, rateLimitingPercent);
+                    }
+                    else
+                    {
+                        taskRule = Activator.CreateInstance(rateType, rateLimitingPercent);
+                    }
                     break;
                 case RateLimitType.ByPredicate:
                     var rateLimitingPredicate = taskOptions.GetValue("RateLimitingPredicate");
-                    taskRule = Activator.CreateInstance(
-                        rateType, rateLimitingPredicate
-                        );
-                    var getRateLimitStatus = taskOptions.GetValue("GetRateLimitStatus");
                     if (getRateLimitStatus != null)
                     {
-                        rateType.SetValue("GetRateLimitStatus", getRateLimitStatus);
+                        taskRule = Activator.CreateInstance(rateType, getRateLimitStatus, rateLimitingPredicate);
+                    }
+                    else
+                    {
+                        taskRule = Activator.CreateInstance(rateType, rateLimitingPredicate);
                     }
                     break;
                 default:

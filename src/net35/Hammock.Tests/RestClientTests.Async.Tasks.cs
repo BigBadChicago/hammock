@@ -73,6 +73,7 @@ namespace Hammock.Tests
         public void Can_initiate_recurring_task_with_rate_limiting_rule()
         {
             const int repeatTimes = 3;
+            //boring rate limiting rule that always says to skip the task
             var taskOptions = new TaskOptions<TwitterRateLimitStatus>
                                   {
                                       RepeatTimes = repeatTimes,
@@ -115,7 +116,7 @@ namespace Hammock.Tests
                                             });
             Assert.IsNotNull(async);
             async.AsyncWaitHandle.WaitOne();
-            
+            Assert.That(repeatCount == repeatTimes);
             Assert.IsTrue(success, "Task manifest did not complete");
         }
     }

@@ -1,12 +1,13 @@
 using System;
 using System.Threading;
+using Hammock.Web;
 
 namespace Hammock.Tasks
 {
     public class TimedTask : ITimedTask
     {
         protected readonly object Lock = new object();
-        protected bool Stopped;
+        protected bool Active;
         protected int Iterations;
         protected Timer Timer;
         protected bool ContinueOnError;
@@ -15,6 +16,8 @@ namespace Hammock.Tasks
         public Exception Exception { get; protected set; }
         public TimeSpan DueTime { get; protected set; }
         public TimeSpan Interval { get; protected set; }
+        internal WebQueryAsyncResult AsyncResult { get; set; }
+        public event Action<TimedTask,EventArgs> Stopped;
 
         public TimedTask(TimeSpan due,
                          TimeSpan interval,
@@ -24,31 +27,6 @@ namespace Hammock.Tasks
             this(due, interval, iterations, action)
         {
             ContinueOnError = continueOnError;
-        }
-
-        private void Start(bool continueOnError)
-        {
-            var count = 0;
-            Timer = new Timer(state =>
-                                  {
-                                      try
-                                      {
-                                          Action(false);
-                                          count++;
-                                          if (Iterations > 0 && count >= Iterations)
-                                          {
-                                              Stop();
-                                          }
-                                      }
-                                      catch (Exception ex)
-                                      {
-                                          Exception = ex;
-                                          if (!continueOnError)
-                                          {
-                                              Stop();
-                                          }
-                                      }
-                                  }, null, DueTime, Interval);
         }
 
         public TimedTask(TimeSpan due,
@@ -62,16 +40,47 @@ namespace Hammock.Tasks
             Action = action;
         }
 
+        protected virtual void Start(bool continueOnError)
+        {
+            var count = 0;
+            Timer = new Timer(state =>
+            {
+                try
+                {
+                    Action(false);
+                    count++;
+                    if (Iterations > 0 && count >= Iterations)
+                    {
+                        Stop();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Exception = ex;
+                    if (!continueOnError)
+                    {
+                        Stop();
+                    }
+                }
+            }, null, DueTime, Interval);
+        }
+
+
         public virtual void Stop()
         {
-            if (!Stopped)
+            if (Active)
             {
                 lock (Lock)
                 {
-                    if (!Stopped)
+                    if (Active)
                     {
-                        Stopped = true;
+                        Active = false;
                         Timer.Change(-1, -1);
+                        OnStopped(EventArgs.Empty);
+                        if (AsyncResult != null)
+                        {
+                            AsyncResult.Signal();
+                        }
                     }
                 }
             }
@@ -79,13 +88,13 @@ namespace Hammock.Tasks
 
         public virtual void Start()
         {
-            if (Stopped)
+            if (!Active)
             {
                 lock (Lock)
                 {
-                    if (Stopped)
+                    if (!Active)
                     {
-                        Stopped = false;
+                        Active = true;
                         if (Timer != null)
                         {
                             Timer.Change(DueTime, Interval);
@@ -101,11 +110,11 @@ namespace Hammock.Tasks
 
         public virtual void Start(TimeSpan dueTime, TimeSpan interval)
         {
-            if (Stopped)
+            if (!Active)
             {
                 lock (Lock)
                 {
-                    if (Stopped)
+                    if (!Active)
                     {
                         DueTime = dueTime;
                         Interval = interval;
@@ -114,9 +123,17 @@ namespace Hammock.Tasks
                 }
             }
         }
+        protected virtual void OnStopped(EventArgs e)
+        {
+            if ( Stopped != null )
+            {
+                Stopped(this, e);
+            }
+        }
 
         public virtual void Dispose()
         {
+            Stop();
             Timer.Dispose();
         }
     }
@@ -135,33 +152,37 @@ namespace Hammock.Tasks
             base(due, interval, iterations, action)
         {
             RateLimitingRule = rateLimitingRule;
+            ContinueOnError = continueOnError; 
+        }
 
+        protected override void Start(bool continueOnError)
+        {
             var count = 0;
             Timer = new Timer(state =>
-                                   {
-                                       try
-                                       {
-                                           var skip = ShouldSkipForRateLimiting();
-                                           Action(skip);
-                                           lock (Lock)
-                                           {
-                                               count++;
+            {
+                try
+                {
+                    var skip = ShouldSkipForRateLimiting();
+                    Action(skip);
+                    lock (Lock)
+                    {
+                        count++;
 
-                                               if (Iterations > 0 && count >= Iterations)
-                                               {
-                                                   Stop();
-                                               }
-                                           }
-                                       }
-                                       catch (Exception ex)
-                                       {
-                                           Exception = ex;
-                                           if (!continueOnError)
-                                           {
-                                               Stop();
-                                           }
-                                       }
-                                   }, null, DueTime, Interval);
+                        if (Iterations > 0 && count >= Iterations)
+                        {
+                            Stop();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Exception = ex;
+                    if (!continueOnError)
+                    {
+                        Stop();
+                    }
+                }
+            }, null, DueTime, Interval);
         }
 
         #region ITimedTask Members

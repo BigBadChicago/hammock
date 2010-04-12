@@ -23,8 +23,16 @@ namespace Hammock.Tasks
 
         public RateLimitingRule(Func<T> getRateLimitStatus, Predicate<T> rateLimitIf)
         {
+            _rateLimitType = RateLimitType.ByPredicate;
             GetRateLimitStatus = getRateLimitStatus;
             RateLimitIf = rateLimitIf;
+        }
+
+        public RateLimitingRule(Func<T> getRateLimitStatus, double percentOfTotal)
+        {
+            _rateLimitType = RateLimitType.ByPercent;
+            GetRateLimitStatus = getRateLimitStatus;
+            LimitToPercentOfTotal = percentOfTotal;
         }
 
         #region IRateLimitingRule Members

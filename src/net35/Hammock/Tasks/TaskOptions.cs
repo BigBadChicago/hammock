@@ -7,7 +7,6 @@ namespace Hammock.Tasks
 #endif
     public class TaskOptions<T> : TaskOptions, ITaskOptions<T>
     {
-        public virtual IRateLimitingRule<T> RateLimitingRule { get; set; }
         public virtual RateLimitType RateLimitType { get; set; }
         public virtual double RateLimitPercent { get; set; }
         public virtual Predicate<T> RateLimitingPredicate { get; set; }
