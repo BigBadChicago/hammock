@@ -1535,5 +1535,14 @@ namespace Hammock
 #endif
             return query;
         }
+
+        public void CancelAllRepeatingTasks()
+        {
+            lock(_timedTasksLock)
+            {
+                _tasks.Values.ForEach(t => t.Stop());
+            }
+        }
+
     }
 }
