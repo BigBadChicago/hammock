@@ -1556,7 +1556,12 @@ namespace Hammock
         {
             lock(_timedTasksLock)
             {
-                _tasks.Values.ForEach(t => t.Stop());
+                //copy to a new list, since canceling 
+                //the task removes it from the _tasks
+                //list, the enumeration will throw
+                var toCancel = new List<TimedTask>();
+                toCancel.AddRange(_tasks.Values);
+                toCancel.ForEach(t => t.Stop());
             }
         }
 
