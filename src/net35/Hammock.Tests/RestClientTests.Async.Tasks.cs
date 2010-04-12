@@ -60,11 +60,7 @@ namespace Hammock.Tests
             Assert.IsNotNull(async);
             async.AsyncWaitHandle.WaitOne();
 
-            // This would only return the first response, not all of them
-            var response = client.EndRequest(async);
-            Assert.IsNotNull(response);
-
-            Assert.IsTrue(repeatCount < repeatTimes, "Task manifest did not complete");
+            Assert.AreEqual(repeatTimes, repeatCount, "Task manifest did not complete");
         }
 
         [Test]
