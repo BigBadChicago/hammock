@@ -7,7 +7,7 @@ namespace Hammock.Caching
 #endif
     public static class CacheFactory
     {
-#if !Smartphone && !Silverlight
+#if !Smartphone && !Silverlight && !ClientProfiles
         public static IDependencyCache AspNetCache
         {
             get { return new AspNetCache(); }

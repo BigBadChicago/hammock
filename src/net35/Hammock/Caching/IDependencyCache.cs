@@ -1,8 +1,10 @@
+#if !ClientProfiles
 using System;
 using System.Web.Caching;
 
 namespace Hammock.Caching
 {
+
     public interface IDependencyCache : ICache
     {
         void Add(string key, object value, CacheDependency dependency, DateTime absoluteExpiration,
@@ -25,7 +27,7 @@ namespace Hammock.Caching
         void Insert(string key, object value, CacheDependency dependencies, DateTime absoluteExpiration,
                     CacheItemUpdateCallback onUpdateCallback);
 #endif
-        
         void Clear();
     }
 }
+#endif

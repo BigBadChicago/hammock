@@ -51,6 +51,24 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\..\net35\Hammock\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ClientProfiles|AnyCPU'">
+    <OutputPath>bin\ClientProfiles\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SL4</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>..\..\..\bin\net40\Hammock.Silverlight.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <NoConfig>true</NoConfig>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System.Json, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -159,14 +177,8 @@
     <Compile Include="..\..\net35\Hammock\Extensions\CollectionExtensions.cs">
       <Link>Extensions\CollectionExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Extensions\FileExtensions.cs">
-      <Link>Extensions\FileExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Extensions\FormatExtensions.cs">
       <Link>Extensions\FormatExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Extensions\MathExtensions.cs">
-      <Link>Extensions\MathExtensions.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Extensions\OAuthExtensions.cs">
       <Link>Extensions\OAuthExtensions.cs</Link>
@@ -176,9 +188,6 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Extensions\ReflectionExtensions.cs">
       <Link>Extensions\ReflectionExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Extensions\RegexExtensions.cs">
-      <Link>Extensions\RegexExtensions.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Extensions\SpecificationExtensions.cs">
       <Link>Extensions\SpecificationExtensions.cs</Link>
@@ -191,9 +200,6 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Extensions\WebExtensions.cs">
       <Link>Extensions\WebExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Extensions\XmlExtensions.cs">
-      <Link>Extensions\XmlExtensions.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\IRestClient.cs">
       <Link>IRestClient.cs</Link>
@@ -219,14 +225,23 @@
     <Compile Include="..\..\net35\Hammock\Retries\IRetryCondition.cs">
       <Link>Retries\IRetryCondition.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\Retries\IRetryCustomCondition.cs">
+      <Link>Retries\IRetryCustomCondition.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Retries\NetworkError.cs">
       <Link>Retries\NetworkError.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Retries\RetryCustomCondition.cs">
+      <Link>Retries\RetryCustomCondition.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Retries\RetryErrorCondition.cs">
       <Link>Retries\RetryErrorCondition.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Retries\RetryPolicy.cs">
       <Link>Retries\RetryPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Retries\RetryResultCondition.cs">
+      <Link>Retries\RetryResultCondition.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\HammockDataContractJsonSerializer.cs">
       <Link>Serialization\HammockDataContractJsonSerializer.cs</Link>
@@ -261,8 +276,14 @@
     <Compile Include="..\..\net35\Hammock\Specifications\OrSpecification.cs">
       <Link>Specifications\OrSpecification.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\Streaming\StreamOptions.cs">
+      <Link>Streaming\StreamOptions.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Tasks\IRateLimitingRule.cs">
       <Link>Tasks\IRateLimitingRule.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Tasks\IRateLimitStatus.cs">
+      <Link>Tasks\IRateLimitStatus.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Tasks\ITaskOptions.cs">
       <Link>Tasks\ITaskOptions.cs</Link>

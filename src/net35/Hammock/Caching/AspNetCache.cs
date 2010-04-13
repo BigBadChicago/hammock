@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
+
+#if !ClientProfiles
 using System.Web.Caching;
+#endif
 
 namespace Hammock.Caching
 {
+#if !ClientProfiles
 #if !SILVERLIGHT
     [Serializable]
 #endif
@@ -124,4 +128,5 @@ namespace Hammock.Caching
 
         #endregion
     }
+#endif
 }
