@@ -253,6 +253,9 @@
     <Compile Include="..\Hammock\Tasks\IRateLimitingRule.cs">
       <Link>Tasks\IRateLimitingRule.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Tasks\IRateLimitStatus.cs">
+      <Link>Tasks\IRateLimitStatus.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Tasks\ITaskOptions.cs">
       <Link>Tasks\ITaskOptions.cs</Link>
     </Compile>

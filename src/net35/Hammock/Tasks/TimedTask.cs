@@ -1,7 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using Hammock.Web;
 
+#if SILVERLIGHT
+using Hammock.Silverlight.Compat;
+#endif
 namespace Hammock.Tasks
 {
     public class TimedTask : ITimedTask
@@ -17,7 +21,7 @@ namespace Hammock.Tasks
         public TimeSpan DueTime { get; protected set; }
         public TimeSpan Interval { get; protected set; }
         internal WebQueryAsyncResult AsyncResult { get; set; }
-        public event Action<TimedTask,EventArgs> Stopped;
+        public event Action<TimedTask, EventArgs> Stopped;
 
         public TimedTask(TimeSpan due,
                          TimeSpan interval,
@@ -125,7 +129,7 @@ namespace Hammock.Tasks
         }
         protected virtual void OnStopped(EventArgs e)
         {
-            if ( Stopped != null )
+            if (Stopped != null)
             {
                 Stopped(this, e);
             }
@@ -152,7 +156,7 @@ namespace Hammock.Tasks
             base(due, interval, iterations, action)
         {
             RateLimitingRule = rateLimitingRule;
-            ContinueOnError = continueOnError; 
+            ContinueOnError = continueOnError;
         }
 
         protected override void Start(bool continueOnError)
@@ -162,16 +166,53 @@ namespace Hammock.Tasks
             {
                 try
                 {
-                    var skip = ShouldSkipForRateLimiting();
-                    Action(skip);
-                    lock (Lock)
+                    //[JD] 
+                    //only allow the task to run once concurrently. 
+                    //if a second task attempts to enter the monitor while
+                    //the first one is still running, simply drop it 
+                    if (Monitor.TryEnter(Lock))
                     {
-                        count++;
-
-                        if (Iterations > 0 && count >= Iterations)
+                        try
                         {
-                            Stop();
+#if TRACE
+                            Trace.WriteLine("Running a periodic task");
+#endif
+                            var skip = RateLimitingRule.ShouldSkipForRateLimiting();
+#if TRACE
+                            Trace.WriteLine(string.Format("{0} Evaluated rate limiting predicate and result was {1}",
+                                                          DateTime.Now.ToShortTimeString(),
+                                                          skip ? "'skip'" : "'don't skip'"));
+#endif
+                            Action(skip);
+                            var newInterval = RateLimitingRule.CalculateNewInterval();
+#if TRACE
+                            Trace.WriteLine(string.Format("{0} Calculated new interval for throttled task and result was: {1}",
+                                                          DateTime.Now.ToShortTimeString(),
+                                                          newInterval.HasValue ? newInterval.Value.ToString() : "'no change'"));
+#endif
+                            count++;
+
+                            if (Iterations > 0 && count >= Iterations)
+                            {
+                                Stop();
+                            }
+                            else if (newInterval.HasValue)
+                            {
+                                Timer.Change((int)newInterval.Value.TotalMilliseconds,
+                                                  (int)newInterval.Value.TotalMilliseconds);
+                            }
                         }
+                        finally
+                        {
+                            Monitor.Exit(Lock);
+                        }
+                    }
+                    else
+                    {
+#if TRACE
+                        Trace.WriteLine("Skipping recurring task because the previous iteration is still active");
+#endif
+                        Action(true);
                     }
                 }
                 catch (Exception ex)
@@ -195,26 +236,5 @@ namespace Hammock.Tasks
         public IRateLimitingRule<T> RateLimitingRule { get; set; }
 
         #endregion
-
-        private bool ShouldSkipForRateLimiting()
-        {
-            // [JD]: Only pre-skip via predicate; percentage based adjusts rate after the call
-            if (RateLimitingRule == null || RateLimitingRule.RateLimitType != RateLimitType.ByPredicate)
-            {
-                return false;
-            }
-
-            if (RateLimitingRule.RateLimitIf == null)
-            {
-                throw new InvalidOperationException("Rule is set to use predicate, but no predicate is defined.");
-            }
-
-            var status = default(T);
-            if (RateLimitingRule.GetRateLimitStatus != null)
-            {
-                status = RateLimitingRule.GetRateLimitStatus();
-            }
-            return !RateLimitingRule.RateLimitIf(status);
-        }
     }
 }

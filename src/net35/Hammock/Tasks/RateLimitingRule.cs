@@ -47,5 +47,47 @@ namespace Hammock.Tasks
         public Predicate<T> RateLimitIf { get; private set; }
 
         #endregion
+
+        public bool ShouldSkipForRateLimiting()
+        {
+            // [JD]: Only pre-skip via predicate; percentage based adjusts rate after the call
+            if (RateLimitType != RateLimitType.ByPredicate)
+            {
+                return false;
+            }
+
+            if (RateLimitIf == null)
+            {
+                throw new InvalidOperationException("Rule is set to use predicate, but no predicate is defined.");
+            }
+
+            var status = default(T);
+            if (GetRateLimitStatus != null)
+            {
+                status = GetRateLimitStatus();
+            }
+            return !RateLimitIf(status);
+        }
+
+        public TimeSpan? CalculateNewInterval()
+        {
+            if (RateLimitType != RateLimitType.ByPercent)
+            {
+                return null;
+            }
+
+            if (!LimitToPercentOfTotal.HasValue)
+            {
+                return null;
+            }
+            var currentRateLimit = (IRateLimitStatus)GetRateLimitStatus();
+            if (currentRateLimit.RemainingUses == 0)
+            {
+                return currentRateLimit.NextReset - DateTime.Now;
+            }
+            var secondsUntilNextReset = (currentRateLimit.NextReset - DateTime.Now).TotalSeconds;
+            var desiredInterval = (int)Math.Ceiling(secondsUntilNextReset * (LimitToPercentOfTotal.Value / 100));
+            return new TimeSpan(0, 0, 0, desiredInterval);
+        }
     }
 }

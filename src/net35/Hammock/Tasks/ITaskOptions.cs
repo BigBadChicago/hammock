@@ -4,8 +4,8 @@ namespace Hammock.Tasks
 {
     public interface ITaskOptions<T>
     {
-        RateLimitType RateLimitType { get; set; }
-        double RateLimitPercent { get; set; }
+        double? RateLimitPercent { get; set; }
+        RateLimitType RateLimitType { get; }
         Predicate<T> RateLimitingPredicate { get; }
         Func<T> GetRateLimitStatus { get; }
     }
