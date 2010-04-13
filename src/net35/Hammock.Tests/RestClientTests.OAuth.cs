@@ -122,11 +122,47 @@ namespace Hammock.Tests
             var request = new RestRequest
             {
                 Credentials = OAuthForTwitterProtectedResource,
-                Path = "/statuses/update.xml",
+                Path = "/statuses/update.json",
                 Method = WebMethod.Post
             };
 
-            request.AddParameter("status", "something #requiring #encoding @!!!1111"); //"string.Format("OAuth Post at {0}. tweet tweet", DateTime.Now.ToShortTimeString()));
+            request.AddParameter("status", string.Format("something #requiring #encoding @! {0}", DateTime.Now.ToShortTimeString()));
+            
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to post successfully");
+        }
+
+        [Test]
+        [Category("OAuth")]
+        public void Can_make_oauth_post_requests_with_post_parameters_synchronously_with_defined_path()
+        {
+            if (_ignoreTestsThatPostToTwitter)
+            {
+                Assert.Ignore("This test makes a live update - enable in app.config to run this test");
+            }
+            ServicePointManager.Expect100Continue = false;
+
+            var client = new RestClient
+            {
+                UserAgent = "Hammock"
+            };
+
+            var update = Uri.EscapeDataString(string.Format(
+                "something #requiring #encoding @! at {0}", DateTime.Now.ToShortTimeString()
+                                                            ));
+                       
+            var path = string.Format(
+                "http://api.twitter.com/1/statuses/update.json?status={0}", 
+                update);
+
+            var request = new RestRequest
+            {
+                Credentials = OAuthForTwitterProtectedResource,
+                Path = path,
+                Method = WebMethod.Post
+            };
 
             var response = client.Request(request);
             Assert.IsNotNull(response);

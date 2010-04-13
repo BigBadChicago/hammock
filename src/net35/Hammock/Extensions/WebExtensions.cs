@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using Hammock.Attributes;
 using Hammock.Attributes.Validation;
 using Hammock.Web;
@@ -37,6 +38,30 @@ namespace Hammock.Extensions
                     }
                 }
             }
+        }
+
+        public static Uri UriMinusQuery(this Uri uri, out WebParameterCollection parameters)
+        {
+            var sb = new StringBuilder();
+
+            parameters = new WebParameterCollection();
+            var query = uri.Query.ParseQueryString();
+            foreach(var key in query.Keys)
+            {
+                parameters.Add(key, query[key]);
+            }
+
+            var port = uri.Scheme.Equals("http") && uri.Port != 80 || 
+                       uri.Scheme.Equals("https") && uri.Port != 443 ? 
+                       ":" + uri.Port : "";
+
+            sb.Append(uri.Scheme)
+                .Append("://")
+                .Append(port)
+                .Append(uri.Host)
+                .Append(uri.AbsolutePath);
+
+            return new Uri(sb.ToString());
         }
 
         public static string ToBasicAuthorizationHeader(string username, string password)

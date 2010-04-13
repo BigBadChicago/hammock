@@ -87,15 +87,16 @@ namespace Hammock
             var path = Path.IsNullOrBlank()
                            ? client.Path.IsNullOrBlank() ? "" : client.Path
                            : Path;
+            
             var versionPath = VersionPath.IsNullOrBlank()
                                   ? client.VersionPath.IsNullOrBlank() ? "" : client.VersionPath
                                   : VersionPath;
-            var hasAuthority = client.Authority.IsNullOrBlank();
+            var skipAuthority = client.Authority.IsNullOrBlank();
 
-            sb.Append(hasAuthority ? "" : client.Authority);
-            sb.Append(hasAuthority ? "" : client.Authority.EndsWith("/") ? "" : "/");
-            sb.Append(versionPath.IsNullOrBlank() ? "" : versionPath);
-            if(!versionPath.IsNullOrBlank())
+            sb.Append(skipAuthority ? "" : client.Authority);
+            sb.Append(skipAuthority ? "" : client.Authority.EndsWith("/") ? "" : "/");
+            sb.Append(skipAuthority ? "" : versionPath.IsNullOrBlank() ? "" : versionPath);
+            if(!skipAuthority && !versionPath.IsNullOrBlank())
             {
                 sb.Append(versionPath.EndsWith("/") ? "" : "/");
             }
@@ -103,6 +104,14 @@ namespace Hammock
 
             Uri uri;
             Uri.TryCreate(sb.ToString(), UriKind.RelativeOrAbsolute, out uri);
+
+            // [DC]: If the path came in with parameters attached, we should scrub those
+            WebParameterCollection parameters;
+            uri = uri.UriMinusQuery(out parameters);
+            foreach(var parameter in parameters)
+            {
+                Parameters.Add(parameter);
+            }
 
             return uri;
         }

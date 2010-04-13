@@ -98,7 +98,6 @@ namespace Hammock
                 _firstTry = false;
             }
 
-
             while (_remainingRetries > 0)
             {
                 var url = uri.ToString();
