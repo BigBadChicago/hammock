@@ -86,7 +86,8 @@ namespace Hammock.Tasks
                 return currentRateLimit.NextReset - DateTime.Now;
             }
             var secondsUntilNextReset = (currentRateLimit.NextReset - DateTime.Now).TotalSeconds;
-            var desiredInterval = (int)Math.Ceiling(secondsUntilNextReset * (LimitToPercentOfTotal.Value / 100));
+            var desiredRetriesBeforeReset = currentRateLimit.RemainingUses * LimitToPercentOfTotal.Value;
+            var desiredInterval = (int)Math.Floor(secondsUntilNextReset / desiredRetriesBeforeReset);
             return new TimeSpan(0, 0, 0, desiredInterval);
         }
     }
