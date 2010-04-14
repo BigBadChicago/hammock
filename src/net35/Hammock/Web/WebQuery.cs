@@ -145,7 +145,7 @@ namespace Hammock.Web
             Result.Response = e.Response;
             Result.RequestHttpMethod = Method.ToUpper();
             Result.IsMock = WebResponse is MockHttpWebResponse;
-
+            Result.TimedOut = TimedOut; 
             int statusCode;
             string statusDescription;
             System.Net.WebHeaderCollection headers;

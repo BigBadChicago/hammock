@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Hammock.Extras;
+using Hammock.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -122,6 +123,65 @@ namespace Hammock.Tests
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.ContentEntity);
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+        }
+
+        [Test]
+        public void Can_timeout_on_asynchronous_query()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://failwhale.diller.ca",
+            };
+
+            var request = new RestRequest
+            {
+                Path = "timeout.php"
+            };
+            request.AddParameter("delay", "6");
+            request.Timeout = 3.Seconds(); 
+
+            var callback = new RestCallback(
+                (req, resp) =>
+                {
+                    Assert.IsNotNull(req);
+                    Assert.IsNotNull(resp);
+                }
+            );
+
+            var asyncResult = client.BeginRequest(request, callback);
+            var response = client.EndRequest(asyncResult);
+                   
+            Assert.IsTrue(response.TimedOut);
+        }
+
+        [Test]
+        public void Can_not_timeout_on_asynchronous_query_with_timeout_set()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://failwhale.diller.ca",
+            };
+
+            var request = new RestRequest
+            {
+                Path = "timeout.php"
+            };
+            request.AddParameter("delay", "1");
+            request.Timeout = 4.Seconds();
+
+            var callback = new RestCallback(
+                (req, resp) =>
+                {
+                    Assert.IsNotNull(req);
+                    Assert.IsNotNull(resp);
+                }
+            );
+
+            var asyncResult = client.BeginRequest(request, callback);
+            var response = client.EndRequest(asyncResult);
+
+
+            Assert.IsFalse(response.TimedOut);
         }
     }
 }

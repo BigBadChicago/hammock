@@ -26,6 +26,7 @@ namespace Hammock.Web
         public virtual Uri ResponseUri { get; set; }
 
         public virtual bool IsMock { get; set; }
+        public virtual bool TimedOut { get; set; }
 
         // Set by RestClient
         public virtual WebQueryResult PreviousResult

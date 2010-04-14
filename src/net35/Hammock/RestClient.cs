@@ -1412,6 +1412,7 @@ namespace Hammock
                     response.ContentType = result.ResponseType;
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
+                    response.TimedOut = result.TimedOut; 
                     return response;
                 };
 
