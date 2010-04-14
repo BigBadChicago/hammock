@@ -115,5 +115,16 @@ namespace Hammock.Web.Mocks
         {
             get { return _requestUri; }
         }
+
+#if !SILVERLIGHT
+        public override int Timeout
+        {
+            get
+            {
+                return int.MaxValue;
+            }
+        }
+#endif
+
     }
 }
