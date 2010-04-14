@@ -174,7 +174,6 @@
     <Compile Include="Tasks\RateLimitType.cs" />
     <Compile Include="Tasks\TaskOptions.cs" />
     <Compile Include="Tasks\TimedTask.cs" />
-    <Compile Include="Tasks\TimedTaskCollection.cs" />
     <Compile Include="Validation\ValidEmailSpecification.cs" />
     <Compile Include="Web\Mocks\MockWebRequestFactory.cs" />
     <Compile Include="Web\WebHeader.cs" />

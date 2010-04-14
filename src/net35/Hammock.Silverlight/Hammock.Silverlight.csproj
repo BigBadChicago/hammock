@@ -274,9 +274,6 @@
     <Compile Include="..\Hammock\Tasks\TimedTask.cs">
       <Link>Tasks\TimedTask.cs</Link>
     </Compile>
-    <Compile Include="..\Hammock\Tasks\TimedTaskCollection.cs">
-      <Link>Tasks\TimedTaskCollection.cs</Link>
-    </Compile>
     <Compile Include="..\Hammock\Validation\ValidationException.cs">
       <Link>Validation\ValidationException.cs</Link>
     </Compile>
