@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Hammock.Extras;
 using Hammock.Tests.Helpers;
+using Hammock.Web;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -151,6 +152,35 @@ namespace Hammock.Tests
             var asyncResult = client.BeginRequest(request, callback);
             var response = client.EndRequest(asyncResult);
                    
+            Assert.IsTrue(response.TimedOut);
+        }
+
+        [Test]
+        public void Can_timeout_on_asynchronous_post()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://failwhale.diller.ca",
+            };
+
+            var request = new RestRequest
+            {
+                Path = "timeout.php"
+            };
+            request.AddParameter("delay", "6");
+            request.Timeout = 3.Seconds();
+
+            var callback = new RestCallback(
+                (req, resp) =>
+                {
+                    Assert.IsNotNull(req);
+                    Assert.IsNotNull(resp);
+                }
+            );
+            request.Method = WebMethod.Post;
+            var asyncResult = client.BeginRequest(request, callback);
+            var response = client.EndRequest(asyncResult);
+
             Assert.IsTrue(response.TimedOut);
         }
 
