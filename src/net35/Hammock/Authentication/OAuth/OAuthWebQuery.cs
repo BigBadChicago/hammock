@@ -368,7 +368,7 @@ namespace Hammock.Authentication.OAuth
 #endif
         private string RestoreUrlParams(string url, IEnumerable<WebPair> parameters)
         {
-            if (Method != WebMethod.Post || Method != WebMethod.Put)
+            if (Method != WebMethod.Post && Method != WebMethod.Put)
             {
                 var builder = new StringBuilder("?");
                 bool first = true;
