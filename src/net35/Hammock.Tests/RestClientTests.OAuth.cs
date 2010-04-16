@@ -99,8 +99,31 @@ namespace Hammock.Tests
             var response = client.Request(request);
             Assert.IsNotNull(response);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
-            Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to post successfully");
+            Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to fetch successfully");
         }
+
+        [Test]
+        [Category("OAuth")]
+        public void Can_make_oauth_get_request_with_url_parameters()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com/",
+                VersionPath = "1",
+                Credentials = OAuthForTwitterProtectedResource,
+            };
+
+            var request = new RestRequest
+            {
+                Path = "statuses/friends_timeline.json?since_id=200"
+            };
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+            Assert.IsFalse(response.Content.Contains("<error>"), "Did not appear to fetch successfully");
+        }
+
 
         [Test]
         [Category("OAuth")]

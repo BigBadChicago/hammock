@@ -90,7 +90,6 @@ namespace Hammock
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
             SetQueryMeta(request, query);
-
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
             {
@@ -144,6 +143,8 @@ namespace Hammock
             _firstTry = _remainingRetries == 0;
             return query;
         }
+
+        
 
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
         {
@@ -1412,7 +1413,7 @@ namespace Hammock
                     response.ContentType = result.ResponseType;
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
-                    response.TimedOut = result.TimedOut; 
+                    response.TimedOut = result.TimedOut;
                     return response;
                 };
 

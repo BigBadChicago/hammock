@@ -361,11 +361,30 @@ namespace Hammock.Authentication.OAuth
 
         public override string Request(string url, out WebException exception)
         {
-            RecalculateProtectedResourceSignature(url); 
+            RecalculateProtectedResourceSignature(url);
+            url = RestoreUrlParams(url, Parameters);
             return base.Request(url, out exception);
         }
 #endif
-
+        private string RestoreUrlParams(string url, IEnumerable<WebPair> parameters)
+        {
+            if (Method != WebMethod.Post || Method != WebMethod.Put)
+            {
+                var builder = new StringBuilder("?");
+                bool first = true;
+                foreach (var param in parameters.Where(p => !p.Name.ToLower().StartsWith("oauth_")))
+                {
+                    if (!first)
+                    {
+                        builder.Append("&");
+                    }
+                    first = false;
+                    builder.Append(param.Name).Append('=').Append(param.Value);
+                }
+                url = url + builder;
+            }
+            return url;
+        }
         private void RecalculateProtectedResourceSignature(string url)
         {
             var info = (OAuthWebQueryInfo) Info;
