@@ -52,6 +52,7 @@ namespace Hammock.Web
         public DecompressionMethods DecompressionMethods { get; set; }
         public virtual TimeSpan? RequestTimeout { get; set; }
         public virtual WebQueryResult Result { get; internal set; }
+        public virtual object UserState { get; internal set; }
 
 #if SILVERLIGHT
         public virtual bool HasElevatedPermissions { get; set; }
@@ -1312,8 +1313,11 @@ namespace Hammock.Web
             }
         }
 #endif
+
         public virtual WebQueryAsyncResult RequestAsync(string url, object userState)
         {
+            UserState = userState;
+
             switch (Method)
             {
                 case WebMethod.Get:
@@ -1334,6 +1338,8 @@ namespace Hammock.Web
                                                         ICache cache,
                                                         object userState)
         {
+            UserState = userState;
+
             switch (Method)
             {
                 case WebMethod.Get:
@@ -1357,6 +1363,8 @@ namespace Hammock.Web
                                                         DateTime absoluteExpiration,
                                                         object userState)
         {
+            UserState = userState;
+
             switch (Method)
             {
                 case WebMethod.Get:
@@ -1380,6 +1388,8 @@ namespace Hammock.Web
                                                         TimeSpan slidingExpiration,
                                                         object userState)
         {
+            UserState = userState;
+
             switch (Method)
             {
                 case WebMethod.Get:
@@ -1397,14 +1407,18 @@ namespace Hammock.Web
             }
         }
 
-        public virtual WebQueryAsyncResult RequestAsync(string url, IEnumerable<HttpPostParameter> parameters)
+        public virtual WebQueryAsyncResult RequestAsync(string url, 
+                                                        IEnumerable<HttpPostParameter> parameters,
+                                                        object userState)
         {
+            UserState = userState;
+
             switch (Method)
             {
                 case WebMethod.Put:
-                    return ExecutePostOrPutAsync(PostOrPut.Put, url, parameters);
+                    return ExecutePostOrPutAsync(PostOrPut.Put, url, parameters, userState);
                 case WebMethod.Post:
-                    return ExecutePostOrPutAsync(PostOrPut.Post, url, parameters);
+                    return ExecutePostOrPutAsync(PostOrPut.Post, url, parameters, userState);
                 default:
                     throw new NotSupportedException("Only HTTP POSTS can use multi-part forms");
             }

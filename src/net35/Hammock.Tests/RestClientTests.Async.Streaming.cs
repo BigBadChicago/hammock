@@ -32,7 +32,7 @@ namespace Hammock.Tests
 
             var responses = 0;
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                     {
                         responses++;
                     }

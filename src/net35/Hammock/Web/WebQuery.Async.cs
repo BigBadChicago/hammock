@@ -463,15 +463,16 @@ namespace Hammock.Web
         {
             WebRequest request;
             byte[] content;
+            object userState;
             Triplet<ICache, object, string> store;
 
-            var state = asyncResult.AsyncState as Pair<WebRequest, byte[]>;
+            var state = asyncResult.AsyncState as Triplet<WebRequest, byte[], object>;
             if (state == null)
             {
                 // No expiration specified
-                if (asyncResult is Pair<WebRequest, Triplet<byte[], ICache, string>>)
+                if (asyncResult is Triplet<WebRequest, Triplet<byte[], ICache, string>, object>)
                 {
-                    var cacheScheme = (Pair<WebRequest, Triplet<byte[], ICache, string>>) asyncResult;
+                    var cacheScheme = (Triplet<WebRequest, Triplet<byte[], ICache, string>, object>)asyncResult;
                     var cache = cacheScheme.Second.Second;
 
                     var url = cacheScheme.First.RequestUri.ToString();
@@ -488,6 +489,7 @@ namespace Hammock.Web
 
                     request = cacheScheme.First;
                     content = cacheScheme.Second.First;
+                    userState = cacheScheme.Third;
                     store = new Triplet<ICache, object, string>
                                 {
                                     First = cache,
@@ -497,9 +499,9 @@ namespace Hammock.Web
                 }
                 else
                     // Absolute expiration specified
-                    if (asyncResult is Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>)
+                    if (asyncResult is Triplet<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>, object>)
                     {
-                        var cacheScheme = (Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>) asyncResult;
+                        var cacheScheme = (Triplet<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>, object>)asyncResult;
                         var url = cacheScheme.First.RequestUri.ToString();
                         var cache = cacheScheme.Second.Second.First;
                         var expiry = cacheScheme.Second.Second.Second;
@@ -517,6 +519,7 @@ namespace Hammock.Web
 
                         request = cacheScheme.First;
                         content = cacheScheme.Second.First;
+                        userState = cacheScheme.Third;
                         store = new Triplet<ICache, object, string>
                                     {
                                         First = cache,
@@ -526,9 +529,9 @@ namespace Hammock.Web
                     }
                     else
                         // Sliding expiration specified
-                        if (asyncResult is Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>)
+                        if (asyncResult is Triplet<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>, object>)
                         {
-                            var cacheScheme = (Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>) asyncResult;
+                            var cacheScheme = (Triplet<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>, object>)asyncResult;
                             var url = cacheScheme.First.RequestUri.ToString();
                             var cache = cacheScheme.Second.Second.First;
                             var expiry = cacheScheme.Second.Second.Second;
@@ -546,6 +549,7 @@ namespace Hammock.Web
 
                             request = cacheScheme.First;
                             content = cacheScheme.Second.First;
+                            userState = cacheScheme.Third;
                             store = new Triplet<ICache, object, string>
                                         {
                                             First = cache,
@@ -564,6 +568,7 @@ namespace Hammock.Web
             {
                 request = state.First;
                 content = state.Second;
+                userState = state.Third;
                 store = null;
             }
 
@@ -578,10 +583,11 @@ namespace Hammock.Web
                 stream.Close();
 
                 request.BeginGetResponse(PostAsyncResponseCallback,
-                                         new Pair<WebRequest, Triplet<ICache, object, string>>
+                                         new Triplet<WebRequest, Triplet<ICache, object, string>, object>
                                              {
                                                  First = request,
-                                                 Second = store
+                                                 Second = store,
+                                                 Third = userState
                                              });
             }
         }
@@ -643,14 +649,19 @@ namespace Hammock.Web
             }
         }
 
-        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url, object prefixKey)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url, object userState)
         {
             WebResponse = null;
 
             byte[] content;
             var request = BuildPostOrPutWebRequest(method, url, out content);
 
-            var state = new Pair<WebRequest, byte[]> {First = request, Second = content};
+            var state = new Triplet<WebRequest, byte[], object>
+                            {
+                                First = request,
+                                Second = content,
+                                Third = userState
+                            };
 
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
@@ -671,7 +682,12 @@ namespace Hammock.Web
             byte[] content;
 
             var request = BuildMultiPartFormRequest(method, url, parameters, out content);
-            var state = new Pair<WebRequest, byte[]> {First = request, Second = content};
+            var state = new Triplet<WebRequest, byte[], object>
+                            {
+                                First = request,
+                                Second = content,
+                                Third = userState
+                            };
             var args = new WebQueryRequestEventArgs(url);
 
             OnQueryRequest(args);

@@ -25,7 +25,7 @@ namespace Hammock.Tests
             };
 
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                     {
                         Assert.IsNotNull(req);
                         Assert.IsNotNull(resp);
@@ -33,6 +33,38 @@ namespace Hammock.Tests
                 );
 
             var asyncResult = client.BeginRequest(request, callback);
+            var response = client.EndRequest(asyncResult);
+
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+        }
+
+        [Test]
+        [Category("Async")]
+        public void Can_make_basic_auth_request_with_user_state_asynchronously()
+        {
+            var client = new RestClient
+            {
+                Credentials = BasicAuthForTwitter,
+                Authority = "http://api.twitter.com",
+                VersionPath = "1"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "statuses/home_timeline.json"
+            };
+
+            var callback = new RestCallback(
+                (req, resp, state) =>
+                    {
+                        Assert.IsNotNull(req);
+                        Assert.IsNotNull(resp);
+                        Assert.AreEqual(12345, state);
+                    }
+                );
+
+            var asyncResult = client.BeginRequest(request, callback, 12345);
             var response = client.EndRequest(asyncResult);
 
             Assert.IsNotNull(response);
@@ -59,7 +91,7 @@ namespace Hammock.Tests
             request.AddHeader("Only", "on this request");
 
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                     {
                         Assert.IsNotNull(req);
                         Assert.IsNotNull(resp);
@@ -76,7 +108,7 @@ namespace Hammock.Tests
         public void Can_use_client_standalone_asynchronously()
         {
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                 {
                     Assert.IsNotNull(req);
                     Assert.IsNotNull(resp);
@@ -100,7 +132,7 @@ namespace Hammock.Tests
         public void Can_use_client_standalone_with_type_asynchronously()
         {
             var callback = new RestCallback<TwitterRateLimitStatus>(
-                (req, resp) =>
+                (req, resp, state) =>
                 {
                     Assert.IsNotNull(req);
                     Assert.IsNotNull(resp);
@@ -142,7 +174,7 @@ namespace Hammock.Tests
             request.Timeout = 3.Seconds(); 
 
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                 {
                     Assert.IsNotNull(req);
                     Assert.IsNotNull(resp);
@@ -171,7 +203,7 @@ namespace Hammock.Tests
             request.Timeout = 3.Seconds();
 
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                 {
                     Assert.IsNotNull(req);
                     Assert.IsNotNull(resp);
@@ -200,7 +232,7 @@ namespace Hammock.Tests
             request.Timeout = 4.Seconds();
 
             var callback = new RestCallback(
-                (req, resp) =>
+                (req, resp, state) =>
                 {
                     Assert.IsNotNull(req);
                     Assert.IsNotNull(resp);

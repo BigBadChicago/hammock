@@ -532,7 +532,7 @@ namespace Hammock
                 throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
             }
 
-            var tag = (Pair<RestRequest, RestCallback>)webResult.Tag;
+            var tag = (Triplet<RestRequest, RestCallback, object>)webResult.Tag;
 
             if (RequestExpectsMock(tag.First))
             {
@@ -570,7 +570,7 @@ namespace Hammock
                 throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
             }
 
-            var tag = (Pair<RestRequest, RestCallback<T>>)webResult.Tag;
+            var tag = (Triplet<RestRequest, RestCallback<T>, object>)webResult.Tag;
 
             if (RequestExpectsMock(tag.First))
             {
@@ -603,11 +603,11 @@ namespace Hammock
         private WebQueryAsyncResult CompleteWithMockWebResponse<T>(
             IAsyncResult result,
             IAsyncResult webResult,
-            Pair<RestRequest,
-            RestCallback<T>> tag)
+            Triplet<RestRequest, RestCallback<T>, object> tag)
         {
             var webResponse = (WebResponse)webResult.AsyncState;
             var restRequest = tag.First;
+            var userState = tag.Third;
 
             string content;
             using (var stream = webResponse.GetResponseStream())
@@ -651,7 +651,7 @@ namespace Hammock
             var callback = tag.Second;
             if (callback != null)
             {
-                callback.Invoke(restRequest, restResponse);
+                callback.Invoke(restRequest, restResponse, userState);
             }
             parentResult.Signal();
             return parentResult;
@@ -660,10 +660,11 @@ namespace Hammock
         private WebQueryAsyncResult CompleteWithMockWebResponse(
             IAsyncResult result,
             IAsyncResult webResult,
-            Pair<RestRequest, RestCallback> tag)
+            Triplet<RestRequest, RestCallback, object> tag)
         {
             var webResponse = (WebResponse)webResult.AsyncState;
             var restRequest = tag.First;
+            var userState = tag.Third;
 
             string content;
             using (var stream = webResponse.GetResponseStream())
@@ -707,7 +708,7 @@ namespace Hammock
             var callback = tag.Second;
             if (callback != null)
             {
-                callback.Invoke(restRequest, restResponse);
+                callback.Invoke(restRequest, restResponse, userState);
             }
             parentResult.Signal();
             return parentResult;
@@ -777,7 +778,7 @@ namespace Hammock
                                       : 10;
 
                 beginRequest = () => BeginRequestStreamFunction(
-                   request, query, url, callback, duration, resultCount
+                   request, query, url, callback, duration, resultCount, userState
                    );
 
                 asyncResult = beginRequest.Invoke();
@@ -881,7 +882,7 @@ namespace Hammock
                                       : 10;
 
                 beginRequest = () => BeginRequestStreamFunction(
-                   request, query, url, callback, duration, resultCount
+                   request, query, url, callback, duration, resultCount, userState
                    );
 
                 asyncResult = beginRequest.Invoke();
@@ -963,10 +964,11 @@ namespace Hammock
                 result = query.RequestAsync(url, userState);
             }
 
-            result.Tag = new Pair<RestRequest, RestCallback>
+            result.Tag = new Triplet<RestRequest, RestCallback, object>
             {
                 First = request,
-                Second = callback
+                Second = callback,
+                Third = userState
             };
 
             return result;
@@ -989,10 +991,10 @@ namespace Hammock
             result.IsCompleted = true;
             if (callback != null && !wasStreaming)
             {
-                callback.Invoke(request, response);
+                callback.Invoke(request, response, query.UserState);
             }
-            //recurring tasks are only signalled when cancelled 
-            //or when they reach their iteration limit
+            // Recurring tasks are only signalled when cancelled 
+            // or when they reach their iteration limit
             lock (_timedTasksLock)
             {
                 if (!_tasks.ContainsKey(request))
@@ -1018,7 +1020,7 @@ namespace Hammock
             result.IsCompleted = true;
             if (callback != null && !wasStreaming)
             {
-                callback.Invoke(request, response);
+                callback.Invoke(request, response, query.UserState);
             }
             //recurring tasks are only signalled when cancelled 
             //or when they reach their iteration limit
@@ -1059,10 +1061,11 @@ namespace Hammock
                 result = query.RequestAsync(url, userState);
             }
 
-            result.Tag = new Pair<RestRequest, RestCallback<T>>
+            result.Tag = new Triplet<RestRequest, RestCallback<T>, object>
             {
                 First = request,
-                Second = callback
+                Second = callback,
+                Third = userState
             };
             return result;
         }
@@ -1072,13 +1075,15 @@ namespace Hammock
                                                                          string url,
                                                                          RestCallback<T> callback,
                                                                          TimeSpan duration,
-                                                                         int resultsPerCallback)
+                                                                         int resultsPerCallback,
+                                                                         object userState)
         {
             var result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
-            result.Tag = new Pair<RestRequest, RestCallback<T>>
+            result.Tag = new Triplet<RestRequest, RestCallback<T>, object>
             {
                 First = request,
-                Second = callback
+                Second = callback,
+                Third = userState
             };
             return result;
         }
@@ -1088,13 +1093,15 @@ namespace Hammock
                                                                       string url,
                                                                       RestCallback callback,
                                                                       TimeSpan duration,
-                                                                      int resultsPerCallback)
+                                                                      int resultsPerCallback,
+                                                                      object userState)
         {
             var result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
-            result.Tag = new Pair<RestRequest, RestCallback>
+            result.Tag = new Triplet<RestRequest, RestCallback, object>
             {
                 First = request,
-                Second = callback
+                Second = callback,
+                Third = userState
             };
             return result;
         }
@@ -1261,7 +1268,9 @@ namespace Hammock
                                                       }
                                                       else
                                                       {
-                                                          callback(request, new RestResponse { SkippedDueToRateLimitingRule = true });
+                                                          callback(request, 
+                                                                   new RestResponse { SkippedDueToRateLimitingRule = true }, 
+                                                                   userState);
                                                       }
                                                   });
 

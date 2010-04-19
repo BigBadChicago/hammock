@@ -72,7 +72,7 @@ namespace Hammock.Tests
 
             var repeatCount = 0;
             var async = client.BeginRequest(request,
-                                            (req, resp) =>
+                                            (req, resp, state) =>
                                                 {
                                                     var rateLimit = resp.ContentEntity as TwitterRateLimitStatus;
                                                     Assert.IsNotNull(rateLimit);
@@ -120,7 +120,7 @@ namespace Hammock.Tests
             var success = false;
             var repeatCount = 0;
             var async = client.BeginRequest(request,
-                                            (req, resp) =>
+                                            (req, resp, state) =>
                                             {
                                                 Assert.IsTrue(resp.SkippedDueToRateLimitingRule);
                                                 repeatCount++;
@@ -183,7 +183,7 @@ namespace Hammock.Tests
             var repeatCount = 0;
             var block = new AutoResetEvent(false);//signalled after first callback
             var async = client.BeginRequest(request,
-                                            (req, resp) =>
+                                            (req, resp, state) =>
                                             {
                                                 if (!resp.SkippedDueToRateLimitingRule)
                                                 {
