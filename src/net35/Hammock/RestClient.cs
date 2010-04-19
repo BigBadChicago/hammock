@@ -1349,7 +1349,11 @@ namespace Hammock
             return true;
         }
 
-        private bool BeginRequestWithCache(RestBase request, WebQuery query, string url, out WebQueryAsyncResult result, object userState)
+        private bool BeginRequestWithCache(RestBase request, 
+                                           WebQuery query, 
+                                           string url, 
+                                           out WebQueryAsyncResult result, 
+                                           object userState)
         {
             var cache = GetCache(request);
             if (cache == null)
@@ -1372,14 +1376,14 @@ namespace Hammock
             switch (options.Mode)
             {
                 case CacheMode.NoExpiration:
-                    result = query.RequestAsync(url, key, cache);
+                    result = query.RequestAsync(url, key, cache, userState);
                     break;
                 case CacheMode.AbsoluteExpiration:
                     var expiry = options.Duration.FromNow();
-                    result = query.RequestAsync(url, key, cache, expiry);
+                    result = query.RequestAsync(url, key, cache, expiry, userState);
                     break;
                 case CacheMode.SlidingExpiration:
-                    result = query.RequestAsync(url, key, cache, options.Duration);
+                    result = query.RequestAsync(url, key, cache, options.Duration, userState);
                     break;
                 default:
                     throw new NotSupportedException("Unknown CacheMode");

@@ -1330,19 +1330,20 @@ namespace Hammock.Web
         }
 
         public virtual WebQueryAsyncResult RequestAsync(string url, 
-                                                 string key, 
-                                                 ICache cache)
+                                                        string key, 
+                                                        ICache cache,
+                                                        object userState)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, userState);
                 case WebMethod.Put:
-                    return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache);
+                    return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, userState);
                 case WebMethod.Post:
-                    return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache);
+                    return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())
@@ -1351,9 +1352,10 @@ namespace Hammock.Web
         }
 
         public virtual WebQueryAsyncResult RequestAsync(string url,
-                                                 string key, 
-                                                 ICache cache, 
-                                                 DateTime absoluteExpiration)
+                                                        string key, 
+                                                        ICache cache, 
+                                                        DateTime absoluteExpiration,
+                                                        object userState)
         {
             switch (Method)
             {
@@ -1373,20 +1375,21 @@ namespace Hammock.Web
         }
 
         public virtual WebQueryAsyncResult RequestAsync(string url, 
-                                                 string key, 
-                                                 ICache cache, 
-                                                 TimeSpan slidingExpiration)
+                                                        string key, 
+                                                        ICache cache, 
+                                                        TimeSpan slidingExpiration,
+                                                        object userState)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, slidingExpiration);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Post:
-                    return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, slidingExpiration);
+                    return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Put:
-                    return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, slidingExpiration);
+                    return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, slidingExpiration);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, slidingExpiration, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())

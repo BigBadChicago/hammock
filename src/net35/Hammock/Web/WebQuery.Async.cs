@@ -14,15 +14,16 @@ namespace Hammock.Web
 {
     public partial class WebQuery
     {
-        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url, object prefixKey)
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url, object userState)
         {
             WebResponse = null;
 
             var request = BuildGetOrDeleteWebRequest(method, url);
-            var state = new Pair<WebRequest, object>
+            var state = new Triplet<WebRequest, object, object>
                             {
                                 First = request,
-                                Second = null
+                                Second = null,
+                                Third = userState
                             };
 
             var args = new WebQueryRequestEventArgs(url);
@@ -37,7 +38,8 @@ namespace Hammock.Web
         private WebQueryAsyncResult ExecuteGetOrDeleteAsync(ICache cache, 
                                                             string key, 
                                                             string url, 
-                                                            WebRequest request)
+                                                            WebRequest request,
+                                                            object userState)
         {
             var fetch = cache.Get<string>(key);
             if (fetch != null)
@@ -53,14 +55,15 @@ namespace Hammock.Web
             }
             else
             {
-                var state = new Pair<WebRequest, Pair<ICache, string>>
+                var state = new Triplet<WebRequest, Pair<ICache, string>, object>
                                 {
                                     First = request,
                                     Second = new Pair<ICache, string>
                                                  {
                                         First = cache,
                                         Second = key
-                                    }
+                                    },
+                                    Third = userState
                                 };
 
                 var args = new WebQueryRequestEventArgs(url);
@@ -77,7 +80,8 @@ namespace Hammock.Web
                                                             string key, 
                                                             string url, 
                                                             DateTime absoluteExpiration, 
-                                                            WebRequest request)
+                                                            WebRequest request,
+                                                            object userState)
         {
             var fetch = cache.Get<string>(key);
             if (fetch != null)
@@ -94,7 +98,7 @@ namespace Hammock.Web
             }
             else
             {
-                var state = new Pair<WebRequest, Pair<ICache, Pair<string, DateTime>>>
+                var state = new Triplet<WebRequest, Pair<ICache, Pair<string, DateTime>>, object>
                                 {
                                     First = request,
                                     Second = new Pair<ICache, Pair<string, DateTime>>
@@ -105,7 +109,8 @@ namespace Hammock.Web
                                                                       First = key,
                                                                       Second = absoluteExpiration
                                                                   }
-                                                 }
+                                                 },
+                                    Third = userState
                                 };
 
                 var args = new WebQueryRequestEventArgs(url);
@@ -122,7 +127,8 @@ namespace Hammock.Web
                                                             string key, 
                                                             string url,
                                                             TimeSpan slidingExpiration, 
-                                                            WebRequest request)
+                                                            WebRequest request,
+                                                            object userState)
         {
             var fetch = cache.Get<string>(key);
             if (fetch != null)
@@ -138,18 +144,19 @@ namespace Hammock.Web
             }
             else
             {
-                var state = new Pair<WebRequest, Pair<ICache, Pair<string, TimeSpan>>>
+                var state = new Triplet<WebRequest, Pair<ICache, Pair<string, TimeSpan>>, object>
                                 {
                                     First = request,
                                     Second = new Pair<ICache, Pair<string, TimeSpan>>
                                                  {
-                                        First = cache,
-                                        Second = new Pair<string, TimeSpan>
-                                                     {
-                                                         First = key,
-                                                         Second = slidingExpiration
-                                                     }
-                                    }
+                                                     First = cache,
+                                                     Second = new Pair<string, TimeSpan>
+                                                                  {
+                                                                      First = key,
+                                                                      Second = slidingExpiration
+                                                                  }
+                                                 },
+                                    Third = userState
                                 };
 
                 var args = new WebQueryRequestEventArgs(url);
@@ -176,42 +183,45 @@ namespace Hammock.Web
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
                                                                       string url, 
                                                                       string prefixKey, 
-                                                                      ICache cache)
+                                                                      ICache cache,
+                                                                      object userState)
         {
             WebResponse = null;
 
             var request = BuildGetOrDeleteWebRequest(method, url);
             var key = CreateCacheKey(prefixKey, url);
 
-            return ExecuteGetOrDeleteAsync(cache, key, url, request);
+            return ExecuteGetOrDeleteAsync(cache, key, url, request, userState);
         }
 
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, 
                                                                       string url, 
                                                                       string prefixKey, 
                                                                       ICache cache, 
-                                                                      DateTime absoluteExpiration)
+                                                                      DateTime absoluteExpiration,
+                                                                      object userState)
         {
             WebResponse = null;
 
             var request = BuildGetOrDeleteWebRequest(method, url);
             var key = CreateCacheKey(prefixKey, url);
 
-            return ExecuteGetOrDeleteAsync(cache, key, url, absoluteExpiration, request);
+            return ExecuteGetOrDeleteAsync(cache, key, url, absoluteExpiration, request, userState);
         }
 
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
                                                                       string url, 
                                                                       string prefixKey,
                                                                       ICache cache,
-                                                                      TimeSpan slidingExpiration)
+                                                                      TimeSpan slidingExpiration,
+                                                                      object userState)
         {
             WebResponse = null;
 
             var request = BuildGetOrDeleteWebRequest(method, url);
             var key = CreateCacheKey(prefixKey, url);
 
-            return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request);
+            return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request, userState);
         }
         
         private void GetAsyncResponseTimeout(object state, bool timedOut)
@@ -233,7 +243,6 @@ namespace Hammock.Web
         {
             object store;
             var request = GetAsyncCacheStore(asyncResult, out store);
-
 
             try
             {
@@ -282,17 +291,17 @@ namespace Hammock.Web
             {
                 var result = HandleWebException(ex);
 
-                var responseArgs = new WebQueryResponseEventArgs(result) {Exception = ex};
+                var responseArgs = new WebQueryResponseEventArgs(result) { Exception = ex };
+
                 OnQueryResponse(responseArgs);
             }
-            
         }
 
         private static WebRequest GetAsyncCacheStore(IAsyncResult asyncResult, out object store)
         {
             WebRequest request;
 
-            var noCache = asyncResult.AsyncState as Pair<WebRequest, object>;
+            var noCache = asyncResult.AsyncState as Triplet<WebRequest, object, object>;
             if(noCache != null)
             {
                 request = noCache.First;
@@ -300,7 +309,7 @@ namespace Hammock.Web
             }
             else
             {
-                var absoluteCache = asyncResult.AsyncState as Pair<WebRequest, Pair<ICache, Pair<string, DateTime>>>;
+                var absoluteCache = asyncResult.AsyncState as Triplet<WebRequest, Pair<ICache, Pair<string, DateTime>>, object>;
                 if(absoluteCache != null)
                 {
                     request = absoluteCache.First;
@@ -308,7 +317,7 @@ namespace Hammock.Web
                 }
                 else
                 {
-                    var slidingCache = asyncResult.AsyncState as Pair<WebRequest, Pair<ICache, Pair<string, TimeSpan>>>;
+                    var slidingCache = asyncResult.AsyncState as Triplet<WebRequest, Pair<ICache, Pair<string, TimeSpan>>, object>;
                     if(slidingCache != null)
                     {
                         request = slidingCache.First;
@@ -676,14 +685,15 @@ namespace Hammock.Web
         protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, 
                                                                     string url, 
                                                                     string prefixKey,
-                                                                    ICache cache)
+                                                                    ICache cache,
+                                                                    object userState)
         {
             WebResponse = null;
 
             byte[] content;
             var request = BuildPostOrPutWebRequest(method, url, out content);
 
-            var state = new Pair<WebRequest, Triplet<byte[], ICache, string>>
+            var state = new Triplet<WebRequest, Triplet<byte[], ICache, string>, object>
                             {
                                 First = request,
                                 Second = new Triplet<byte[], ICache, string>
@@ -691,7 +701,8 @@ namespace Hammock.Web
                                                  First = content,
                                                  Second = cache,
                                                  Third = prefixKey
-                                             }
+                                             },
+                                Third = userState
                             };
 
             var args = new WebQueryRequestEventArgs(url);
@@ -707,14 +718,15 @@ namespace Hammock.Web
                                                                     string url, 
                                                                     string prefixKey, 
                                                                     ICache cache, 
-                                                                    DateTime absoluteExpiration)
+                                                                    DateTime absoluteExpiration,
+                                                                    object userState)
         {
             WebResponse = null;
 
             byte[] content;
             var request = BuildPostOrPutWebRequest(method, url, out content);
 
-            var state = new Pair<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>>
+            var state = new Triplet<WebRequest, Pair<byte[], Triplet<ICache, DateTime, string>>, object>
                             {
                                 First = request,
                                 Second = new Pair<byte[], Triplet<ICache, DateTime, string>>
@@ -726,7 +738,8 @@ namespace Hammock.Web
                                                                   Second = absoluteExpiration,
                                                                   Third = prefixKey
                                                               }
-                                             }
+                                             },
+                                Third = userState
                             };
 
             var args = new WebQueryRequestEventArgs(url);
@@ -742,14 +755,15 @@ namespace Hammock.Web
                                                                     string url, 
                                                                     string prefixKey,
                                                                     ICache cache, 
-                                                                    TimeSpan slidingExpiration)
+                                                                    TimeSpan slidingExpiration,
+                                                                    object userState)
         {
             WebResponse = null;
 
             byte[] content;
             var request = BuildPostOrPutWebRequest(method, url, out content);
 
-            var state = new Pair<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>>
+            var state = new Triplet<WebRequest, Pair<byte[], Triplet<ICache, TimeSpan, string>>, object>
                             {
                                 First = request,
                                 Second = new Pair<byte[], Triplet<ICache, TimeSpan, string>>
@@ -761,7 +775,8 @@ namespace Hammock.Web
                                                                   Second = slidingExpiration,
                                                                   Third = prefixKey
                                                               }
-                                             }
+                                             },
+                                Third = userState
                             };
 
             var args = new WebQueryRequestEventArgs(url);
