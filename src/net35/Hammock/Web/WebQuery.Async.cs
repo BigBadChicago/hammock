@@ -14,7 +14,7 @@ namespace Hammock.Web
 {
     public partial class WebQuery
     {
-        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url)
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url, object prefixKey)
         {
             WebResponse = null;
 
@@ -325,7 +325,7 @@ namespace Hammock.Web
             return request;
         }
 
-        private bool _isStreaming = false;
+        private bool _isStreaming;
         public virtual bool IsStreaming
         {
             get
@@ -634,7 +634,7 @@ namespace Hammock.Web
             }
         }
 
-        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url)
+        protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method, string url, object prefixKey)
         {
             WebResponse = null;
 
@@ -654,7 +654,8 @@ namespace Hammock.Web
 
         protected virtual WebQueryAsyncResult ExecutePostOrPutAsync(PostOrPut method,
                                                                     string url,
-                                                                    IEnumerable<HttpPostParameter> parameters)
+                                                                    IEnumerable<HttpPostParameter> parameters,
+                                                                    object userState)
         {
             WebResponse = null;
 

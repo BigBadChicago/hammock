@@ -471,44 +471,54 @@ namespace Hammock
             return tag;
         }
 
+        public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback, object userState)
+        {
+            return BeginRequest(request, callback, null, null, false /* isInternal */, userState);
+        }
+
+        public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback, object userState)
+        {
+            return BeginRequest(request, callback, null, null, false /* isInternal */, null);
+        }
+        
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
-            return BeginRequest(request, callback, null, null, false /* isInternal */);
+            return BeginRequest(request, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback)
         {
-            return BeginRequest(request, callback, null, null, false /* isInternal */);
+            return BeginRequest(request, callback, null, null, false /* isInternal */, null);
         }
 
-        public IAsyncResult BeginRequest(RestCallback callback)
+        public virtual IAsyncResult BeginRequest(RestCallback callback)
         {
-            return BeginRequest(null, callback, null, null, false /* isInternal */);
+            return BeginRequest(null, callback, null, null, false /* isInternal */, null);
         }
 
-        public IAsyncResult BeginRequest(RestRequest request)
+        public virtual IAsyncResult BeginRequest(RestRequest request)
         {
-            return BeginRequest(request, null);
+            return BeginRequest(request, null, null);
         }
 
-        public IAsyncResult BeginRequest<T>(RestRequest request)
+        public virtual IAsyncResult BeginRequest<T>(RestRequest request)
         {
-            return BeginRequest<T>(request, null);
+            return BeginRequest<T>(request, null, null);
         }
 
-        public IAsyncResult BeginRequest<T>(RestCallback<T> callback)
+        public virtual IAsyncResult BeginRequest<T>(RestCallback<T> callback)
         {
-            return BeginRequest(null, callback);
+            return BeginRequest(null, callback, null);
         }
 
         // Pattern: http://msdn.microsoft.com/en-us/library/ms228963.aspx
-        public RestResponse EndRequest(IAsyncResult result)
+        public virtual RestResponse EndRequest(IAsyncResult result)
         {
             var webResult = EndRequestImpl(result);
             return webResult.AsyncState as RestResponse;
         }
 
-        public RestResponse<T> EndRequest<T>(IAsyncResult result)
+        public virtual RestResponse<T> EndRequest<T>(IAsyncResult result)
         {
             var webResult = EndRequestImpl<T>(result);
             return webResult.AsyncState as RestResponse<T>;
@@ -726,7 +736,8 @@ namespace Hammock
                                           RestCallback callback,
                                           WebQuery query,
                                           string url,
-                                          bool isInternal)
+                                          bool isInternal,
+                                          object userState)
         {
             request = request ?? new RestRequest();
             if (!isInternal)
@@ -778,7 +789,8 @@ namespace Hammock
                        request,
                        query,
                        url,
-                       callback);
+                       callback,
+                       userState);
 
                 asyncResult = beginRequest.Invoke();
             }
@@ -800,7 +812,7 @@ namespace Hammock
                                                    if (retry)
                                                    {
                                                        previous = current;
-                                                       BeginRequest(request, callback, query, url, true);
+                                                       BeginRequest(request, callback, query, url, true /* isInternal */, userState);
                                                        Interlocked.Decrement(ref _remainingRetries);
                                                    }
                                                    else
@@ -828,7 +840,8 @@ namespace Hammock
                                              RestCallback<T> callback,
                                              WebQuery query,
                                              string url,
-                                             bool isInternal)
+                                             bool isInternal,
+                                             object userState)
         {
             request = request ?? new RestRequest();
             if (!isInternal)
@@ -876,7 +889,7 @@ namespace Hammock
             else
             {
                 beginRequest = () => BeginRequestFunction(
-                   isInternal, request, query, url, callback
+                   isInternal, request, query, url, callback, userState
                    );
 
                 asyncResult = beginRequest.Invoke();
@@ -897,7 +910,7 @@ namespace Hammock
                     if (retry)
                     {
                         previous = current;
-                        BeginRequest(request, callback, query, url, true);
+                        BeginRequest(request, callback, query, url, true /* isInternal */, userState);
                         Interlocked.Decrement(ref _remainingRetries);
                     }
                     else
@@ -926,19 +939,20 @@ namespace Hammock
                                                          RestRequest request,
                                                          WebQuery query,
                                                          string url,
-                                                         RestCallback callback)
+                                                         RestCallback callback,
+                                                         object userState)
         {
             WebQueryAsyncResult result;
             if (!isInternal)
             {
-                if (!BeginRequestWithTask(request, callback, query, url, out result))
+                if (!BeginRequestWithTask(request, callback, query, url, out result, userState))
                 {
-                    if (!BeginRequestWithCache(request, query, url, out result))
+                    if (!BeginRequestWithCache(request, query, url, out result, userState))
                     {
-                        if (!BeginRequestMultiPart(request, query, url, out result))
+                        if (!BeginRequestMultiPart(request, query, url, out result, userState))
                         {
                             // Normal operation
-                            result = query.RequestAsync(url);
+                            result = query.RequestAsync(url, userState);
                         }
                     }
                 }
@@ -946,7 +960,7 @@ namespace Hammock
             else
             {
                 // Normal operation
-                result = query.RequestAsync(url);
+                result = query.RequestAsync(url, userState);
             }
 
             result.Tag = new Pair<RestRequest, RestCallback>
@@ -1021,19 +1035,20 @@ namespace Hammock
                                                             RestRequest request,
                                                             WebQuery query,
                                                             string url,
-                                                            RestCallback<T> callback)
+                                                            RestCallback<T> callback,
+                                                            object userState)
         {
             WebQueryAsyncResult result;
             if (!isInternal)
             {
-                if (!BeginRequestWithTask(request, callback, query, url, out result))
+                if (!BeginRequestWithTask(request, callback, query, url, out result, userState))
                 {
-                    if (!BeginRequestWithCache(request, query, url, out result))
+                    if (!BeginRequestWithCache(request, query, url, out result, userState))
                     {
-                        if (!BeginRequestMultiPart(request, query, url, out result))
+                        if (!BeginRequestMultiPart(request, query, url, out result, userState))
                         {
                             // Normal operation
-                            result = query.RequestAsync(url);
+                            result = query.RequestAsync(url, userState);
                         }
                     }
                 }
@@ -1041,7 +1056,7 @@ namespace Hammock
             else
             {
                 // Normal operation
-                result = query.RequestAsync(url);
+                result = query.RequestAsync(url, userState);
             }
 
             result.Tag = new Pair<RestRequest, RestCallback<T>>
@@ -1088,7 +1103,8 @@ namespace Hammock
                                           RestCallback callback,
                                           WebQuery query,
                                           string url,
-                                          out WebQueryAsyncResult asyncResult)
+                                          out WebQueryAsyncResult asyncResult,
+                                          object userState)
         {
             var taskOptions = GetTaskOptions(request);
             if (taskOptions == null)
@@ -1117,7 +1133,9 @@ namespace Hammock
                                                            callback,
                                                            query,
                                                            url,
-                                                           true));
+                                                           true /* isInternal */,
+                                                           userState
+                                                           ));
 
 #if !NETCF
             }
@@ -1128,7 +1146,8 @@ namespace Hammock
                                                  taskOptions,
                                                  callback,
                                                  query,
-                                                 url);
+                                                 url,
+                                                 userState);
             }
 #endif
 
@@ -1173,7 +1192,8 @@ namespace Hammock
                                           RestCallback<T> callback,
                                           WebQuery query,
                                           string url,
-                                          out WebQueryAsyncResult asyncResult)
+                                          out WebQueryAsyncResult asyncResult,
+                                          object userState)
         {
             var taskOptions = GetTaskOptions(request);
             if (taskOptions == null)
@@ -1202,7 +1222,8 @@ namespace Hammock
                                                            callback,
                                                            query,
                                                            url,
-                                                           true));
+                                                           true /* isInternal */,
+                                                           userState));
 #if !NETCF
             }
             else
@@ -1212,7 +1233,8 @@ namespace Hammock
                                                  taskOptions,
                                                  callback,
                                                  query,
-                                                 url);
+                                                 url,
+                                                 userState);
 
             }
 #endif
@@ -1229,17 +1251,13 @@ namespace Hammock
         }
 
 #if !NETCF
-        private object BuildRateLimitingTask(RestRequest request,
-                                            ITaskOptions taskOptions,
-                                            RestCallback callback,
-                                            WebQuery query,
-                                            string url)
+        private object BuildRateLimitingTask(RestRequest request, ITaskOptions taskOptions, RestCallback callback, WebQuery query, string url, object userState)
         {
             var taskAction = new Action<bool>(skip =>
                                                   {
                                                       if (!skip)
                                                       {
-                                                          BeginRequest(request, callback, query, url, true);
+                                                          BeginRequest(request, callback, query, url, true /* isInternal */, userState);
                                                       }
                                                       else
                                                       {
@@ -1254,13 +1272,16 @@ namespace Hammock
                                             ITaskOptions taskOptions,
                                             RestCallback<T> callback,
                                             WebQuery query,
-                                            string url)
+                                            string url,
+                                            object userState)
         {
             var taskAction = new Action<bool>(skip => BeginRequest(request,
                                                                    callback,
                                                                    query,
                                                                    url,
-                                                                   true));
+                                                                   true /* isInternal */,
+                                                                   userState
+                                                                   ));
 
             return BuildRateLimitingTaskImpl(taskOptions, taskAction);
         }
@@ -1313,10 +1334,7 @@ namespace Hammock
         }
 #endif
 
-        private bool BeginRequestMultiPart(RestBase request,
-                                           WebQuery query,
-                                           string url,
-                                           out WebQueryAsyncResult result)
+        private bool BeginRequestMultiPart(RestBase request, WebQuery query, string url, out WebQueryAsyncResult result, object userState)
         {
             var parameters = GetPostParameters(request);
             if (parameters == null || parameters.Count() == 0)
@@ -1331,10 +1349,7 @@ namespace Hammock
             return true;
         }
 
-        private bool BeginRequestWithCache(RestBase request,
-                                           WebQuery query,
-                                           string url,
-                                           out WebQueryAsyncResult result)
+        private bool BeginRequestWithCache(RestBase request, WebQuery query, string url, out WebQueryAsyncResult result, object userState)
         {
             var cache = GetCache(request);
             if (cache == null)

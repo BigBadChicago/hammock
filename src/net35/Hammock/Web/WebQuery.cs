@@ -1312,18 +1312,18 @@ namespace Hammock.Web
             }
         }
 #endif
-        public virtual WebQueryAsyncResult RequestAsync(string url)
+        public virtual WebQueryAsyncResult RequestAsync(string url, object userState)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, userState);
                 case WebMethod.Put:
-                    return ExecutePostOrPutAsync(PostOrPut.Put, url);
+                    return ExecutePostOrPutAsync(PostOrPut.Put, url, userState);
                 case WebMethod.Post:
-                    return ExecutePostOrPutAsync(PostOrPut.Post, url);
+                    return ExecutePostOrPutAsync(PostOrPut.Post, url, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, userState);
                 default:
                     throw new NotSupportedException("Unknown web method");
             }
