@@ -18,7 +18,9 @@ namespace Hammock
         IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback, object userState);
         
         IAsyncResult BeginRequest(RestRequest request);
+        IAsyncResult BeginRequest(RestRequest request, object userState);
         IAsyncResult BeginRequest<T>(RestRequest request);
+        IAsyncResult BeginRequest<T>(RestRequest request, object userState);
         
         IAsyncResult BeginRequest(RestCallback callback);
         IAsyncResult BeginRequest<T>(RestCallback<T> callback);

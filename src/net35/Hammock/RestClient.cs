@@ -501,9 +501,19 @@ namespace Hammock
             return BeginRequest(request, null, null);
         }
 
+        public IAsyncResult BeginRequest(RestRequest request, object userState)
+        {
+            return BeginRequest(request, null, userState);
+        }
+
         public virtual IAsyncResult BeginRequest<T>(RestRequest request)
         {
             return BeginRequest<T>(request, null, null);
+        }
+
+        public IAsyncResult BeginRequest<T>(RestRequest request, object userState)
+        {
+            return BeginRequest<T>(request, null, userState);
         }
 
         public virtual IAsyncResult BeginRequest<T>(RestCallback<T> callback)
