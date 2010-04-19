@@ -1368,13 +1368,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, absoluteExpiration);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, absoluteExpiration, userState);
                 case WebMethod.Put:
-                    return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, absoluteExpiration);
+                    return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, absoluteExpiration, userState);
                 case WebMethod.Post:
-                    return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, absoluteExpiration);
+                    return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, absoluteExpiration, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, absoluteExpiration);
+                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, absoluteExpiration, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())
