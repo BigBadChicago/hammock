@@ -381,6 +381,13 @@ namespace Hammock.Web
             {
                 using (response = request.EndGetResponse(asyncResult))
                 {
+#if SILVERLIGHT
+                    if (DecompressionMethods == DecompressionMethods.GZip ||
+                       DecompressionMethods == DecompressionMethods.Deflate)
+                    {
+                        response = new GzipHttpWebResponse((HttpWebResponse)response);
+                    }
+#endif
                     using (stream = response.GetResponseStream())
                     {
                         if (stream != null)
@@ -629,6 +636,14 @@ namespace Hammock.Web
             {
                 // Avoid disposing until no longer needed to build results
                 var response = request.EndGetResponse(asyncResult);
+
+#if SILVERLIGHT
+                if (DecompressionMethods == DecompressionMethods.GZip ||
+                    DecompressionMethods == DecompressionMethods.Deflate)
+                {
+                    response = new GzipHttpWebResponse((HttpWebResponse)response);
+                }
+#endif
                 WebResponse = response;
 
                 using (var reader = new StreamReader(response.GetResponseStream()))
