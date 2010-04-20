@@ -594,7 +594,7 @@ namespace Hammock.Web
 
         protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
         {
-            var state = asyncResult.AsyncState as Pair<WebRequest, Triplet<ICache, object, string>>;
+            var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
             if (state == null)
             {
                 throw new ArgumentNullException("asyncResult", 
