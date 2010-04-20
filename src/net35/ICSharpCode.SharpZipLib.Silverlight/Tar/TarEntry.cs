@@ -35,6 +35,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 namespace ICSharpCode.SharpZipLib.Silverlight.Tar
 {
@@ -432,7 +433,11 @@ namespace ICSharpCode.SharpZipLib.Silverlight.Tar
                 return new TarEntry[0];
             }
 
+#if !SL4
             var list = Directory.GetFileSystemEntries(_file);
+#else
+            var list = Directory.EnumerateFileSystemEntries(_file).ToArray();
+#endif
             var result = new TarEntry[list.Length];
 
             for (var i = 0; i < list.Length; ++i)

@@ -36,6 +36,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 namespace ICSharpCode.SharpZipLib.Silverlight.Core
 {
@@ -460,7 +461,11 @@ namespace ICSharpCode.SharpZipLib.Silverlight.Core
         {
             try
             {
+#if !SL4
                 var names = Directory.GetFiles(directory);
+#else
+                var names = Directory.EnumerateFiles(directory).ToArray(); 
+#endif
                 var hasMatch = false;
                 for (var fileIndex = 0; fileIndex < names.Length; ++fileIndex)
                 {
@@ -507,7 +512,11 @@ namespace ICSharpCode.SharpZipLib.Silverlight.Core
             {
                 try
                 {
+#if !SL4
                     var names = Directory.GetDirectories(directory);
+#else
+                    var names = System.IO.Directory.EnumerateDirectories(directory); 
+#endif
                     foreach (var fulldir in names)
                     {
                         if ((directoryFilter_ == null) || (directoryFilter_.IsMatch(fulldir)))
