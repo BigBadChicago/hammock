@@ -90,20 +90,14 @@
     <Compile Include="..\..\net35\Hammock\Caching\IDependencyCache.cs" />
     <Compile Include="..\..\net35\Hammock\Caching\SimpleCache.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\CollectionExtensions.cs" />
-    <Compile Include="..\..\net35\Hammock\Extensions\FileExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\FormatExtensions.cs" />
-    <Compile Include="..\..\net35\Hammock\Extensions\MathExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\OAuthExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\ObjectExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\ReflectionExtensions.cs" />
-    <Compile Include="..\..\net35\Hammock\Extensions\RegexExtensions.cs" />
-    <Compile Include="..\..\net35\Hammock\Extensions\SecurityExtensions.cs" />
-    <Compile Include="..\..\net35\Hammock\Extensions\SerializationExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\SpecificationExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\StringExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\TimeExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Extensions\WebExtensions.cs" />
-    <Compile Include="..\..\net35\Hammock\Extensions\XmlExtensions.cs" />
     <Compile Include="..\..\net35\Hammock\Model\PropertyChangedBase.cs" />
     <Compile Include="..\..\net35\Hammock\Retries\ConnectionClosed.cs" />
     <Compile Include="..\..\net35\Hammock\Retries\IRetryCondition.cs" />
@@ -131,7 +125,6 @@
     <Compile Include="..\..\net35\Hammock\Tasks\RateLimitType.cs" />
     <Compile Include="..\..\net35\Hammock\Tasks\TaskOptions.cs" />
     <Compile Include="..\..\net35\Hammock\Tasks\TimedTask.cs" />
-    <Compile Include="..\..\net35\Hammock\Tasks\TimedTaskCollection.cs" />
     <Compile Include="..\..\net35\Hammock\Validation\ValidationException.cs" />
     <Compile Include="..\..\net35\Hammock\Validation\ValidEmailSpecification.cs" />
     <Compile Include="..\..\net35\Hammock\Web\BasicAuthWebQuery.cs" />
@@ -162,6 +155,11 @@
     <Compile Include="..\..\net35\Hammock\Web\Mocks\MockHttpWebRequest.cs" />
     <Compile Include="..\..\net35\Hammock\Web\Mocks\MockHttpWebResponse.cs" />
     <Compile Include="..\..\net35\Hammock\Web\Mocks\MockWebRequestFactory.cs" />
+    <Compile Include="..\..\net35\Hammock\Streaming\StreamOptions.cs" />
+    <Compile Include="..\..\net35\Hammock\Retries\IRetryCustomCondition.cs" />
+    <Compile Include="..\..\net35\Hammock\Retries\RetryCustomCondition.cs" />
+    <Compile Include="..\..\net35\Hammock\Retries\RetryResultCondition.cs" />
+    <Compile Include="..\..\net35\Hammock\Tasks\IRateLimitStatus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

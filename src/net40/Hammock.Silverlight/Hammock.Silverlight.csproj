@@ -49,7 +49,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\net35\Hammock\key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ClientProfiles|AnyCPU'">
     <OutputPath>bin\ClientProfiles\</OutputPath>
@@ -411,9 +411,6 @@
     <None Include="..\..\net35\Hammock\Caching\_Caching.cd">
       <Link>Caching\_Caching.cd</Link>
     </None>
-    <None Include="..\..\net35\Hammock\key.snk">
-      <Link>key.snk</Link>
-    </None>
     <None Include="..\..\net35\Hammock\Model\_Model.cd">
       <Link>Model\_Model.cd</Link>
     </None>
@@ -432,6 +429,7 @@
     <None Include="..\..\net35\Hammock\_Hammock.cd">
       <Link>_Hammock.cd</Link>
     </None>
+    <None Include="key.snk" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />

@@ -31,6 +31,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -386,9 +392,6 @@
     <None Include="..\..\net35\Hammock\Caching\_Caching.cd">
       <Link>Caching\_Caching.cd</Link>
     </None>
-    <None Include="..\..\net35\Hammock\key.snk">
-      <Link>key.snk</Link>
-    </None>
     <None Include="..\..\net35\Hammock\Tasks\_Tasks.cd">
       <Link>Tasks\_Tasks.cd</Link>
     </None>
@@ -401,6 +404,7 @@
     <None Include="..\..\net35\Hammock\_Hammock.cd">
       <Link>_Hammock.cd</Link>
     </None>
+    <None Include="key.snk" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
