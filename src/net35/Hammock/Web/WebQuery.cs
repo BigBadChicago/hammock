@@ -90,13 +90,18 @@ namespace Hammock.Web
         public virtual bool HasEntity { get; set; }
         public virtual byte[] PostContent { get; set; }
 
-        protected WebQuery() : this(null)
+        static WebQuery()
         {
 #if SL3 || SL4
             // [DC]: Opt-in to the networking stack so we can get headers for proxies
             WebRequest.RegisterPrefix("http://", WebRequestCreator.ClientHttp);
             WebRequest.RegisterPrefix("https://", WebRequestCreator.ClientHttp);
 #endif
+        }
+
+        protected WebQuery() : this(null)
+        {
+
         }
 
         protected WebQuery(IWebQueryInfo info)
