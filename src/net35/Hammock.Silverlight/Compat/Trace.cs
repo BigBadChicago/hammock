@@ -7,12 +7,11 @@ namespace Hammock.Silverlight.Compat
 {
     public class Trace : IDisposable
     {
-        private static readonly IsolatedStorageFile _file;
+        private static IsolatedStorageFile _file;
         private static IsolatedStorageFileStream _fileStream;
         private static StreamWriter _streamWriter;
 
         public static bool Enabled { get; set; }
-        
 
         private static void ObtainWriter()
         {
