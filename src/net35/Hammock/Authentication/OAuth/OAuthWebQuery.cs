@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Web;
 #if !Silverlight
@@ -365,7 +366,57 @@ namespace Hammock.Authentication.OAuth
             url = RestoreUrlParams(url, Parameters);
             return base.Request(url, out exception);
         }
+
+        public override string Request(string url, string key, ICache cache, out WebException exception)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.Request(url, key, cache, out exception);
+        }
+
+        public override string Request(string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.Request(url, key, cache, absoluteExpiration, out exception);
+        }
+
+        public override string Request(string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.Request(url, key, cache, slidingExpiration, out exception);
+        }
 #endif
+
+        public override WebQueryAsyncResult RequestAsync(string url, IEnumerable<HttpPostParameter> parameters, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.RequestAsync(url, parameters, userState);
+        }
+
+        public override WebQueryAsyncResult RequestAsync(string url, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            url = RestoreUrlParams(url, Parameters);
+            return base.RequestAsync(url, userState);
+        }
+
+        public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.RequestAsync(url, key, cache, userState);
+        }
+
+        public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, DateTime absoluteExpiration, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.RequestAsync(url, key, cache, absoluteExpiration, userState);
+        }
+
+        public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, TimeSpan slidingExpiration, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            return base.RequestAsync(url, key, cache, slidingExpiration, userState);
+        }
+        
         private string RestoreUrlParams(string url, IEnumerable<WebPair> parameters)
         {
             if (Method != WebMethod.Post && Method != WebMethod.Put)
@@ -385,6 +436,7 @@ namespace Hammock.Authentication.OAuth
             }
             return url;
         }
+
         private void RecalculateProtectedResourceSignature(string url)
         {
             var info = (OAuthWebQueryInfo) Info;
