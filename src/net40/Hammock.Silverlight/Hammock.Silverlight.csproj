@@ -87,6 +87,9 @@
     <Compile Include="..\..\net35\Hammock.Silverlight\Compat\DecompressionMethods.cs">
       <Link>Compat\DecompressionMethods.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock.Silverlight\Compat\GzipHttpWebResponse.cs">
+      <Link>Compat\GzipHttpWebResponse.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock.Silverlight\Compat\NameValueCollection.cs">
       <Link>Compat\NameValueCollection.cs</Link>
     </Compile>

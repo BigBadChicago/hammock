@@ -413,7 +413,6 @@ namespace Hammock.Web
 #if !SILVERLIGHT
                 request.AutomaticDecompression = DecompressionMethods;
 #else
-                // TODO: Implement decompression on HttpWebResponse
                 if (HasElevatedPermissions)
                 {
                     switch (DecompressionMethods)

@@ -360,12 +360,19 @@
     </Compile>
     <Compile Include="Caching\IsolatedStorageCache.cs" />
     <Compile Include="Compat\DecompressionMethods.cs" />
+    <Compile Include="Compat\GzipHttpWebResponse.cs" />
     <Compile Include="Compat\NameValueCollection.cs" />
     <Compile Include="Compat\Trace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="key.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ICSharpCode.SharpZipLib.Silverlight\ICSharpCode.SharpZipLib.Silverlight.csproj">
+      <Project>{2E420750-6124-473B-808D-41755C907648}</Project>
+      <Name>ICSharpCode.SharpZipLib.Silverlight</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
