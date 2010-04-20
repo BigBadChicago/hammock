@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\bin\net40\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET40,ClientProfiles</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,7 +26,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\..\bin\net40\</OutputPath>
     <DefineConstants>TRACE;NET40,ClientProfiles</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -277,9 +277,6 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Tasks\TimedTask.cs">
       <Link>Tasks\TimedTask.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Tasks\TimedTaskCollection.cs">
-      <Link>Tasks\TimedTaskCollection.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Validation\ValidationException.cs">
       <Link>Validation\ValidationException.cs</Link>
