@@ -33,3 +33,13 @@ glob:src/net35/Hammock.Tests/app.config
 glob:bin/mono/*.*
 glob:*.orig
 glob:src/net35/Hammock.Tests/App.config
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/de/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/es/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/fr/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/it/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/ja/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/ko/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/zh-Hans/*.*
+glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/zh-Hant/*.*
+
