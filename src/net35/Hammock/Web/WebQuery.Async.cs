@@ -171,11 +171,19 @@ namespace Hammock.Web
 
         protected virtual void RegisterAbortTimer(WebRequest request, IAsyncResult asyncResult)
         {
-#if !Smartphone && !Silverlight
+#if SILVERLIGHT
+            var timeout = RequestTimeout != null ? 
+                (int)RequestTimeout.Value.TotalMilliseconds
+                : 0;
+#else
+            var timeout = request.Timeout;
+#endif 
+
+#if !Smartphone
             // Async operations ignore the WebRequest's Timeout property
             ThreadPool.RegisterWaitForSingleObject(asyncResult.AsyncWaitHandle,
                                                    GetAsyncResponseTimeout,
-                                                   request, request.Timeout,
+                                                   request, timeout,
                                                    true);
 #endif
         }
@@ -246,8 +254,17 @@ namespace Hammock.Web
 
             try
             {
-                using (var response = (HttpWebResponse) request.EndGetResponse(asyncResult))
+                var response = request.EndGetResponse(asyncResult);
+                using (response)
                 {
+#if SILVERLIGHT
+                    if(DecompressionMethods == DecompressionMethods.GZip || 
+                       DecompressionMethods == DecompressionMethods.Deflate)
+                    {
+                        response = new GzipHttpWebResponse((HttpWebResponse)response);
+                    }
+#endif
+
                     using (var stream = response.GetResponseStream())
                     {
                         using (var reader = new StreamReader(stream))
