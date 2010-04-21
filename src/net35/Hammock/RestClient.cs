@@ -480,7 +480,17 @@ namespace Hammock
         {
             return BeginRequest(request, callback, null, null, false /* isInternal */, null);
         }
-        
+
+        public IAsyncResult BeginRequest()
+        {
+            return BeginRequest(null /* request */, null /* callback */);
+        }
+
+        public IAsyncResult BeginRequest<T>()
+        {
+            return BeginRequest(null /* request */, null /* callback */);
+        }
+
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
             return BeginRequest(request, callback, null, null, false /* isInternal */, null);
