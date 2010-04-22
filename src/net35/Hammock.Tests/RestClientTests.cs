@@ -7,6 +7,7 @@ using Hammock.Authentication.Basic;
 using Hammock.Extras;
 using Hammock.Tests.Converters;
 using Hammock.Tests.Postmark;
+using Hammock.Tests.Postmark.Converters;
 using Hammock.Web;
 using Newtonsoft.Json;
 using NUnit.Framework;

@@ -94,7 +94,6 @@
     <None Include="app.config" />
     <None Include="app.config.example" />
     <None Include="key.snk" />
-    <None Include="NLog.config" />
     <Compile Include="RestClientTests.Async.Streaming.cs" />
     <Compile Include="Attributes\Validation\BooleanToIntegerTests.cs" />
     <Compile Include="Attributes\Validation\DateTimeFormatTests.cs" />

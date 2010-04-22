@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Hammock.Tests.Converters
+namespace Hammock.Tests.Postmark.Converters
 {
     internal class NameValuePair
     {

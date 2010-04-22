@@ -14,7 +14,7 @@ namespace Hammock.Authentication.OAuth
     /// </summary>
     public class OAuthWorkflow
     {
-        public string Version = "1.0";
+        public string Version { get; set; }
         public string ConsumerKey { get; set; }
         public string ConsumerSecret { get; set; }
         public string Token { get; set; }
@@ -183,7 +183,7 @@ namespace Hammock.Authentication.OAuth
             var timestamp = OAuthTools.GetTimestamp();
             var nonce = OAuthTools.GetNonce();
 
-            AddClientAuthParameters(parameters, timestamp, nonce);
+            AddXAuthParameters(parameters, timestamp, nonce);
 
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, uri.ToString(), parameters);
             var signature = OAuthTools.GetSignature(SignatureMethod, signatureBase, ConsumerSecret);
@@ -376,7 +376,7 @@ namespace Hammock.Authentication.OAuth
                                          new WebPair("oauth_nonce", nonce),
                                          new WebPair("oauth_signature_method", SignatureMethod.ToRequestValue()),
                                          new WebPair("oauth_timestamp", timestamp),
-                                         new WebPair("oauth_version", Version)
+                                         new WebPair("oauth_version", Version ?? "1.0")
                                      };
 
             if (!Token.IsNullOrBlank())
@@ -400,7 +400,7 @@ namespace Hammock.Authentication.OAuth
             }
         }
 
-        private void AddClientAuthParameters(ICollection<WebPair> parameters, string timestamp, string nonce)
+        private void AddXAuthParameters(ICollection<WebPair> parameters, string timestamp, string nonce)
         {
             var authParameters = new WebParameterCollection
                                      {
@@ -411,7 +411,7 @@ namespace Hammock.Authentication.OAuth
                                          new WebPair("oauth_signature_method", SignatureMethod.ToRequestValue()),
                                          new WebPair("oauth_timestamp", timestamp),
                                          new WebPair("oauth_nonce", nonce),
-                                         new WebPair("oauth_version", Version)
+                                         new WebPair("oauth_version", Version ?? "1.0")
                                      };
 
             foreach (var authParameter in authParameters)

@@ -531,7 +531,6 @@ namespace Hammock
             return BeginRequest(null, callback, null);
         }
 
-        // Pattern: http://msdn.microsoft.com/en-us/library/ms228963.aspx
         public virtual RestResponse EndRequest(IAsyncResult result)
         {
             var webResult = EndRequestImpl(result);
