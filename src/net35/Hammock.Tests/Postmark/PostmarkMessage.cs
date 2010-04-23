@@ -37,6 +37,7 @@ namespace Hammock.Tests.Postmark
             HtmlBody = message.IsBodyHtml ? message.Body : null;
             TextBody = message.IsBodyHtml ? null : message.Body;
 
+#if NET40
             var sb = new StringBuilder();
             var total = message.ReplyToList.Count;
             var count = 0;
@@ -50,6 +51,9 @@ namespace Hammock.Tests.Postmark
                 }
             }
             ReplyTo = sb.ToString();
+#else
+            ReplyTo = message.ReplyTo.ToString();
+#endif
             Headers = message.Headers;
         }
 

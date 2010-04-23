@@ -319,13 +319,13 @@ namespace Hammock.Web
             return request;
         }
 
-        protected virtual WebRequest BuildGetOrDeleteWebRequest(GetOrDelete method, string url)
+        protected virtual WebRequest BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions method, string url)
         {
             url = AppendParameters(url);
 
             var request = WebRequest.Create(url);
 #if SILVERLIGHT && !WindowsPhone
-            var httpMethod = method == GetOrDelete.Get ? "GET" : "DELETE";
+            var httpMethod = method.ToUpper();
             if (HasElevatedPermissions)
             {
                 request.Method = httpMethod;
@@ -336,12 +336,12 @@ namespace Hammock.Web
                 request.Headers[SilverlightMethodHeader] = httpMethod;
             }
 #else
-            request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
+            request.Method = method.ToUpper();
 #endif
             AuthenticateRequest(request);
 #if TRACE
             Trace.WriteLine(String.Concat(
-                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                "REQUEST: ", request.Method, " ", request.RequestUri)
                 );
 #endif
             
@@ -801,16 +801,16 @@ namespace Hammock.Web
         }
 
 #if !SILVERLIGHT
-        protected virtual string ExecuteGetOrDelete(GetOrDelete method, string url, string key, ICache cache, out WebException exception)
+        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, string key, ICache cache, out WebException exception)
         {
             WebException ex = null;
-            var ret = ExecuteWithCache(cache, url, key, (c, u) => ExecuteGetOrDelete(method, cache, url, key, out ex));
+            var ret = ExecuteWithCache(cache, url, key, (c, u) => ExecuteGetDeleteHeadOptions(method, cache, url, key, out ex));
             exception = ex;
             return ret; 
 
         }
 
-        protected virtual string ExecuteGetOrDelete(GetOrDelete method, 
+        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
                                                     string url, 
                                                     string key, 
                                                     ICache cache, 
@@ -820,12 +820,12 @@ namespace Hammock.Web
             WebException ex = null; 
             var ret = ExecuteWithCacheAndAbsoluteExpiration(cache, url, key, absoluteExpiration,
                                                             (c, u, e) =>
-                                                            ExecuteGetOrDelete(method, cache, url, key, absoluteExpiration, out ex));
+                                                            ExecuteGetDeleteHeadOptions(method, cache, url, key, absoluteExpiration, out ex));
             exception = ex;
             return ret; 
         }
 
-        protected virtual string ExecuteGetOrDelete(GetOrDelete method, 
+        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
                                                     string url, 
                                                     string key, 
                                                     ICache cache, 
@@ -835,18 +835,18 @@ namespace Hammock.Web
             WebException ex = null; 
             var ret = ExecuteWithCacheAndSlidingExpiration(cache, url, key, slidingExpiration,
                                                            (c, u, e) =>
-                                                           ExecuteGetOrDelete(method, cache, url, key, slidingExpiration, out ex));
+                                                           ExecuteGetDeleteHeadOptions(method, cache, url, key, slidingExpiration, out ex));
             exception = ex;
             return ret; 
         }
 
-        private string ExecuteGetOrDelete(GetOrDelete method,
-                                          ICache cache, 
-                                          string url, 
-                                          string key, 
-                                          out WebException exception)
+        private string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method,
+                                                   ICache cache, 
+                                                   string url, 
+                                                   string key, 
+                                                   out WebException exception)
         {
-            var result = ExecuteGetOrDelete(method, url, out exception);
+            var result = ExecuteGetDeleteHeadOptions(method, url, out exception);
             if (exception == null)
             {
                 cache.Insert(CreateCacheKey(key, url), result);
@@ -854,10 +854,10 @@ namespace Hammock.Web
             return result;
         }
 
-        private string ExecuteGetOrDelete(GetOrDelete method, ICache cache, string url, string key,
-                                          DateTime absoluteExpiration, out WebException exception)
+        private string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, ICache cache, string url, string key,
+                                                   DateTime absoluteExpiration, out WebException exception)
         {
-            var result = ExecuteGetOrDelete(method, url, out exception);
+            var result = ExecuteGetDeleteHeadOptions(method, url, out exception);
             if (exception == null)
             {
                 cache.Insert(CreateCacheKey(key, url), result, absoluteExpiration);
@@ -865,10 +865,10 @@ namespace Hammock.Web
             return result;
         }
 
-        private string ExecuteGetOrDelete(GetOrDelete method, ICache cache, string url, string key,
-                                          TimeSpan slidingExpiration, out WebException exception)
+        private string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, ICache cache, string url, string key,
+                                                   TimeSpan slidingExpiration, out WebException exception)
         {
-            var result = ExecuteGetOrDelete(method, url, out exception);
+            var result = ExecuteGetDeleteHeadOptions(method, url, out exception);
             if (exception == null)
             {
                 cache.Insert(CreateCacheKey(key, url), result, slidingExpiration);
@@ -880,34 +880,37 @@ namespace Hammock.Web
         public virtual event EventHandler<WebQueryRequestEventArgs> QueryRequest;
         public virtual void OnQueryRequest(WebQueryRequestEventArgs args)
         {
-            if (QueryRequest != null)
+            var handler = QueryRequest;
+            if (handler != null)
             {
-                QueryRequest(this, args);
+                handler(this, args);
             }
         }
 
         public virtual event EventHandler<WebQueryResponseEventArgs> QueryResponse;
         public virtual void OnQueryResponse(WebQueryResponseEventArgs args)
         {
-            if (QueryResponse != null)
+            var handler = QueryResponse;
+            if (handler != null)
             {
-                QueryResponse(this, args);
+                handler(this, args);
             }
         }
 
+
 #if !SILVERLIGHT
-        protected virtual string ExecuteGetOrDelete(GetOrDelete method, string url, out WebException exception)
+        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, out WebException exception)
         {
             WebResponse = null;
-            var request = BuildGetOrDeleteWebRequest(method, url);
+            var request = BuildGetDeleteHeadOptionsWebRequest(method, url);
             
             var requestArgs = new WebQueryRequestEventArgs(url);
             OnQueryRequest(requestArgs);
 
-            return ExecuteGetOrDelete(request, out exception);
+            return ExecuteGetDeleteHeadOptions(request, out exception);
         }
 
-        private string ExecuteGetOrDelete(WebRequest request, out WebException exception)
+        private string ExecuteGetDeleteHeadOptions(WebRequest request, out WebException exception)
         {
             try
             {
@@ -1127,13 +1130,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDelete(GetOrDelete.Get, url, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, out exception);
                 case WebMethod.Put:
                     return ExecutePostOrPut(PostOrPut.Put, url, out exception);
                 case WebMethod.Post:
                     return ExecutePostOrPut(PostOrPut.Post, url, out exception);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDelete(GetOrDelete.Delete, url, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1144,13 +1147,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDelete(GetOrDelete.Get, url, key, cache, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, out exception);
                 case WebMethod.Put:
                     return ExecutePostOrPut(PostOrPut.Put, url, key, cache, out exception);
                 case WebMethod.Post: 
                     return ExecutePostOrPut(PostOrPut.Post, url, key, cache, out exception);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDelete(GetOrDelete.Delete, url, key, cache, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1161,13 +1164,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDelete(GetOrDelete.Get, url, key, cache, absoluteExpiration, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, absoluteExpiration, out exception);
                 case WebMethod.Put:
                     return ExecutePostOrPut(PostOrPut.Put, url, key, cache, absoluteExpiration, out exception);
                 case WebMethod.Post:
                     return ExecutePostOrPut(PostOrPut.Post, url, key, cache, absoluteExpiration, out exception);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDelete(GetOrDelete.Delete, url, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1178,13 +1181,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDelete(GetOrDelete.Get, url, key, cache, slidingExpiration, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, slidingExpiration, out exception);
                 case WebMethod.Put:
                     return ExecutePostOrPut(PostOrPut.Put, url, key, cache, slidingExpiration, out exception);
                 case WebMethod.Post:
                     return ExecutePostOrPut(PostOrPut.Post, url, key, cache, slidingExpiration, out exception);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDelete(GetOrDelete.Delete, url, key, cache, slidingExpiration, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1212,13 +1215,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, userState);
                 case WebMethod.Put:
                     return ExecutePostOrPutAsync(PostOrPut.Put, url, userState);
                 case WebMethod.Post:
                     return ExecutePostOrPutAsync(PostOrPut.Post, url, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, userState);
                 default:
                     throw new NotSupportedException("Unknown web method");
             }
@@ -1259,13 +1262,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, key, cache, userState);
                 case WebMethod.Put:
                     return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, userState);
                 case WebMethod.Post:
                     return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())
@@ -1314,13 +1317,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, absoluteExpiration, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, key, cache, absoluteExpiration, userState);
                 case WebMethod.Put:
                     return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, absoluteExpiration, userState);
                 case WebMethod.Post:
                     return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, absoluteExpiration, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, absoluteExpiration, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, absoluteExpiration, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())
@@ -1370,13 +1373,13 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, slidingExpiration, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Post:
                     return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Put:
                     return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Delete:
-                    return ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, slidingExpiration, userState);
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())

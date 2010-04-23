@@ -101,7 +101,7 @@ namespace Hammock.Authentication.OAuth
             return request;
         }
 
-        protected override WebRequest BuildGetOrDeleteWebRequest(GetOrDelete method, string url)
+        protected override WebRequest BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions method, string url)
         {
             var uri = new Uri(url);
             switch (ParameterHandling)
@@ -116,7 +116,7 @@ namespace Hammock.Authentication.OAuth
 
             var request = WebRequest.Create(uri);
 #if SILVERLIGHT
-            var httpMethod = method == GetOrDelete.Get ? "GET" : "DELETE";
+            var httpMethod = method.ToUpper();
             if (HasElevatedPermissions)
             {
                 request.Method = httpMethod;
@@ -127,12 +127,12 @@ namespace Hammock.Authentication.OAuth
                 request.Headers[SilverlightMethodHeader] = httpMethod;
             }
 #else
-            request.Method = method == GetOrDelete.Get ? "GET" : "DELETE";
+            request.Method = method.ToUpper();
 #endif
             AuthenticateRequest(request);
 #if TRACE
             Trace.WriteLine(String.Concat(
-                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
+                "REQUEST: ", request.Method, " ", request.RequestUri)
                 );
 #endif
             // [DC] LSP violation necessary for "pure" mocks

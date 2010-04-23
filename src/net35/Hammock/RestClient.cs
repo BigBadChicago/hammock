@@ -36,7 +36,7 @@ namespace Hammock
         private const string MockHttpMethod = "mockHttpMethod";
 
         public virtual string Authority { get; set; }
-
+        
 #if SILVERLIGHT
         public virtual bool HasElevatedPermissions { get; set; }
 #endif

@@ -1,8 +1,10 @@
 ﻿namespace Hammock.Web
 {
-    public enum GetOrDelete
+    public enum GetDeleteHeadOptions
     {
         Get,
-        Delete
+        Delete,
+        Head,
+        Options
     }
 }

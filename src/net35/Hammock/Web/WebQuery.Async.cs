@@ -14,11 +14,11 @@ namespace Hammock.Web
 {
     public partial class WebQuery
     {
-        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, string url, object userState)
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetDeleteHeadOptions method, string url, object userState)
         {
             WebResponse = null;
 
-            var request = BuildGetOrDeleteWebRequest(method, url);
+            var request = BuildGetDeleteHeadOptionsWebRequest(method, url);
             var state = new Triplet<WebRequest, object, object>
                             {
                                 First = request,
@@ -188,7 +188,7 @@ namespace Hammock.Web
 #endif
         }
 
-        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetDeleteHeadOptions method,
                                                                       string url, 
                                                                       string prefixKey, 
                                                                       ICache cache,
@@ -196,13 +196,13 @@ namespace Hammock.Web
         {
             WebResponse = null;
 
-            var request = BuildGetOrDeleteWebRequest(method, url);
+            var request = BuildGetDeleteHeadOptionsWebRequest(method, url);
             var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, request, userState);
         }
 
-        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method, 
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetDeleteHeadOptions method, 
                                                                       string url, 
                                                                       string prefixKey, 
                                                                       ICache cache, 
@@ -211,13 +211,13 @@ namespace Hammock.Web
         {
             WebResponse = null;
 
-            var request = BuildGetOrDeleteWebRequest(method, url);
+            var request = BuildGetDeleteHeadOptionsWebRequest(method, url);
             var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, absoluteExpiration, request, userState);
         }
 
-        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetOrDelete method,
+        protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetDeleteHeadOptions method,
                                                                       string url, 
                                                                       string prefixKey,
                                                                       ICache cache,
@@ -226,7 +226,7 @@ namespace Hammock.Web
         {
             WebResponse = null;
 
-            var request = BuildGetOrDeleteWebRequest(method, url);
+            var request = BuildGetDeleteHeadOptionsWebRequest(method, url);
             var key = CreateCacheKey(prefixKey, url);
 
             return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request, userState);
@@ -842,7 +842,7 @@ namespace Hammock.Web
         {
             WebResponse = null;
 
-            var request = BuildGetOrDeleteWebRequest(GetOrDelete.Get, url);
+            var request = BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions.Get, url);
 
             var state = new Pair<WebRequest, Pair<TimeSpan, int>>
                             {
