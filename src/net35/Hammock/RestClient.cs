@@ -1992,7 +1992,15 @@ namespace Hammock
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
                     response.TimedOut = result.TimedOut;
+#if !SILVERLIGHT
                     response.Headers = result.WebResponse.Headers;
+#else
+                    response.Headers = new NameValueCollection();
+                    foreach(var key in result.WebResponse.Headers.AllKeys)
+                    {
+                        response.Headers.Add(key, result.WebResponse.Headers[key]);
+                    }
+#endif
                     return response;
                 };
 
