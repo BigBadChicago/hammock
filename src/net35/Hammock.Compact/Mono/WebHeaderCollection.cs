@@ -39,8 +39,8 @@ namespace Mono.Net
     [ComVisible(true)]
     public class WebHeaderCollection : NameValueCollection
     {
-        private static readonly Hashtable restricted;
-        private static readonly Hashtable multiValue;
+        private static readonly Hashtable _restricted;
+        private static readonly Hashtable _multiValue;
 
         private static readonly char[] tspecials =
             new[]
@@ -59,8 +59,7 @@ namespace Mono.Net
         {
             // the list of restricted header names as defined 
             // by the ms.net spec
-            restricted = new Hashtable(CaseInsensitiveHashCodeProvider.DefaultInvariant,
-                                       CaseInsensitiveComparer.DefaultInvariant)
+            _restricted = new Hashtable(StringComparer.InvariantCultureIgnoreCase)
                              {
                                  {"accept", true},
                                  {"connection", true},
@@ -78,8 +77,7 @@ namespace Mono.Net
 
             // see par 14 of RFC 2068 to see which header names
             // accept multiple values each separated by a comma
-            multiValue = new Hashtable(CaseInsensitiveHashCodeProvider.DefaultInvariant,
-                                       CaseInsensitiveComparer.DefaultInvariant)
+            _multiValue = new Hashtable(StringComparer.InvariantCultureIgnoreCase)
                              {
                                  {"accept", true},
                                  {"accept-charset", true},
@@ -258,7 +256,7 @@ namespace Mono.Net
             if (headerName == "") // MS throw nullexception here!
                 throw new ArgumentException("empty string", "headerName");
 
-            return restricted.ContainsKey(headerName);
+            return _restricted.ContainsKey(headerName);
         }
 
         public static bool IsRestricted(string headerName, bool response)
@@ -565,7 +563,7 @@ namespace Mono.Net
 
         internal static bool IsMultiValue(string headerName)
         {
-            return !string.IsNullOrEmpty(headerName) && multiValue.ContainsKey(headerName);
+            return !string.IsNullOrEmpty(headerName) && _multiValue.ContainsKey(headerName);
         }
 
         internal static bool IsHeaderValue(string value)

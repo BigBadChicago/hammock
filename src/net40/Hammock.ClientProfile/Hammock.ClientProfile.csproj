@@ -47,17 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\net35\Hammock.Compact\Mono\HttpRequestHeader.cs">
-      <Link>Mono\HttpRequestHeader.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Compact\Mono\HttpResponseHeader.cs">
-      <Link>Mono\HttpResponseHeader.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock.Compact\Mono\HttpUtility.cs">
       <Link>Mono\HttpUtility.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Compact\Mono\KeyedHashAlgorithm.cs">
-      <Link>Mono\KeyedHashAlgorithm.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock.Compact\Mono\WebHeaderCollection.cs">
       <Link>Mono\WebHeaderCollection.cs</Link>

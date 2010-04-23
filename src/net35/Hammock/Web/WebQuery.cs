@@ -306,7 +306,7 @@ namespace Hammock.Web
                     );
 #endif
                 
-#if !Silverlight
+#if !SILVERLIGHT
                 // [DC]: This is set by Silverlight
                 request.ContentLength = content.Length;
 #endif
@@ -896,116 +896,6 @@ namespace Hammock.Web
         }
 
 #if !SILVERLIGHT
-
-        // TODO Turf this method after using it to build an async post method
-        public virtual void ExecuteStreamPost(PostOrPut method, string url, TimeSpan duration, int resultCount)
-        {
-            WebResponse = null;
-            byte[] content;
-            var request = BuildPostOrPutWebRequest(method, url, out content);
-
-            var requestArgs = new WebQueryRequestEventArgs(url);
-            OnQueryRequest(requestArgs);
-
-            Stream stream = null;
-            try
-            {
-                using (stream = request.GetRequestStream())
-                {
-                    if(stream != null)
-                    {
-                        _isStreaming = true;
-
-                        stream.Write(content, 0, content.Length);
-                        stream.Close();
-
-                        var response = request.GetResponse();
-                        WebResponse = response;
-
-                        using (var responseStream = response.GetResponseStream())
-                        {
-                            // [DC]: cannot refactor this block to common method; will cause hwr to hang
-                            var count = 0;
-                            var results = new List<string>();
-                            var start = DateTime.UtcNow;
-
-                            using (var reader = new StreamReader(responseStream))
-                            {
-                                string line;
-
-                                while ((line = reader.ReadLine()).Length > 0)
-                                {
-                                    if (line.Equals(Environment.NewLine))
-                                    {
-                                        // Keep-Alive
-                                        continue;
-                                    }
-
-                                    if (line.Equals("<html>"))
-                                    {
-                                        // We're looking at a 401 or similar; construct error result?
-                                        EndStreaming(request);
-                                        return;
-                                    }
-
-                                    results.Add(line);
-                                    count++;
-
-                                    if (count < resultCount)
-                                    {
-                                        // Result buffer
-                                        continue;
-                                    }
-
-                                    var sb = new StringBuilder();
-                                    foreach (var result in results)
-                                    {
-                                        sb.AppendLine(result);
-                                    }
-
-                                    var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
-                                    OnQueryResponse(responseArgs);
-                                    results.Clear();
-
-                                    count = 0;
-
-                                    var now = DateTime.UtcNow;
-                                    if (now.Subtract(start) < duration)
-                                    {
-                                        continue;
-                                    }
-
-                                    // Time elapsed
-                                    _isStreaming = true;
-                                    request.Abort();
-                                    return;
-                                }
-
-                                // Stream dried up
-                            }
-                        }
-
-                        _isStreaming = false;
-                        request.Abort();
-                    }
-                }
-            }
-            catch (WebException)
-            {
-                // 
-            }
-            finally
-            {
-                if (stream != null)
-                {
-                    stream.Close();
-                    stream.Dispose();
-                }
-            }
-        }
-#endif
-
-#if !SILVERLIGHT
         protected virtual string ExecuteGetOrDelete(GetOrDelete method, string url, out WebException exception)
         {
             WebResponse = null;
@@ -1318,6 +1208,7 @@ namespace Hammock.Web
         }
 #endif
 
+#if !WindowsPhone
         public virtual WebQueryAsyncResult RequestAsync(string url, object userState)
         {
             UserState = userState;
@@ -1336,7 +1227,32 @@ namespace Hammock.Web
                     throw new NotSupportedException("Unknown web method");
             }
         }
+#else
+        public virtual void RequestAsync(string url, object userState)
+        {
+            UserState = userState;
 
+            switch (Method)
+            {
+                case WebMethod.Get:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, userState);
+                    break;
+                case WebMethod.Put:
+                    ExecutePostOrPutAsync(PostOrPut.Put, url, userState);
+                    break;
+                case WebMethod.Post:
+                    ExecutePostOrPutAsync(PostOrPut.Post, url, userState);
+                    break;
+                case WebMethod.Delete:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, userState);
+                    break;
+                default:
+                    throw new NotSupportedException("Unknown web method");
+            }
+        }
+#endif
+
+#if !WindowsPhone
         public virtual WebQueryAsyncResult RequestAsync(string url, 
                                                         string key, 
                                                         ICache cache,
@@ -1360,7 +1276,37 @@ namespace Hammock.Web
                         );
             }
         }
+#else
+        public virtual void RequestAsync(string url,
+                                         string key,
+                                         ICache cache,
+                                         object userState)
+        {
+            UserState = userState;
 
+            switch (Method)
+            {
+                case WebMethod.Get:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, userState);
+                    break;
+                case WebMethod.Put:
+                    ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, userState);
+                    break;
+                case WebMethod.Post:
+                    ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, userState);
+                    break;
+                case WebMethod.Delete:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, userState);
+                    break;
+                default:
+                    throw new NotSupportedException(
+                        "Unsupported web method: {0}".FormatWith(Method.ToUpper())
+                        );
+            }
+        }
+#endif
+
+#if !WindowsPhone
         public virtual WebQueryAsyncResult RequestAsync(string url,
                                                         string key, 
                                                         ICache cache, 
@@ -1385,7 +1331,38 @@ namespace Hammock.Web
                         );
             }
         }
+#else
+        public virtual void RequestAsync(string url,
+                                         string key,
+                                         ICache cache,
+                                         DateTime absoluteExpiration,
+                                         object userState)
+        {
+            UserState = userState;
 
+            switch (Method)
+            {
+                case WebMethod.Get:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, absoluteExpiration, userState);
+                    break;
+                case WebMethod.Put:
+                    ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, absoluteExpiration, userState);
+                    break;
+                case WebMethod.Post:
+                    ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, absoluteExpiration, userState);
+                    break;
+                case WebMethod.Delete:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, absoluteExpiration, userState);
+                    break;
+                default:
+                    throw new NotSupportedException(
+                        "Unsupported web method: {0}".FormatWith(Method.ToUpper())
+                        );
+            }
+        }
+#endif
+
+#if !WindowsPhone
         public virtual WebQueryAsyncResult RequestAsync(string url, 
                                                         string key, 
                                                         ICache cache, 
@@ -1410,7 +1387,38 @@ namespace Hammock.Web
                         );
             }
         }
+#else
+        public virtual void RequestAsync(string url,
+                                         string key,
+                                         ICache cache,
+                                         TimeSpan slidingExpiration,
+                                         object userState)
+        {
+            UserState = userState;
 
+            switch (Method)
+            {
+                case WebMethod.Get:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, slidingExpiration, userState);
+                    break;
+                case WebMethod.Post:
+                    ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, slidingExpiration, userState);
+                    break;
+                case WebMethod.Put:
+                    ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, slidingExpiration, userState);
+                    break;
+                case WebMethod.Delete:
+                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, slidingExpiration, userState);
+                    break;
+                default:
+                    throw new NotSupportedException(
+                        "Unsupported web method: {0}".FormatWith(Method.ToUpper())
+                        );
+            }
+        }
+#endif
+
+#if !WindowsPhone
         public virtual WebQueryAsyncResult RequestAsync(string url, 
                                                         IEnumerable<HttpPostParameter> parameters,
                                                         object userState)
@@ -1427,6 +1435,26 @@ namespace Hammock.Web
                     throw new NotSupportedException("Only HTTP POSTS can use multi-part forms");
             }
         }
+#else
+        public virtual void RequestAsync(string url,
+                                         IEnumerable<HttpPostParameter> parameters,
+                                         object userState)
+        {
+            UserState = userState;
+
+            switch (Method)
+            {
+                case WebMethod.Put:
+                    ExecutePostOrPutAsync(PostOrPut.Put, url, parameters, userState);
+                    break;
+                case WebMethod.Post:
+                    ExecutePostOrPutAsync(PostOrPut.Post, url, parameters, userState);
+                    break;
+                default:
+                    throw new NotSupportedException("Only HTTP POSTS can use multi-part forms");
+            }
+        }
+#endif
 
 #if !SILVERLIGHT
         public virtual string ExecutePostOrPut(PostOrPut method, 

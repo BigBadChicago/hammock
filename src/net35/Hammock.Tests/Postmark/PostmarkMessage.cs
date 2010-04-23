@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Net.Mail;
+using System.Text;
 using System.Web;
 
 namespace Hammock.Tests.Postmark
@@ -35,7 +36,20 @@ namespace Hammock.Tests.Postmark
             Subject = message.Subject;
             HtmlBody = message.IsBodyHtml ? message.Body : null;
             TextBody = message.IsBodyHtml ? null : message.Body;
-            ReplyTo = message.ReplyTo.DisplayName;
+
+            var sb = new StringBuilder();
+            var total = message.ReplyToList.Count;
+            var count = 0;
+            foreach(var replyTo in message.ReplyToList)
+            {
+                sb.Append(replyTo);
+                count++;
+                if(count < total)
+                {
+                    sb.Append(",");
+                }
+            }
+            ReplyTo = sb.ToString();
             Headers = message.Headers;
         }
 

@@ -386,6 +386,7 @@ namespace Hammock.Authentication.OAuth
         }
 #endif
 
+#if !WindowsPhone
         public override WebQueryAsyncResult RequestAsync(string url, IEnumerable<HttpPostParameter> parameters, object userState)
         {
             RecalculateProtectedResourceSignature(url);
@@ -416,6 +417,38 @@ namespace Hammock.Authentication.OAuth
             RecalculateProtectedResourceSignature(url);
             return base.RequestAsync(url, key, cache, slidingExpiration, userState);
         }
+#else
+        public override void RequestAsync(string url, IEnumerable<HttpPostParameter> parameters, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            base.RequestAsync(url, parameters, userState);
+        }
+
+        public override void RequestAsync(string url, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            url = RestoreUrlParams(url, Parameters);
+            base.RequestAsync(url, userState);
+        }
+
+        public override void RequestAsync(string url, string key, ICache cache, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            base.RequestAsync(url, key, cache, userState);
+        }
+
+        public override void RequestAsync(string url, string key, ICache cache, DateTime absoluteExpiration, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            base.RequestAsync(url, key, cache, absoluteExpiration, userState);
+        }
+
+        public override void RequestAsync(string url, string key, ICache cache, TimeSpan slidingExpiration, object userState)
+        {
+            RecalculateProtectedResourceSignature(url);
+            base.RequestAsync(url, key, cache, slidingExpiration, userState);
+        }
+#endif
         
         private string RestoreUrlParams(string url, IEnumerable<WebPair> parameters)
         {

@@ -11,6 +11,8 @@ namespace Hammock
         RestResponse<T> Request<T>(RestRequest request);
         RestResponse<T> Request<T>();
 #endif
+
+#if !WindowsPhone
         IAsyncResult BeginRequest();
         IAsyncResult BeginRequest<T>();
 
@@ -30,5 +32,23 @@ namespace Hammock
 
         RestResponse EndRequest(IAsyncResult result);
         RestResponse<T> EndRequest<T>(IAsyncResult result);
+#else
+        void BeginRequest();
+        void BeginRequest<T>();
+
+        void BeginRequest(RestRequest request, RestCallback callback);
+        void BeginRequest(RestRequest request, RestCallback callback, object userState);
+
+        void BeginRequest<T>(RestRequest request, RestCallback<T> callback);
+        void BeginRequest<T>(RestRequest request, RestCallback<T> callback, object userState);
+
+        void BeginRequest(RestRequest request);
+        void BeginRequest(RestRequest request, object userState);
+        void BeginRequest<T>(RestRequest request);
+        void BeginRequest<T>(RestRequest request, object userState);
+
+        void BeginRequest(RestCallback callback);
+        void BeginRequest<T>(RestCallback<T> callback);
+#endif
     }
 }
