@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.Sil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.Silverlight.Tests", "ICSharpCode.SharpZipLib.Silverlight.Tests\ICSharpCode.SharpZipLib.Silverlight.Tests.csproj", "{B96C231F-B8CA-4426-AC65-19D2826CC965}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.WindowsPhone", "ICSharpCode.SharpZipLib.WindowsPhone\ICSharpCode.SharpZipLib.WindowsPhone.csproj", "{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{B96C231F-B8CA-4426-AC65-19D2826CC965}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B96C231F-B8CA-4426-AC65-19D2826CC965}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B96C231F-B8CA-4426-AC65-19D2826CC965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,5 +70,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5953279F-F478-4D5F-9906-03D56CE2DA2D} = {5C8A9B7C-5129-453C-AD09-EE170E36A1E6}
 		{B96C231F-B8CA-4426-AC65-19D2826CC965} = {5C8A9B7C-5129-453C-AD09-EE170E36A1E6}
+		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E} = {5C8A9B7C-5129-453C-AD09-EE170E36A1E6}
 	EndGlobalSection
 EndGlobal

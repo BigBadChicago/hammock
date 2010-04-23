@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Hammock.Web;
 
 #if SILVERLIGHT
@@ -29,6 +28,7 @@ namespace Hammock.Authentication.OAuth
         public virtual string AccessTokenUrl { get; set; }
         public virtual string AuthorizationUrl { get; set; }
         public virtual string CallbackUrl { get; set; }
+        public virtual string Version { get; set; }
 
         public virtual WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method)
         {
@@ -48,7 +48,8 @@ namespace Hammock.Authentication.OAuth
                                    ClientUsername = ClientUsername,
                                    Verifier = Verifier, 
                                    Token = Token, 
-                                   TokenSecret = TokenSecret
+                                   TokenSecret = TokenSecret,
+                                   Version = Version ?? "1.0"
                                };
 
             switch(Type)
