@@ -6,9 +6,7 @@ namespace Hammock.Web
         Post,
         Delete,
         Put,
-        /*
         Head,
         Options
-        */
     }
 }

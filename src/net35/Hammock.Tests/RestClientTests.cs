@@ -95,6 +95,28 @@ namespace Hammock.Tests
         }
 
         [Test]
+        public void Can_make_head_request()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://is.gd",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "bF9rh",
+                Method = WebMethod.Head
+            };
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+
+            var longUrl = response.Headers["X-Pingback"];
+            Assert.AreEqual("http://tweetsharp.com/xmlrpc.php", longUrl);
+        }
+
+        [Test]
         public void Can_make_basic_auth_request_with_headers_synchronously()
         {
             var client = new RestClient

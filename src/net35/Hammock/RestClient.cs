@@ -1992,6 +1992,7 @@ namespace Hammock
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
                     response.TimedOut = result.TimedOut;
+                    response.Headers = result.WebResponse.Headers;
                     return response;
                 };
 

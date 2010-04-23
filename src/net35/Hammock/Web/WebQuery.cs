@@ -1137,6 +1137,10 @@ namespace Hammock.Web
                     return ExecutePostOrPut(PostOrPut.Post, url, out exception);
                 case WebMethod.Delete:
                     return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, out exception);
+                case WebMethod.Head:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, out exception);
+                case WebMethod.Options:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1154,6 +1158,10 @@ namespace Hammock.Web
                     return ExecutePostOrPut(PostOrPut.Post, url, key, cache, out exception);
                 case WebMethod.Delete:
                     return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, out exception);
+                case WebMethod.Head:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache,  out exception);
+                case WebMethod.Options:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1170,7 +1178,11 @@ namespace Hammock.Web
                 case WebMethod.Post:
                     return ExecutePostOrPut(PostOrPut.Post, url, key, cache, absoluteExpiration, out exception);
                 case WebMethod.Delete:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, out exception);
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, absoluteExpiration, out exception);
+                case WebMethod.Head:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache, absoluteExpiration, out exception);
+                case WebMethod.Options:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, absoluteExpiration, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1188,6 +1200,10 @@ namespace Hammock.Web
                     return ExecutePostOrPut(PostOrPut.Post, url, key, cache, slidingExpiration, out exception);
                 case WebMethod.Delete:
                     return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, out exception);
+                case WebMethod.Head:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache, slidingExpiration, out exception);
+                case WebMethod.Options:
+                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, slidingExpiration, out exception);
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
@@ -1222,6 +1238,10 @@ namespace Hammock.Web
                     return ExecutePostOrPutAsync(PostOrPut.Post, url, userState);
                 case WebMethod.Delete:
                     return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, userState);
+                case WebMethod.Head:
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, userState);
+                case WebMethod.Options:
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, userState);
                 default:
                     throw new NotSupportedException("Unknown web method");
             }
@@ -1243,7 +1263,13 @@ namespace Hammock.Web
                     ExecutePostOrPutAsync(PostOrPut.Post, url, userState);
                     break;
                 case WebMethod.Delete:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, userState);
+                    break;
+                case WebMethod.Head:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, userState);
+                    break;
+                case WebMethod.Options:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, userState);
                     break;
                 default:
                     throw new NotSupportedException("Unknown web method");
@@ -1269,6 +1295,10 @@ namespace Hammock.Web
                     return ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, userState);
                 case WebMethod.Delete:
                     return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, userState);
+                case WebMethod.Head:
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, key, cache, userState);
+                case WebMethod.Options:
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, key, cache, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())
@@ -1286,7 +1316,7 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, key, cache, userState);
                     break;
                 case WebMethod.Put:
                     ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, userState);
@@ -1295,7 +1325,13 @@ namespace Hammock.Web
                     ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, userState);
                     break;
                 case WebMethod.Delete:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, userState);
+                    break;
+                case WebMethod.Head:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, key, cache, userState);
+                    break;
+                case WebMethod.Options:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, key, cache, userState);
                     break;
                 default:
                     throw new NotSupportedException(
@@ -1342,7 +1378,7 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, absoluteExpiration, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, key, cache, absoluteExpiration, userState);
                     break;
                 case WebMethod.Put:
                     ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, absoluteExpiration, userState);
@@ -1351,7 +1387,13 @@ namespace Hammock.Web
                     ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, absoluteExpiration, userState);
                     break;
                 case WebMethod.Delete:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, absoluteExpiration, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, absoluteExpiration, userState);
+                    break;
+                case WebMethod.Head:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, key, cache, absoluteExpiration, userState);
+                    break;
+                case WebMethod.Options:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, key, cache, absoluteExpiration, userState);
                     break;
                 default:
                     throw new NotSupportedException(
@@ -1380,6 +1422,10 @@ namespace Hammock.Web
                     return ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, slidingExpiration, userState);
                 case WebMethod.Delete:
                     return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, userState);
+                case WebMethod.Head:
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, key, cache, slidingExpiration, userState);
+                case WebMethod.Options:
+                    return ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, key, cache, slidingExpiration, userState);
                 default:
                     throw new NotSupportedException(
                         "Unsupported web method: {0}".FormatWith(Method.ToUpper())
@@ -1398,7 +1444,7 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, key, cache, slidingExpiration, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, key, cache, slidingExpiration, userState);
                     break;
                 case WebMethod.Post:
                     ExecutePostOrPutAsync(PostOrPut.Post, url, key, cache, slidingExpiration, userState);
@@ -1407,7 +1453,13 @@ namespace Hammock.Web
                     ExecutePostOrPutAsync(PostOrPut.Put, url, key, cache, slidingExpiration, userState);
                     break;
                 case WebMethod.Delete:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Delete, url, key, cache, slidingExpiration, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, userState);
+                    break;
+                case WebMethod.Head:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Head, url, key, cache, slidingExpiration, userState);
+                    break;
+                case WebMethod.Options:
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Options, url, key, cache, slidingExpiration, userState);
                     break;
                 default:
                     throw new NotSupportedException(
