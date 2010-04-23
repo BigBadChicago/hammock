@@ -271,7 +271,7 @@ namespace Hammock.Web
 
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
-#if SILVERLIGHT
+#if SILVERLIGHT && !WindowsPhone
             var httpMethod = method == PostOrPut.Post ? "POST" : "PUT"; ;
             if (HasElevatedPermissions)
             {
@@ -306,7 +306,7 @@ namespace Hammock.Web
                     );
 #endif
                 
-#if !SILVERLIGHT
+#if !SILVERLIGHT 
                 // [DC]: This is set by Silverlight
                 request.ContentLength = content.Length;
 #endif
@@ -324,7 +324,7 @@ namespace Hammock.Web
             url = AppendParameters(url);
 
             var request = WebRequest.Create(url);
-#if SILVERLIGHT
+#if SILVERLIGHT && !WindowsPhone
             var httpMethod = method == GetOrDelete.Get ? "GET" : "DELETE";
             if (HasElevatedPermissions)
             {
@@ -362,7 +362,7 @@ namespace Hammock.Web
                 AppendHeaders(request);
                 if (!UserAgent.IsNullOrBlank())
                 {
-#if SILVERLIGHT
+#if SILVERLIGHT && !WindowsPhone
                     // [DC] User-Agent is still restricted in elevated mode
                     request.Headers[SilverlightUserAgentHeader] = UserAgent;
 #else
@@ -400,7 +400,7 @@ namespace Hammock.Web
 
             if (!UserAgent.IsNullOrBlank())
             {
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !WindowsPhone
                 request.UserAgent = UserAgent;
 #else
                 // [DC]: User agent is still restricted in elevated permissions
@@ -410,7 +410,7 @@ namespace Hammock.Web
 
             if (DecompressionMethods != DecompressionMethods.None)
             {
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !WindowsPhone
                 request.AutomaticDecompression = DecompressionMethods;
 #else
                 if (HasElevatedPermissions)
@@ -951,7 +951,7 @@ namespace Hammock.Web
 #endif
             HandleRequestMeta(request);
 
-#if !Smartphone
+#if !Smartphone 
             var encoding = Encoding.GetEncoding("iso-8859-1");
 #else
             var encoding =  Encoding.GetEncoding(1252);
@@ -999,11 +999,7 @@ namespace Hammock.Web
 #endif
                             const string fileMask = "Content-Disposition: file; name=\"{0}\"; filename=\"{1}\"";
                             var fileHeader = fileMask.FormatWith(parameter.Name, parameter.FileName);
-#if !Smartphone
                             var fileData = encoding.GetString(fileBytes, 0, fileBytes.Length);
-#else
-                            var fileData = encoding.GetString(fileBytes, 0, fileBytes.Length);
-#endif
                             var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
 
                             contents.AppendLine(fileHeader);

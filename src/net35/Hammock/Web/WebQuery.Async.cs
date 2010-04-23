@@ -179,7 +179,7 @@ namespace Hammock.Web
             var timeout = request.Timeout;
 #endif 
 
-#if !Smartphone
+#if !Smartphone && !WindowsPhone
             // Async operations ignore the WebRequest's Timeout property
             ThreadPool.RegisterWaitForSingleObject(asyncResult.AsyncWaitHandle,
                                                    GetAsyncResponseTimeout,
