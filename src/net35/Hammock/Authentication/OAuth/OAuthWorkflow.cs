@@ -271,7 +271,7 @@ namespace Hammock.Authentication.OAuth
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
-                               Version = Version,
+                               Version = Version ?? "1.0",
                                UserAgent = "Hammock",
                                ConsumerSecret = ConsumerSecret,
                                TokenSecret = TokenSecret
