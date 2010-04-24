@@ -32,7 +32,7 @@ namespace Hammock.Tests.Postmark.Converters
             writer.WriteRawValue(serialized);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object originalValue, JsonSerializer serializer)
         {
             return reader.Value;
         }

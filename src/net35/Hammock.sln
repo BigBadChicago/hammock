@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.Sil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Silverlight.Tests", "Hammock.Silverlight.Tests\Hammock.Silverlight.Tests.csproj", "{4F57A893-4E4B-4B94-B049-A6F422207AFF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E441403C-33CA-4175-B119-1C77EBAEBFC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,5 +90,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C0B2D801-2435-4233-A823-66F6341CC73B} = {0D6CBA8E-3846-4559-AA4E-AEE3373A03CB}
 		{2E420750-6124-473B-808D-41755C907648} = {0D6CBA8E-3846-4559-AA4E-AEE3373A03CB}
+		{4F57A893-4E4B-4B94-B049-A6F422207AFF} = {E441403C-33CA-4175-B119-1C77EBAEBFC1}
+		{E0461346-CB62-489E-9893-CFEA249F8380} = {E441403C-33CA-4175-B119-1C77EBAEBFC1}
 	EndGlobalSection
 EndGlobal
