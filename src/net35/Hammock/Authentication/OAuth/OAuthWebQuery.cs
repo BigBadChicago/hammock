@@ -454,14 +454,11 @@ namespace Hammock.Authentication.OAuth
         {
             if (Method != WebMethod.Post && Method != WebMethod.Put)
             {
-                var builder = new StringBuilder("?");
+                var builder = new StringBuilder();
                 bool first = true;
                 foreach (var param in parameters.Where(p => !p.Name.ToLower().StartsWith("oauth_")))
                 {
-                    if (!first)
-                    {
-                        builder.Append("&");
-                    }
+                    builder.Append(first ? "?" : "&");
                     first = false;
                     builder.Append(param.Name).Append('=').Append(param.Value);
                 }
