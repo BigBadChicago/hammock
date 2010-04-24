@@ -1254,7 +1254,7 @@ namespace Hammock.Web
             switch (Method)
             {
                 case WebMethod.Get:
-                    ExecuteGetOrDeleteAsync(GetOrDelete.Get, url, userState);
+                    ExecuteGetOrDeleteAsync(GetDeleteHeadOptions.Get, url, userState);
                     break;
                 case WebMethod.Put:
                     ExecutePostOrPutAsync(PostOrPut.Put, url, userState);
