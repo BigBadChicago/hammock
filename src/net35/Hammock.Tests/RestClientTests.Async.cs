@@ -159,6 +159,7 @@ namespace Hammock.Tests
         }
 
         [Test]
+        [Timeout(10000)]
         public void Can_timeout_on_asynchronous_query()
         {
             var client = new RestClient

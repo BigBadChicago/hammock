@@ -9,6 +9,7 @@ namespace Hammock.Tests
         [Test]
         [Category("Async")]
         [Category("Streaming")]
+        [Timeout(30000)]
         public void Can_stream_with_get_async()
         {
             var options = new StreamOptions
