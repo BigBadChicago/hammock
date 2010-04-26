@@ -1268,17 +1268,17 @@ namespace Hammock
         {
             if (!isInternal)
             {
-                //if (!BeginRequestWithTask(request, callback, query, url, userState))
-                //{
-                //    if (!BeginRequestWithCache(request, query, url, userState))
-                //    {
-                //        if (!BeginRequestMultiPart(request, query, url, userState))
-                //        {
+                if (!BeginRequestWithTask(request, callback, query, url, userState))
+                {
+                    if (!BeginRequestWithCache(request, query, url, userState))
+                    {
+                        if (!BeginRequestMultiPart(request, query, url, userState))
+                        {
                             // Normal operation
                             query.RequestAsync(url, userState);
-                //        }
-                //    }
-                //}
+                        }
+                    }
+                }
             }
             else
             {
@@ -1674,7 +1674,6 @@ namespace Hammock
                                                           true /* isInternal */,
                                                           userState
                                                           ));
-
             }
             else
             {
@@ -1689,9 +1688,8 @@ namespace Hammock
 
             RegisterTimedTaskForRequest(request, task);
 
-            Action action = task.Start;
-
-            action.BeginInvoke(ar => { /* No callback */ }, null);
+            var action = new Action(task.Start);
+            action.Invoke();
             return true;
         }
 
