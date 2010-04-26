@@ -158,8 +158,6 @@ namespace Hammock.Tests
                 RateLimitPercent = 20.0, 
                 GetRateLimitStatus = getRateLimit,
             };
-            
-            
 
             var settings = GetSerializerSettings();
             var serializer = new HammockJsonDotNetSerializer(settings);
@@ -198,7 +196,7 @@ namespace Hammock.Tests
             Thread.Sleep((int)5.Seconds().TotalMilliseconds);
             //should still be 1 since the rate limit doesn't reset for 10 min
             Assert.AreEqual(1, repeatCount);
-            client.CancelAllRepeatingTasks();
+            client.CancelPeriodicTasks();
         }
     }
 }

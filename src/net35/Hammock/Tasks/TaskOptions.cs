@@ -31,7 +31,6 @@ namespace Hammock.Tasks
                 _rateLimitPercent = value;
             }
         }
-        
     }
 
 #if !SILVERLIGHT

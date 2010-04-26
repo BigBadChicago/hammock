@@ -45,7 +45,11 @@ namespace Hammock
         private bool _firstTry = true;
 #endif
         private int _remainingRetries;
+
         private readonly object _timedTasksLock = new object();
+        private readonly object _streamingLock = new object();
+        private WebQuery _streamQuery;
+
         private readonly Dictionary<RestRequest, TimedTask> _tasks = new Dictionary<RestRequest, TimedTask>();
 
         static RestClient()
@@ -1318,6 +1322,11 @@ namespace Hammock
                 callback.Invoke(request, response, query.UserState);
             }
 
+            if (wasStreaming)
+            {
+                _streamQuery = null;
+            }
+
             SignalTasks(request, result);
         }
         private void CompleteWithQuery(WebQuery query,
@@ -1339,6 +1348,11 @@ namespace Hammock
             if (callback != null && !wasStreaming)
             {
                 callback.Invoke(request, response, query.UserState);
+            }
+
+            if(wasStreaming)
+            {
+                _streamQuery = null;
             }
             
             SignalTasks(request, result);
@@ -1448,8 +1462,7 @@ namespace Hammock
             }
         }
 #endif
-
-        private static WebQueryAsyncResult BeginRequestStreamFunction<T>(RestRequest request,
+        private WebQueryAsyncResult BeginRequestStreamFunction<T>(RestRequest request,
                                                                          WebQuery query,
                                                                          string url,
                                                                          RestCallback<T> callback,
@@ -1457,17 +1470,18 @@ namespace Hammock
                                                                          int resultsPerCallback,
                                                                          object userState)
         {
-            var result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
+            var result = GetStreamResult(request, query, url, duration, resultsPerCallback);
+
             result.Tag = new Triplet<RestRequest, RestCallback<T>, object>
             {
                 First = request,
                 Second = callback,
                 Third = userState
             };
+
             return result;
         }
-
-        private static WebQueryAsyncResult BeginRequestStreamFunction(RestRequest request,
+        private WebQueryAsyncResult BeginRequestStreamFunction(RestRequest request,
                                                                       WebQuery query,
                                                                       string url,
                                                                       RestCallback callback,
@@ -1475,19 +1489,8 @@ namespace Hammock
                                                                       int resultsPerCallback,
                                                                       object userState)
         {
-            WebQueryAsyncResult result;
-            switch(request.Method)
-            {
-                case WebMethod.Get:
-                    result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
-                    break;
-                case WebMethod.Post:
-                    result = query.ExecuteStreamPostAsync(url, duration, resultsPerCallback);
-                    break;
-                    default:
-                    throw new NotSupportedException("Unsupported HTTP method declared for streaming.");
-            }
-             
+            var result = GetStreamResult(request, query, url, duration, resultsPerCallback);
+
             result.Tag = new Triplet<RestRequest, RestCallback, object>
             {
                 First = request,
@@ -1498,6 +1501,34 @@ namespace Hammock
             return result;
         }
 
+        private WebQueryAsyncResult GetStreamResult(RestBase request, 
+                                                    WebQuery query, 
+                                                    string url, 
+                                                    TimeSpan duration, 
+                                                    int resultsPerCallback)
+        {
+            if(!request.Method.HasValue)
+            {
+                request.Method = WebMethod.Get;
+            }
+
+            WebQueryAsyncResult result;
+            switch(request.Method)
+            {
+                case WebMethod.Get:
+                    result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
+                    break;
+                case WebMethod.Post:
+                    result = query.ExecuteStreamPostAsync(url, duration, resultsPerCallback);
+                    break;
+                default:
+                    throw new NotSupportedException("Unsupported HTTP method declared for streaming.");
+            }
+
+            _streamQuery = query;
+
+            return result;
+        }
 
         private void RegisterTimedTaskForRequest(RestRequest request, TimedTask task)
         {
@@ -2144,7 +2175,18 @@ namespace Hammock
             return query;
         }
 
-        public void CancelAllRepeatingTasks()
+        public void CancelStreaming()
+        {
+            lock (_streamingLock)
+            {
+               if(_streamQuery != null)
+               {
+                   _streamQuery.IsStreaming = false;
+               }
+            }
+        }
+
+        public void CancelPeriodicTasks()
         {
             lock (_timedTasksLock)
             {

@@ -360,9 +360,20 @@ namespace Hammock.Web
         {
             get
             {
-                return _isStreaming;
+                lock(_sync)
+                {
+                    return _isStreaming;
+                }
+            }
+            set
+            {
+                lock(_sync)
+                {
+                    _isStreaming = value;
+                }
             }
         }
+
         public virtual bool TimedOut { get; set; }
 
         private void AsyncStreamCallback(IAsyncResult asyncResult)
@@ -438,6 +449,13 @@ namespace Hammock.Web
 
                     while ((line = reader.ReadLine()).Length > 0)
                     {
+                        if(!_isStreaming)
+                        {
+                            // [DC] Streaming was cancelling out of band
+                            EndStreaming(request);
+                            return;
+                        }
+
                         if (line.Equals(Environment.NewLine))
                         {
                             // Keep-Alive
