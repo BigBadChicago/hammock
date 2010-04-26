@@ -534,12 +534,12 @@ namespace Hammock
 #else
         public virtual void BeginRequest(RestRequest request, RestCallback callback, object userState)
         {
-            BeginRequest(request, callback, null, null, false /* isInternal */, userState);
+            BeginRequestImpl(request, callback, null, null, false /* isInternal */, userState);
         }
 
         public virtual void BeginRequest<T>(RestRequest request, RestCallback<T> callback, object userState)
         {
-            BeginRequest(request, callback, null, null, false /* isInternal */, null);
+            BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
         public void BeginRequest()
@@ -554,17 +554,17 @@ namespace Hammock
 
         public virtual void BeginRequest(RestRequest request, RestCallback callback)
         {
-            BeginRequest(request, callback, null, null, false /* isInternal */, null);
+            BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual void BeginRequest<T>(RestRequest request, RestCallback<T> callback)
         {
-            BeginRequest(request, callback, null, null, false /* isInternal */, null);
+            BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual void BeginRequest(RestCallback callback)
         {
-            BeginRequest(null, callback, null, null, false /* isInternal */, null);
+            BeginRequestImpl(null, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual void BeginRequest(RestRequest request)
@@ -1021,12 +1021,12 @@ namespace Hammock
         }
 #else
         // TODO BeginRequest and BeginRequest<T> have too much duplication
-        private void BeginRequest(RestRequest request,
-                                  RestCallback callback,
-                                  WebQuery query,
-                                  string url,
-                                  bool isInternal,
-                                  object userState)
+        private void BeginRequestImpl(RestRequest request,
+                                      RestCallback callback,
+                                      WebQuery query,
+                                      string url,
+                                      bool isInternal,
+                                      object userState)
         {
             request = request ?? new RestRequest();
             if (!isInternal)
@@ -1099,7 +1099,7 @@ namespace Hammock
                         if (retry)
                         {
                             previous = current;
-                            BeginRequest(request, callback, query, url, true /* isInternal */, userState);
+                            BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                             Interlocked.Decrement(ref _remainingRetries);
                         }
                         else
@@ -1122,13 +1122,12 @@ namespace Hammock
                 };
             }
         }
-
-        private void BeginRequest<T>(RestRequest request,
-                                     RestCallback<T> callback,
-                                     WebQuery query,
-                                     string url,
-                                     bool isInternal,
-                                     object userState)
+        private void BeginRequestImpl<T>(RestRequest request,
+                                         RestCallback<T> callback,
+                                         WebQuery query,
+                                         string url,
+                                         bool isInternal,
+                                         object userState)
         {
             request = request ?? new RestRequest();
             if (!isInternal)
@@ -1195,7 +1194,7 @@ namespace Hammock
                     if (retry)
                     {
                         previous = current;
-                        BeginRequest(request, callback, query, url, true /* isInternal */, userState);
+                        BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                         Interlocked.Decrement(ref _remainingRetries);
                     }
                     else
@@ -1707,13 +1706,13 @@ namespace Hammock
                                      taskOptions.RepeatInterval,
                                      taskOptions.RepeatTimes,
                                      taskOptions.ContinueOnError,
-                                     skip => BeginRequest(request,
-                                                          callback,
-                                                          query,
-                                                          url,
-                                                          true /* isInternal */,
-                                                          userState
-                                                          ));
+                                     skip => BeginRequestImpl(request,
+                                                              callback,
+                                                              query,
+                                                              url,
+                                                              true /* isInternal */,
+                                                              userState
+                                                 ));
             }
             else
             {
@@ -1758,12 +1757,12 @@ namespace Hammock
                                       taskOptions.RepeatInterval,
                                       taskOptions.RepeatTimes,
                                       taskOptions.ContinueOnError,
-                                      skip => BeginRequest(request,
-                                                           callback,
-                                                           query,
-                                                           url,
-                                                           true /* isInternal */,
-                                                           userState));
+                                      skip => BeginRequestImpl(request,
+                                                               callback,
+                                                               query,
+                                                               url,
+                                                               true /* isInternal */,
+                                                               userState));
             }
             else
             {
