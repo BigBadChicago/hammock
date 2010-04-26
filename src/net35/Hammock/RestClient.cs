@@ -136,15 +136,11 @@ namespace Hammock
                 {
                     _remainingRetries = 0;
                 }
-
-
             }
 
             _firstTry = _remainingRetries == 0;
             return query;
         }
-
-        
 
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
         {
@@ -474,12 +470,12 @@ namespace Hammock
 #if !WindowsPhone
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback, object userState)
         {
-            return BeginRequest(request, callback, null, null, false /* isInternal */, userState);
+            return BeginRequestImpl(request, callback, null, null, false /* isInternal */, userState);
         }
 
         public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback, object userState)
         {
-            return BeginRequest(request, callback, null, null, false /* isInternal */, null);
+            return BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
         public IAsyncResult BeginRequest()
@@ -494,17 +490,17 @@ namespace Hammock
 
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
-            return BeginRequest(request, callback, null, null, false /* isInternal */, null);
+            return BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback)
         {
-            return BeginRequest(request, callback, null, null, false /* isInternal */, null);
+            return BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual IAsyncResult BeginRequest(RestCallback callback)
         {
-            return BeginRequest(null, callback, null, null, false /* isInternal */, null);
+            return BeginRequestImpl(null, callback, null, null, false /* isInternal */, null);
         }
 
         public virtual IAsyncResult BeginRequest(RestRequest request)
@@ -816,8 +812,8 @@ namespace Hammock
         }
 
 #if !WindowsPhone
-        // TODO BeginRequest and BeginRequest<T> have too much duplication
-        private IAsyncResult BeginRequest(RestRequest request,
+        // TODO BeginRequestImpl and BeginRequestImpl<T> have too much duplication
+        private IAsyncResult BeginRequestImpl(RestRequest request,
                                           RestCallback callback,
                                           WebQuery query,
                                           string url,
@@ -897,7 +893,7 @@ namespace Hammock
                                                    if (retry)
                                                    {
                                                        previous = current;
-                                                       BeginRequest(request, callback, query, url, true /* isInternal */, userState);
+                                                       BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                                                        Interlocked.Decrement(ref _remainingRetries);
                                                    }
                                                    else
@@ -921,8 +917,7 @@ namespace Hammock
             }
             return asyncResult;
         }
-
-        private IAsyncResult BeginRequest<T>(RestRequest request,
+        private IAsyncResult BeginRequestImpl<T>(RestRequest request,
                                              RestCallback<T> callback,
                                              WebQuery query,
                                              string url,
@@ -996,7 +991,7 @@ namespace Hammock
                     if (retry)
                     {
                         previous = current;
-                        BeginRequest(request, callback, query, url, true /* isInternal */, userState);
+                        BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                         Interlocked.Decrement(ref _remainingRetries);
                     }
                     else
@@ -1308,8 +1303,9 @@ namespace Hammock
                                           WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult<T>(request, query);
-            if (query.IsStreaming)
+            if (query.IsStreaming && callback != null)
             {
+                callback.Invoke(request, response, query.UserState);
                 return;
             }
 
@@ -1330,8 +1326,9 @@ namespace Hammock
                                        WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult(request, query);
-            if (query.IsStreaming)
+            if (query.IsStreaming && callback != null)
             {
+                callback.Invoke(request, response, query.UserState);
                 return;
             }
 
@@ -1478,13 +1475,26 @@ namespace Hammock
                                                                       int resultsPerCallback,
                                                                       object userState)
         {
-            var result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
+            WebQueryAsyncResult result;
+            switch(request.Method)
+            {
+                case WebMethod.Get:
+                    result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
+                    break;
+                case WebMethod.Post:
+                    result = query.ExecuteStreamPostAsync(url, duration, resultsPerCallback);
+                    break;
+                    default:
+                    throw new NotSupportedException("Unsupported HTTP method declared for streaming.");
+            }
+             
             result.Tag = new Triplet<RestRequest, RestCallback, object>
             {
                 First = request,
                 Second = callback,
                 Third = userState
             };
+
             return result;
         }
 
@@ -1546,7 +1556,7 @@ namespace Hammock
                                      taskOptions.RepeatInterval,
                                      taskOptions.RepeatTimes,
                                      taskOptions.ContinueOnError,
-                                     skip => BeginRequest(request,
+                                     skip => BeginRequestImpl(request,
                                                           callback,
                                                           query,
                                                           url,
@@ -1609,12 +1619,12 @@ namespace Hammock
                                       taskOptions.RepeatInterval,
                                       taskOptions.RepeatTimes,
                                       taskOptions.ContinueOnError,
-                                      skip => BeginRequest(request,
-                                                           callback,
-                                                           query,
-                                                           url,
-                                                           true /* isInternal */,
-                                                           userState));
+                                      skip => BeginRequestImpl(request,
+                                                               callback,
+                                                               query,
+                                                               url,
+                                                               true /* isInternal */,
+                                                               userState));
 #if !NETCF
             }
             else
@@ -1753,7 +1763,7 @@ namespace Hammock
                                                   {
                                                       if (!skip)
                                                       {
-                                                          BeginRequest(request, callback, query, url, true /* isInternal */, userState);
+                                                          BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                                                       }
                                                       else
                                                       {
@@ -1773,12 +1783,12 @@ namespace Hammock
                                             string url,
                                             object userState)
         {
-            var taskAction = new Action<bool>(skip => BeginRequest(request,
-                                                                   callback,
-                                                                   query,
-                                                                   url,
-                                                                   true /* isInternal */,
-                                                                   userState
+            var taskAction = new Action<bool>(skip => BeginRequestImpl(request,
+                                                                       callback,
+                                                                       query,
+                                                                       url,
+                                                                       true /* isInternal */,
+                                                                       userState
                                                                    ));
 
             return BuildRateLimitingTaskImpl(taskOptions, taskAction);
@@ -1798,25 +1808,15 @@ namespace Hammock
             {
                 case RateLimitType.ByPercent:
                     var rateLimitingPercent = taskOptions.GetValue("RateLimitPercent");
-                    if (getRateLimitStatus != null)
-                    {
-                        taskRule = Activator.CreateInstance(rateType, getRateLimitStatus, rateLimitingPercent);
-                    }
-                    else
-                    {
-                        taskRule = Activator.CreateInstance(rateType, rateLimitingPercent);
-                    }
+                    taskRule = getRateLimitStatus != null
+                                   ? Activator.CreateInstance(rateType, getRateLimitStatus, rateLimitingPercent)
+                                   : Activator.CreateInstance(rateType, rateLimitingPercent);
                     break;
                 case RateLimitType.ByPredicate:
                     var rateLimitingPredicate = taskOptions.GetValue("RateLimitingPredicate");
-                    if (getRateLimitStatus != null)
-                    {
-                        taskRule = Activator.CreateInstance(rateType, getRateLimitStatus, rateLimitingPredicate);
-                    }
-                    else
-                    {
-                        taskRule = Activator.CreateInstance(rateType, rateLimitingPredicate);
-                    }
+                    taskRule = getRateLimitStatus != null
+                                   ? Activator.CreateInstance(rateType, getRateLimitStatus, rateLimitingPredicate)
+                                   : Activator.CreateInstance(rateType, rateLimitingPredicate);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

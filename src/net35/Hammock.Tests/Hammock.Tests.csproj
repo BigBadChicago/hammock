@@ -110,7 +110,6 @@
     <Compile Include="RestClientTests.OAuth.cs" />
     <Compile Include="RestClientTests.Retries.cs" />
     <Compile Include="RestClientTests.Async.Tasks.cs" />
-    <Compile Include="RestClientTests.Streaming.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="twitterProfilePhoto.jpg">

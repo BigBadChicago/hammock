@@ -365,7 +365,7 @@ namespace Hammock.Web
         }
         public virtual bool TimedOut { get; set; }
 
-        private void GetAsyncStreamCallback(IAsyncResult asyncResult)
+        private void AsyncStreamCallback(IAsyncResult asyncResult)
         {
             var state = asyncResult.AsyncState as Pair<WebRequest, Pair<TimeSpan, int>>;
             if (state == null)
@@ -393,7 +393,7 @@ namespace Hammock.Web
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
 #endif
-                    GetStream(out stream, request, response, duration, resultCount);
+                    StreamImpl(out stream, request, response, duration, resultCount);
                 }
             }
             catch (WebException ex)
@@ -415,7 +415,7 @@ namespace Hammock.Web
             }
         }
 
-        private void GetStream(out Stream stream, 
+        private void StreamImpl(out Stream stream, 
                                WebRequest request, WebResponse response, 
                                TimeSpan duration, int resultCount)
         {
@@ -495,6 +495,38 @@ namespace Hammock.Web
             var endArgs = new WebQueryResponseEventArgs("END STREAMING");
             OnQueryResponse(endArgs);
             request.Abort();
+        }
+
+        protected virtual void PostAsyncStreamRequestCallback(IAsyncResult asyncResult)
+        {
+            var state = asyncResult.AsyncState as Triplet<WebRequest, byte[], Pair<TimeSpan, int>>;
+            if (state == null)
+            {
+                // Unrecognized state signature
+                throw new ArgumentNullException("asyncResult",
+                                                "The asynchronous post failed to return its state");
+            }
+
+            var request = state.First;
+            var content = state.Second;
+
+            using (var stream = request.EndGetRequestStream(asyncResult))
+            {
+                if (content != null)
+                {
+                    stream.Write(content, 0, content.Length);
+                    stream.Flush();
+                }
+                stream.Close();
+
+                request.BeginGetResponse(AsyncStreamCallback,
+                                         new Pair<WebRequest, Pair<TimeSpan, int>>
+                                             {
+                                                 First = request,
+                                                 Second = state.Third
+                                             }
+                    );
+            }
         }
 
         protected virtual void PostAsyncRequestCallback(IAsyncResult asyncResult)
@@ -851,13 +883,21 @@ namespace Hammock.Web
         }
 
         public virtual WebQueryAsyncResult ExecuteStreamGetAsync(string url, 
-                                                                TimeSpan duration, 
-                                                                int resultCount)
+                                                                 TimeSpan duration, 
+                                                                 int resultCount)
         {
             WebResponse = null;
 
             var request = BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions.Get, url);
+            var state = OnGetStreamQueryRequest(url, request, duration, resultCount);
 
+            var inner = request.BeginGetResponse(AsyncStreamCallback, state);
+            var result = new WebQueryAsyncResult { InnerResult = inner };
+            return result;
+        }
+
+        private Pair<WebRequest, Pair<TimeSpan, int>> OnGetStreamQueryRequest(string url, WebRequest request, TimeSpan duration, int resultCount)
+        {
             var state = new Pair<WebRequest, Pair<TimeSpan, int>>
                             {
                                 First = request,
@@ -870,8 +910,38 @@ namespace Hammock.Web
 
             var args = new WebQueryRequestEventArgs(url);
             OnQueryRequest(args);
+            return state;
+        }
 
-            var inner = request.BeginGetResponse(GetAsyncStreamCallback, state);
+        private Triplet<WebRequest, byte[], Pair<TimeSpan, int>> OnPostStreamQueryRequest(string url, WebRequest request, byte[] content, TimeSpan duration, int resultCount)
+        {
+            var state = new Triplet<WebRequest, byte[], Pair<TimeSpan, int>>
+            {
+                First = request,
+                Second = content,
+                Third = new Pair<TimeSpan, int>
+                {
+                    First = duration,
+                    Second = resultCount
+                }
+            };
+
+            var args = new WebQueryRequestEventArgs(url);
+            OnQueryRequest(args);
+            return state;
+        }
+
+        public virtual WebQueryAsyncResult ExecuteStreamPostAsync(string url, 
+                                                                  TimeSpan duration, 
+                                                                  int resultCount)
+        {
+            WebResponse = null;
+
+            byte[] content;
+            var request = BuildPostOrPutWebRequest(PostOrPut.Post, url, out content);
+            var state = OnPostStreamQueryRequest(url, request, content, duration, resultCount);
+
+            var inner = request.BeginGetRequestStream(PostAsyncStreamRequestCallback, state);
             var result = new WebQueryAsyncResult { InnerResult = inner };
             return result;
         }
