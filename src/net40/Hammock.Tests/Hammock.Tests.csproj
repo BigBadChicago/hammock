@@ -115,6 +115,9 @@
     <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Retries.cs">
       <Link>RestClientTests.Async.Retries.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Streaming.cs">
+      <Link>RestClientTests.Async.Streaming.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Tasks.cs">
       <Link>RestClientTests.Async.Tasks.cs</Link>
     </Compile>
@@ -149,6 +152,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\net35\Hammock.Tests\app.config">
+      <Link>app.config</Link>
+    </None>
+    <None Include="..\..\net35\Hammock.Tests\app.config.example">
+      <Link>app.config.example</Link>
+    </None>
     <None Include="key.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

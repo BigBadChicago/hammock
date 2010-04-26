@@ -360,6 +360,7 @@ namespace Hammock.Web
             }
         }
         public virtual bool TimedOut { get; set; }
+
         private void GetAsyncStreamCallback(IAsyncResult asyncResult)
         {
             var state = asyncResult.AsyncState as Pair<WebRequest, Pair<TimeSpan, int>>;
@@ -383,77 +384,12 @@ namespace Hammock.Web
                 {
 #if SILVERLIGHT
                     if (DecompressionMethods == DecompressionMethods.GZip ||
-                       DecompressionMethods == DecompressionMethods.Deflate)
+                        DecompressionMethods == DecompressionMethods.Deflate)
                     {
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
 #endif
-                    using (stream = response.GetResponseStream())
-                    {
-                        if (stream != null)
-                        {
-                            _isStreaming = true;
-
-                            var count = 0;
-                            var results = new List<string>();
-                            var start = DateTime.UtcNow;
-
-                            using (var reader = new StreamReader(stream))
-                            {
-                                string line;
-
-                                while ((line = reader.ReadLine()).Length > 0)
-                                {
-                                    if (line.Equals(Environment.NewLine))
-                                    {
-                                        // Keep-Alive
-                                        continue;
-                                    }
-
-                                    if (line.Equals("<html>"))
-                                    {
-                                        // We're looking at a 401 or similar; construct error result?
-                                        EndStreaming(request);
-                                        return;
-                                    }
-
-                                    results.Add(line);
-                                    count++;
-
-                                    if (count < resultCount)
-                                    {
-                                        // Result buffer
-                                        continue;
-                                    }
-
-                                    var sb = new StringBuilder();
-                                    foreach (var result in results)
-                                    {
-                                        sb.AppendLine(result);
-                                    }
-
-                                    var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
-                                    OnQueryResponse(responseArgs);
-                                    results.Clear();
-
-                                    count = 0;
-
-                                    var now = DateTime.UtcNow;
-                                    if (now.Subtract(start) < duration)
-                                    {
-                                        continue;
-                                    }
-
-                                    // Time elapsed
-                                    EndStreaming(request);
-                                    return;
-                                }
-
-                                // Stream dried up
-                            }
-                            EndStreaming(request);
-                        }
-                    }
+                    GetStream(out stream, request, response, duration, resultCount);
                 }
             }
             catch (WebException ex)
@@ -472,6 +408,80 @@ namespace Hammock.Web
                 }
 
                 WebResponse = response;
+            }
+        }
+
+        private void GetStream(out Stream stream, 
+                               WebRequest request, WebResponse response, 
+                               TimeSpan duration, int resultCount)
+        {
+            using (stream = response.GetResponseStream())
+            {
+                if (stream == null)
+                {
+                    return;
+                }
+
+                _isStreaming = true;
+
+                var count = 0;
+                var results = new List<string>();
+                var start = DateTime.UtcNow;
+
+                using (var reader = new StreamReader(stream))
+                {
+                    string line;
+
+                    while ((line = reader.ReadLine()).Length > 0)
+                    {
+                        if (line.Equals(Environment.NewLine))
+                        {
+                            // Keep-Alive
+                            continue;
+                        }
+
+                        if (line.Equals("<html>"))
+                        {
+                            // We're looking at a 401 or similar; construct error result?
+                            EndStreaming(request);
+                            return;
+                        }
+
+                        results.Add(line);
+
+                        count++;
+                        if (count < resultCount)
+                        {
+                            // Result buffer
+                            continue;
+                        }
+
+                        var sb = new StringBuilder();
+                        foreach (var result in results)
+                        {
+                            sb.AppendLine(result);
+                        }
+
+                        var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
+                        OnQueryResponse(responseArgs);
+                        results.Clear();
+
+                        count = 0;
+
+                        var now = DateTime.UtcNow;
+                        if (now.Subtract(start) < duration)
+                        {
+                            continue;
+                        }
+
+                        // Time elapsed
+                        EndStreaming(request);
+                        return;
+                    }
+
+                    // Stream dried up
+                }
+                EndStreaming(request);
             }
         }
 

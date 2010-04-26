@@ -243,7 +243,6 @@ namespace Hammock.Tests
             var asyncResult = client.BeginRequest(request, callback);
             var response = client.EndRequest(asyncResult);
 
-
             Assert.IsFalse(response.TimedOut);
         }
     }

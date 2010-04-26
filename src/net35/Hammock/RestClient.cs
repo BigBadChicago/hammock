@@ -1990,6 +1990,11 @@ namespace Hammock
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
                     response.TimedOut = result.TimedOut;
+                    if(result.WebResponse == null)
+                    {
+                        // [DC] WebResponse could be null, i.e. when streaming
+                        return response;
+                    }
 #if !SILVERLIGHT
                     response.Headers = result.WebResponse.Headers;
 #else

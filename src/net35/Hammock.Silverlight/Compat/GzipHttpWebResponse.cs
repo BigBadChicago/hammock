@@ -7,6 +7,8 @@ namespace Hammock.Silverlight.Compat
 {
     public class GzipHttpWebResponse : WebResponse
     {
+        private const int ChunkSize = 2048;
+
         private readonly HttpWebResponse _response;
 
         public GzipHttpWebResponse(HttpWebResponse response)
@@ -33,8 +35,8 @@ namespace Hammock.Silverlight.Compat
             if (compressed != null)
             {
                 var decompressed = new MemoryStream();
-                var size = 2048;
-                var buffer = new byte[2048];
+                var size = ChunkSize;
+                var buffer = new byte[ChunkSize];
                 while (true)
                 {
                     size = compressed.Read(buffer, 0, size);
