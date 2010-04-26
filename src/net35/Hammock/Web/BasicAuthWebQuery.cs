@@ -49,7 +49,7 @@ namespace Hammock.Web
             var credentials = WebExtensions.ToBasicAuthorizationHeader(_username, _password);
             AuthorizationHeader = header;
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT || WindowsPhone
             request.Headers[header] = credentials;
 #else
             if (HasElevatedPermissions)
