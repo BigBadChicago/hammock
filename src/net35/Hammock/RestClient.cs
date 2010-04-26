@@ -1288,6 +1288,19 @@ namespace Hammock
         }
 #endif
 
+        private void SignalTasks(RestRequest request, WebQueryAsyncResult result)
+        {
+            // Recurring tasks are only signalled when cancelled 
+            // or when they reach their iteration limit
+            lock (_timedTasksLock)
+            {
+                if (!_tasks.ContainsKey(request))
+                {
+                    result.Signal();
+                }
+            }
+        }
+
 #if !WindowsPhone
         private void CompleteWithQuery<T>(WebQuery query,
                                           RestRequest request,
@@ -1308,15 +1321,8 @@ namespace Hammock
             {
                 callback.Invoke(request, response, query.UserState);
             }
-            // Recurring tasks are only signalled when cancelled 
-            // or when they reach their iteration limit
-            lock (_timedTasksLock)
-            {
-                if (!_tasks.ContainsKey(request))
-                {
-                    result.Signal();
-                }
-            }
+
+            SignalTasks(request, result);
         }
         private void CompleteWithQuery(WebQuery query,
                                        RestRequest request,
@@ -1337,15 +1343,8 @@ namespace Hammock
             {
                 callback.Invoke(request, response, query.UserState);
             }
-            //recurring tasks are only signalled when cancelled 
-            //or when they reach their iteration limit
-            lock (_timedTasksLock)
-            {
-                if (!_tasks.ContainsKey(request))
-                {
-                    result.Signal();
-                }
-            }
+            
+            SignalTasks(request, result);
         }
 #else
         private void CompleteWithQuery<T>(WebQuery query,
@@ -2149,9 +2148,9 @@ namespace Hammock
         {
             lock (_timedTasksLock)
             {
-                //copy to a new list, since canceling 
-                //the task removes it from the _tasks
-                //list, the enumeration will throw
+                // Copy to a new list, since canceling 
+                // the task removes it from the _tasks
+                // list, the enumeration will throw
                 var toCancel = new List<TimedTask>();
                 toCancel.AddRange(_tasks.Values);
                 toCancel.ForEach(t => t.Stop());

@@ -171,6 +171,10 @@ namespace Hammock.Web
 
         protected virtual void RegisterAbortTimer(WebRequest request, IAsyncResult asyncResult)
         {
+#if SL4
+            return;
+#endif
+
 #if SILVERLIGHT
             var timeout = RequestTimeout != null ? 
                 (int)RequestTimeout.Value.TotalMilliseconds

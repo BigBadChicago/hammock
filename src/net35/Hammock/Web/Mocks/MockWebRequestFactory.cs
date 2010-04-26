@@ -10,7 +10,7 @@ using System.Collections.Specialized;
 using Hammock.Silverlight.Compat;
 #endif
 
-#if SILVERLIGHT3
+#if SL3 || SL4
 using System.Windows.Browser;
 #endif
 

@@ -19,7 +19,7 @@ namespace Hammock.Caching
             get { return new SimpleCache(); }
         }
 
-#if Silverlight
+#if SILVERLIGHT
         public static ICache IsolatedStorageCache
         {
             get { throw new NotImplementedException(); }

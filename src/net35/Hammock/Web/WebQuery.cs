@@ -897,7 +897,6 @@ namespace Hammock.Web
             }
         }
 
-
 #if !SILVERLIGHT
         protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, out WebException exception)
         {
