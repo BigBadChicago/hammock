@@ -29,6 +29,7 @@ namespace Hammock
         public virtual Uri ResponseUri { get; set; }
         public virtual bool IsMock { get; set; }
         public virtual bool TimedOut { get; set; }
+        public virtual int TimesTried { get; set; }
         public virtual object Tag { get; set; }
         public virtual NameValueCollection Headers { get; set; }
         public virtual bool SkippedDueToRateLimitingRule { get; set; }

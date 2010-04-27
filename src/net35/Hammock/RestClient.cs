@@ -128,7 +128,7 @@ namespace Hammock
                         _remainingRetries--;
                         if (_remainingRetries > 0)
                         {
-                            query.Result = new WebQueryResult { PreviousResult = current };
+                            query.Result = new WebQueryResult { TimesTried = retryPolicy.RetryCount - _remainingRetries + 1};
                         }
                     }
                     else
@@ -880,12 +880,10 @@ namespace Hammock
                 asyncResult = beginRequest.Invoke();
             }
 
-            WebQueryResult previous = null;
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
                 query.QueryResponse += (sender, args) =>
                                            {
-                                               query.Result.PreviousResult = previous;
                                                var current = query.Result;
 
                                                if (retryPolicy != null)
@@ -893,15 +891,16 @@ namespace Hammock
                                                    // [DC]: Query should already have exception applied
                                                    var exception = query.Result.Exception;
                                                    var retry = ShouldRetry(retryPolicy, exception, current);
-
+                                                   
                                                    if (retry)
                                                    {
-                                                       previous = current;
                                                        BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                                                        Interlocked.Decrement(ref _remainingRetries);
+                                                       current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                                                    }
                                                    else
                                                    {
+                                                       current.TimesTried = retryPolicy.RetryCount - _remainingRetries; 
                                                        _remainingRetries = 0;
                                                    }
                                                }
@@ -980,10 +979,8 @@ namespace Hammock
                 asyncResult = beginRequest.Invoke();
             }
 
-            WebQueryResult previous = null;
             query.QueryResponse += (sender, args) =>
             {
-                query.Result.PreviousResult = previous;
                 var current = query.Result;
 
                 if (retryPolicy != null)
@@ -994,12 +991,13 @@ namespace Hammock
 
                     if (retry)
                     {
-                        previous = current;
                         BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                         Interlocked.Decrement(ref _remainingRetries);
+                        current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                     }
                     else
                     {
+                        current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                         _remainingRetries = 0;
                     }
                 }
@@ -2019,6 +2017,7 @@ namespace Hammock
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
                     response.TimedOut = result.TimedOut;
+                    response.TimesTried = result.TimesTried;
                     if(result.WebResponse == null)
                     {
                         // [DC] WebResponse could be null, i.e. when streaming
