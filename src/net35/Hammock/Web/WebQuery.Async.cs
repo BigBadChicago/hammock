@@ -268,7 +268,6 @@ namespace Hammock.Web
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
 #endif
-
                     using (var stream = response.GetResponseStream())
                     {
                         using (var reader = new StreamReader(stream))

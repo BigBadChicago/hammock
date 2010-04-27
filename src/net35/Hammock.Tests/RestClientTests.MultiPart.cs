@@ -32,6 +32,32 @@ namespace Hammock.Tests
         }
 
         [Test]
+        [Category("MultiPart")]
+        public void Can_send_file_with_oauth()
+        {
+            ServicePointManager.Expect100Continue = false;
+
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                Credentials = OAuthForTwitterProtectedResource,
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "account/update_profile_image.json"
+            };
+
+            request.AddFile("failwhale", "failwhale.jpg", "failwhale.jpg", "image/jpeg");
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+        }
+
+
+        [Test]
         [Ignore("Makes a live update to a Twitter profile")]
         [Category("MultiPart")]
         public void Can_send_form_file_sequentially()
