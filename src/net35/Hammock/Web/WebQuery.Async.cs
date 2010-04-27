@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -174,21 +175,24 @@ namespace Hammock.Web
 #if SL4
             return;
 #endif
-
-#if SILVERLIGHT
+            // [DC] request.Timeout is ignored with async
             var timeout = RequestTimeout != null ? 
                 (int)RequestTimeout.Value.TotalMilliseconds
-                : 0;
-#else
-            var timeout = request.Timeout;
-#endif 
+                : 30000; // Default ReadWriteTimeout
+
+            var state = new Pair<HttpWebRequest, IAsyncResult>
+                            {
+                                First = (HttpWebRequest)request,
+                                Second = asyncResult
+                            };
 
 #if !Smartphone && !WindowsPhone
             // Async operations ignore the WebRequest's Timeout property
             ThreadPool.RegisterWaitForSingleObject(asyncResult.AsyncWaitHandle,
-                                                   GetAsyncResponseTimeout,
-                                                   request, timeout,
-                                                   true);
+                                                   TimedOutCallback,
+                                                   state, 
+                                                   timeout, 
+                                                   true /* executeOnlyOnce */);
 #endif
         }
 
@@ -236,18 +240,40 @@ namespace Hammock.Web
             return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request, userState);
         }
         
-        private void GetAsyncResponseTimeout(object state, bool timedOut)
+        private void TimedOutCallback(object state, bool timedOut)
         {
             if (!timedOut)
             {
                 return;
             }
 
-            var request = state as WebRequest;
-            if (request != null)
+            var pair = state as Pair<HttpWebRequest, IAsyncResult>;
+            if (pair != null)
             {
+                var request = pair.First;
+                var result = pair.Second;
+
                 TimedOut = true;
                 request.Abort();
+
+                // [DC] LSP violation necessary for POST functionality;
+                // [DC] We did not get far enough along to prepare a response
+                if(result is WebQueryAsyncResult)
+                {
+                    var response = new RestResponse
+                                       {
+                                           TimedOut = true,
+                                           StatusCode = 0
+                                       };
+#if TRACE
+                    // Just for cosmetic purposes
+                    Trace.WriteLine(String.Concat("RESPONSE: ", response.StatusCode));
+                    Trace.WriteLine("BODY:");
+#endif
+                    var aborted = ((WebQueryAsyncResult)result);
+                    aborted.AsyncState = response;
+                    aborted.Signal();
+                }
             }
         }
 
@@ -762,8 +788,8 @@ namespace Hammock.Web
             OnQueryRequest(args);
 
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-            RegisterAbortTimer(request, inner);
             var result = new WebQueryAsyncResult { InnerResult = inner };
+            RegisterAbortTimer(request, result);
             return result;
         }
 
@@ -788,8 +814,8 @@ namespace Hammock.Web
             OnQueryRequest(args);
 
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-            RegisterAbortTimer(request, inner); 
             var result = new WebQueryAsyncResult {InnerResult = inner};
+            RegisterAbortTimer(request, result);
             return result;
         }
 
@@ -820,8 +846,8 @@ namespace Hammock.Web
             OnQueryRequest(args);
 
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-            RegisterAbortTimer(request, inner); 
             var result = new WebQueryAsyncResult { InnerResult = inner };
+            RegisterAbortTimer(request, result);
             return result;
         }
 
@@ -857,8 +883,8 @@ namespace Hammock.Web
             OnQueryRequest(args);
 
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-            RegisterAbortTimer(request, inner); 
             var result = new WebQueryAsyncResult { InnerResult = inner };
+            RegisterAbortTimer(request, result);
             return result;
         }
 
@@ -894,8 +920,8 @@ namespace Hammock.Web
             OnQueryRequest(args);
 
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-            RegisterAbortTimer(request, inner); 
             var result = new WebQueryAsyncResult { InnerResult = inner };
+            RegisterAbortTimer(request, result);
             return result;
         }
 

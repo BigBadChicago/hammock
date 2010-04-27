@@ -448,7 +448,9 @@ namespace Hammock.Web
 #if !SILVERLIGHT
             if (RequestTimeout.HasValue)
             {
+                // [DC] Need to synchronize these as Timeout is ignored in async requests
                 request.Timeout = (int)RequestTimeout.Value.TotalMilliseconds;
+                request.ReadWriteTimeout = (int)RequestTimeout.Value.TotalMilliseconds;
             }
 #endif
             

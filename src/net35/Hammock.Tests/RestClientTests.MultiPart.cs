@@ -47,10 +47,10 @@ namespace Hammock.Tests
 
             var request = new RestRequest
             {
-                Path = "account/update_profile_image.json"
+                Path = "account/update_profile_background_image.json"
             };
 
-            request.AddFile("failwhale", "failwhale.jpg", "failwhale.jpg", "image/jpeg");
+            request.AddFile("failwhale", "failwhale.jpg", "failwhale.jpg", "application/octet-stream");
 
             var response = client.Request(request);
             Assert.IsNotNull(response);

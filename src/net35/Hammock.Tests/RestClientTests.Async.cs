@@ -160,7 +160,7 @@ namespace Hammock.Tests
 
         [Test]
         [Timeout(10000)]
-        public void Can_timeout_on_asynchronous_query()
+        public void Can_timeout_on_asynchronous_get()
         {
             var client = new RestClient
             {
@@ -189,6 +189,7 @@ namespace Hammock.Tests
         }
 
         [Test]
+        [Timeout(10000)]
         public void Can_timeout_on_asynchronous_post()
         {
             var client = new RestClient
