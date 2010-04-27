@@ -1080,46 +1080,17 @@ namespace Hammock
                 beginRequest.Invoke();
             }
 
-            WebQueryResult previous = null;
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
-                query.QueryResponse += (sender, args) =>
-                {
-                    query.Result.PreviousResult = previous;
-                    var current = query.Result;
-
-                    if (retryPolicy != null)
-                    {
-                        // [DC]: Query should already have exception applied
-                        var exception = query.Result.Exception;
-                        var retry = ShouldRetry(retryPolicy, exception, current);
-
-                        if (retry)
-                        {
-                            previous = current;
-                            BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
-                            Interlocked.Decrement(ref _remainingRetries);
-                        }
-                        else
-                        {
-                            _remainingRetries = 0;
-                        }
-                    }
-                    else
-                    {
-                        _remainingRetries = 0;
-                    }
-
-                    query.Result = current;
-
-
-                    if (_remainingRetries == 0)
-                    {
-                        CompleteWithQuery(query, request, callback);
-                    }
-                };
+                query.QueryResponse += (sender, args) => QueryResponseCallback(query, 
+                                                                               retryPolicy, 
+                                                                               request, 
+                                                                               callback, 
+                                                                               url, 
+                                                                               userState);
             }
         }
+
         private void BeginRequestImpl<T>(RestRequest request,
                                          RestCallback<T> callback,
                                          WebQuery query,
@@ -1177,42 +1148,94 @@ namespace Hammock
                 beginRequest.Invoke();
             }
 
-            WebQueryResult previous = null;
-            query.QueryResponse += (sender, args) =>
+            query.QueryResponse += (sender, args) => QueryResponseCallback(query,
+                                                                           retryPolicy,
+                                                                           request,
+                                                                           callback,
+                                                                           url,
+                                                                           userState);
+        }
+
+
+        private void QueryResponseCallback(WebQuery query,
+                                           RetryPolicy retryPolicy,
+                                           RestRequest request,
+                                           RestCallback callback,
+                                           string url,
+                                           object userState)
+        {
+            var current = query.Result;
+
+            if (retryPolicy != null)
             {
-                query.Result.PreviousResult = previous;
-                var current = query.Result;
+                // [DC]: Query should already have exception applied
+                var exception = query.Result.Exception;
+                var retry = ShouldRetry(retryPolicy, exception, current);
 
-                if (retryPolicy != null)
+                if (retry)
                 {
-                    // [DC]: Query should already have exception applied
-                    var exception = query.Result.Exception;
-                    var retry = ShouldRetry(retryPolicy, exception, current);
-
-                    if (retry)
-                    {
-                        previous = current;
-                        BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
-                        Interlocked.Decrement(ref _remainingRetries);
-                    }
-                    else
-                    {
-                        _remainingRetries = 0;
-                    }
+                    BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
+                    Interlocked.Decrement(ref _remainingRetries);
+                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                 }
                 else
                 {
+                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                     _remainingRetries = 0;
                 }
+            }
+            else
+            {
+                _remainingRetries = 0;
+            }
 
-                query.Result = current;
+            query.Result = current;
 
-                // [DC]: Callback is for a final result, not a retry
-                if (_remainingRetries == 0)
+            // [DC]: Callback is for a final result, not a retry
+            if (_remainingRetries == 0)
+            {
+                CompleteWithQuery(query, request, callback);
+            }
+        }
+        private void QueryResponseCallback<T>(WebQuery query,
+                                              RetryPolicy retryPolicy,
+                                              RestRequest request,
+                                              RestCallback<T> callback,
+                                              string url,
+                                              object userState)
+        {
+            var current = query.Result;
+
+            if (retryPolicy != null)
+            {
+                // [DC]: Query should already have exception applied
+                var exception = query.Result.Exception;
+                var retry = ShouldRetry(retryPolicy, exception, current);
+
+                if (retry)
                 {
-                    CompleteWithQuery(query, request, callback);
+                    BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
+                    Interlocked.Decrement(ref _remainingRetries);
+                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                 }
-            };
+                else
+                {
+                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
+                    _remainingRetries = 0;
+                }
+            }
+            else
+            {
+                _remainingRetries = 0;
+            }
+
+            query.Result = current;
+
+            // [DC]: Callback is for a final result, not a retry
+            if (_remainingRetries == 0)
+            {
+                CompleteWithQuery(query, request, callback);
+            }
         }
 #endif
 
