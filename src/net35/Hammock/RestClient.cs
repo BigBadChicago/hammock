@@ -121,7 +121,7 @@ namespace Hammock
 
                 if (retryPolicy != null)
                 {
-                    var retry = ShouldRetry(retryPolicy, exception, current);
+                    var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
 
                     if (retry)
                     {
@@ -840,7 +840,7 @@ namespace Hammock
             }
 
             var retryPolicy = GetRetryPolicy(request);
-            _remainingRetries = (retryPolicy != null
+            _remainingRetries = (!isInternal && retryPolicy != null
                                      ? retryPolicy.RetryCount
                                      : 0);
 
@@ -890,7 +890,7 @@ namespace Hammock
                                                {
                                                    // [DC]: Query should already have exception applied
                                                    var exception = query.Result.Exception;
-                                                   var retry = ShouldRetry(retryPolicy, exception, current);
+                                                   var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
                                                    
                                                    if (retry)
                                                    {
@@ -942,7 +942,7 @@ namespace Hammock
             }
 
             var retryPolicy = GetRetryPolicy(request);
-            _remainingRetries = (retryPolicy != null
+            _remainingRetries = (!isInternal && retryPolicy != null
                                      ? retryPolicy.RetryCount
                                      : 0);
 
@@ -987,7 +987,7 @@ namespace Hammock
                 {
                     // [DC]: Query should already have exception applied
                     var exception = query.Result.Exception;
-                    var retry = ShouldRetry(retryPolicy, exception, current);
+                    var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
 
                     if (retry)
                     {
@@ -1170,7 +1170,7 @@ namespace Hammock
             {
                 // [DC]: Query should already have exception applied
                 var exception = query.Result.Exception;
-                var retry = ShouldRetry(retryPolicy, exception, current);
+                var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
 
                 if (retry)
                 {
@@ -1210,7 +1210,7 @@ namespace Hammock
             {
                 // [DC]: Query should already have exception applied
                 var exception = query.Result.Exception;
-                var retry = ShouldRetry(retryPolicy, exception, current);
+                var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
 
                 if (retry)
                 {
