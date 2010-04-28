@@ -180,9 +180,9 @@ namespace Hammock.Web
                 (int)RequestTimeout.Value.TotalMilliseconds
                 : 30000; // Default ReadWriteTimeout
 
-            var state = new Pair<HttpWebRequest, IAsyncResult>
+            var state = new Pair<WebRequest, IAsyncResult>
                             {
-                                First = (HttpWebRequest)request,
+                                First = request,
                                 Second = asyncResult
                             };
 
@@ -247,7 +247,7 @@ namespace Hammock.Web
                 return;
             }
 
-            var pair = state as Pair<HttpWebRequest, IAsyncResult>;
+            var pair = state as Pair<WebRequest, IAsyncResult>;
             if (pair != null)
             {
                 var request = pair.First;

@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
+using Hammock.Web;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -8,6 +10,7 @@ namespace Hammock.Tests
         [Test]
         [Category("Async")]
         [Category("MultiPart")]
+        [Timeout(10000)]
         public void Can_send_form_field_asynchronously()
         {
             ServicePointManager.Expect100Continue = false;
@@ -26,7 +29,6 @@ namespace Hammock.Tests
             };
 
             request.AddField("email", "bob@example.com");
-
             var asyncResult = client.BeginRequest(request);
             var response = client.EndRequest(asyncResult);
             Assert.IsNotNull(response);
