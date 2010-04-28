@@ -37,7 +37,9 @@ namespace Hammock.Tests.OAuth
                                 ConsumerKey = _consumerKey,
                                 ConsumerSecret = _consumerSecret,
                                 SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                                ParameterHandling = OAuthParameterHandling.UrlOrPostParameters,
                                 RequestTokenUrl = _requestTokenUrl,
+                                Version = "1.0"
                             };
 
             var info = oauth.BuildRequestTokenInfo(WebMethod.Get);
@@ -53,7 +55,8 @@ namespace Hammock.Tests.OAuth
                                 Token = token,
                                 SignatureMethod = OAuthSignatureMethod.HmacSha1,
                                 AccessTokenUrl = _accessTokenUrl,
-                                Verifier = pin
+                                Verifier = pin,
+                                Version = "1.0"
                             };
 
             var info = oauth.BuildAccessTokenInfo(WebMethod.Post);
@@ -130,7 +133,7 @@ namespace Hammock.Tests.OAuth
         [Test]
         public void Can_build_request_token()
         {
-            var query = GetRequestTokenQuery();
+            OAuthWebQuery query = GetRequestTokenQuery();
             WebException exception;
             var response = query.Request(_requestTokenUrl, out exception);
 
