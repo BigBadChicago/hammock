@@ -51,7 +51,7 @@ namespace Hammock.Tests
             var taskOptions = new TaskOptions
                               {
                                   RepeatTimes = repeatTimes,
-                                  RepeatInterval = 2.Seconds()
+                                  RepeatInterval = 5.Seconds()
                               };
 
             var client = new RestClient
@@ -79,7 +79,7 @@ namespace Hammock.Tests
                                                     repeatCount++;
                                                 });
             Assert.IsNotNull(async);
-            async.AsyncWaitHandle.WaitOne();
+            client.EndRequest(async);
 
             Assert.AreEqual(repeatTimes, repeatCount, "Task manifest did not complete");
         }
