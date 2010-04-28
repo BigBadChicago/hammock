@@ -23,6 +23,7 @@ namespace Hammock.Authentication.OAuth
         public string Verifier { get; set; }
 
         public OAuthSignatureMethod SignatureMethod { get; set; }
+        public OAuthSignatureTreatment SignatureTreatment { get; set; }
         public OAuthParameterHandling ParameterHandling { get; set; }
 
         public string ClientUsername { get; set; }
@@ -83,7 +84,7 @@ namespace Hammock.Authentication.OAuth
             AddAuthParameters(parameters, timestamp, nonce);
 
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, RequestTokenUrl, parameters);
-            var signature = OAuthTools.GetSignature(SignatureMethod, signatureBase, ConsumerSecret);
+            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret);
 
             var info = new OAuthWebQueryInfo
                            {
@@ -91,6 +92,7 @@ namespace Hammock.Authentication.OAuth
                                ParameterHandling = ParameterHandling,
                                ConsumerKey = ConsumerKey,
                                SignatureMethod = SignatureMethod.ToRequestValue(),
+                               SignatureTreatment = SignatureTreatment,
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
@@ -140,7 +142,7 @@ namespace Hammock.Authentication.OAuth
             AddAuthParameters(parameters, timestamp, nonce);
 
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, uri.ToString(), parameters);
-            var signature = OAuthTools.GetSignature(SignatureMethod, signatureBase, ConsumerSecret);
+            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret);
 
             var info = new OAuthWebQueryInfo
                            {
@@ -149,6 +151,7 @@ namespace Hammock.Authentication.OAuth
                                ConsumerKey = ConsumerKey,
                                Token = Token,
                                SignatureMethod = SignatureMethod.ToRequestValue(),
+                               SignatureTreatment = SignatureTreatment,
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
@@ -186,7 +189,7 @@ namespace Hammock.Authentication.OAuth
             AddXAuthParameters(parameters, timestamp, nonce);
 
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, uri.ToString(), parameters);
-            var signature = OAuthTools.GetSignature(SignatureMethod, signatureBase, ConsumerSecret);
+            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret);
 
             var info = new OAuthWebQueryInfo
                            {
@@ -197,6 +200,7 @@ namespace Hammock.Authentication.OAuth
                                ClientPassword = ClientPassword,
                                ConsumerKey = ConsumerKey,
                                SignatureMethod = SignatureMethod.ToRequestValue(),
+                               SignatureTreatment = SignatureTreatment,
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
@@ -259,7 +263,7 @@ namespace Hammock.Authentication.OAuth
 
             // [DC] Escape parameters at this point; do not escape again if recalculating
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, url, copy);
-            var signature = OAuthTools.GetSignature(SignatureMethod, signatureBase, ConsumerSecret, TokenSecret);
+            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret, TokenSecret);
 
             var info = new OAuthWebQueryInfo
                            {
@@ -268,6 +272,7 @@ namespace Hammock.Authentication.OAuth
                                ConsumerKey = ConsumerKey,
                                Token = Token,
                                SignatureMethod = SignatureMethod.ToRequestValue(),
+                               SignatureTreatment = SignatureTreatment,
                                Signature = signature,
                                Timestamp = timestamp,
                                Nonce = nonce,
@@ -276,7 +281,6 @@ namespace Hammock.Authentication.OAuth
                                ConsumerSecret = ConsumerSecret,
                                TokenSecret = TokenSecret
                            };
-
             
             return info;
         }

@@ -176,7 +176,7 @@ namespace Hammock.Authentication.OAuth
             sb.Append(!basic && !secure ? qualified : "");
             sb.Append(url.AbsolutePath);
 
-            return sb.ToString().ToLower();
+            return sb.ToString(); //.ToLower();
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace Hammock.Authentication.OAuth
         {
             var sb = new StringBuilder();
 
-            // separating &'s are not URL encoded
+            // Separating &'s are not URL encoded
             var requestMethod = method.ToUpper().Then("&");
             var requestUrl = UrlEncodeRelaxed(ConstructRequestUrl(url.AsUri())).Then("&");
             var requestParameters = UrlEncodeRelaxed(NormalizeRequestParameters(parameters));
@@ -215,10 +215,29 @@ namespace Hammock.Authentication.OAuth
         /// <param name="signatureBase">The signature base</param>
         /// <param name="consumerSecret">The consumer key</param>
         /// <returns></returns>
-        public static string GetSignature(OAuthSignatureMethod signatureMethod, string signatureBase,
+        public static string GetSignature(OAuthSignatureMethod signatureMethod, 
+                                          string signatureBase,
                                           string consumerSecret)
         {
-            return GetSignature(signatureMethod, signatureBase, consumerSecret, null);
+            return GetSignature(signatureMethod, OAuthSignatureTreatment.Escaped, signatureBase, consumerSecret, null);
+        }
+
+        /// <summary>
+        /// Creates a signature value given a signature base and the consumer secret.
+        /// This method is used when the token secret is currently unknown.
+        /// </summary>
+        /// <seealso cref="http://oauth.net/core/1.0#rfc.section.9.2"/>
+        /// <param name="signatureMethod">The hashing method</param>
+        /// <param name="signatureTreatment">The treatment to use on a signature value</param>
+        /// <param name="signatureBase">The signature base</param>
+        /// <param name="consumerSecret">The consumer key</param>
+        /// <returns></returns>
+        public static string GetSignature(OAuthSignatureMethod signatureMethod,
+                                          OAuthSignatureTreatment signatureTreatment, 
+                                          string signatureBase,
+                                          string consumerSecret)
+        {
+            return GetSignature(signatureMethod, signatureTreatment, signatureBase, consumerSecret, null);
         }
 
         /// <summary>
@@ -230,7 +249,27 @@ namespace Hammock.Authentication.OAuth
         /// <param name="consumerSecret">The consumer secret</param>
         /// <param name="tokenSecret">The token secret</param>
         /// <returns></returns>
-        public static string GetSignature(OAuthSignatureMethod signatureMethod, string signatureBase,
+        public static string GetSignature(OAuthSignatureMethod signatureMethod, 
+                                          string signatureBase,
+                                          string consumerSecret,
+                                          string tokenSecret)
+        {
+            return GetSignature(signatureMethod, OAuthSignatureTreatment.Escaped, consumerSecret, tokenSecret);
+        }
+
+        /// <summary>
+        /// Creates a signature value given a signature base and the consumer secret and a known token secret.
+        /// </summary>
+        /// <seealso cref="http://oauth.net/core/1.0#rfc.section.9.2"/>
+        /// <param name="signatureMethod">The hashing method</param>
+        /// <param name="signatureTreatment">The treatment to use on a signature value</param>
+        /// <param name="signatureBase">The signature base</param>
+        /// <param name="consumerSecret">The consumer secret</param>
+        /// <param name="tokenSecret">The token secret</param>
+        /// <returns></returns>
+        public static string GetSignature(OAuthSignatureMethod signatureMethod, 
+                                          OAuthSignatureTreatment signatureTreatment,
+                                          string signatureBase,
                                           string consumerSecret,
                                           string tokenSecret)
         {
@@ -259,7 +298,9 @@ namespace Hammock.Authentication.OAuth
                     throw new NotImplementedException("Only HMAC-SHA1 is currently supported.");
             }
 
-            return UrlEncodeRelaxed(signature);
+            return signatureTreatment == OAuthSignatureTreatment.Escaped
+                       ? UrlEncodeRelaxed(signature)
+                       : signature;
         }
     }
 }

@@ -16,4 +16,20 @@ namespace Hammock.Authentication.OAuth
         UrlOrPostParameters
 #endif
     }
+
+#if !SILVERLIGHT
+    [Serializable]
+#endif
+    public enum OAuthSignatureTreatment
+    {
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles
+        [EnumMember]
+        Escaped,
+        [EnumMember]
+        Unescaped
+#else
+        Escaped,
+        Unescaped
+#endif
+    }
 }

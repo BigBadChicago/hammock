@@ -1,3 +1,4 @@
+using System;
 using Hammock.Attributes.Specialized;
 using Hammock.Web;
 
@@ -47,6 +48,7 @@ namespace Hammock.Authentication.OAuth
         public WebMethod WebMethod { get; set; }
         
         public OAuthParameterHandling ParameterHandling { get; set; }
+        public OAuthSignatureTreatment SignatureTreatment { get; set; }
         
         internal string ConsumerSecret { get; set; }
         

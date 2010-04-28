@@ -222,7 +222,7 @@ namespace Hammock.Authentication.OAuth
 #if SILVERLIGHT
                     var postParameters = new WebParameterCollection(query.ParseQueryString());
 #else
-                    var postParameters = new WebParameterCollection(HttpUtility.ParseQueryString(query));
+                    var postParameters = new WebParameterCollection(query.ParseQueryString());
 #endif
                     // Append any leftover values to the POST body
                     var nonAuthParameters = GetPostParametersValue(postParameters, true /* escapeParameters */);

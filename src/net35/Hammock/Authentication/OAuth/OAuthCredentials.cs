@@ -16,6 +16,7 @@ namespace Hammock.Authentication.OAuth
         public virtual string ConsumerSecret { get; set; }
         public virtual OAuthParameterHandling ParameterHandling { get; set; }
         public virtual OAuthSignatureMethod SignatureMethod { get; set; }
+        public virtual OAuthSignatureTreatment SignatureTreatment { get; set; }
         public virtual OAuthType Type { get; set; }
 
         public virtual string Token { get; set; }
@@ -40,6 +41,7 @@ namespace Hammock.Authentication.OAuth
                                    ConsumerSecret = ConsumerSecret,
                                    ParameterHandling = ParameterHandling,
                                    SignatureMethod = SignatureMethod,
+                                   SignatureTreatment = SignatureTreatment,
                                    RequestTokenUrl = RequestTokenUrl,
                                    AccessTokenUrl = AccessTokenUrl,
                                    AuthorizationUrl = AuthorizationUrl,

@@ -37,7 +37,8 @@ namespace Hammock.Tests.OAuth
                                 ConsumerKey = _consumerKey,
                                 ConsumerSecret = _consumerSecret,
                                 SignatureMethod = OAuthSignatureMethod.HmacSha1,
-                                ParameterHandling = OAuthParameterHandling.UrlOrPostParameters,
+                                SignatureTreatment = OAuthSignatureTreatment.Escaped, // Default
+                                ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
                                 RequestTokenUrl = _requestTokenUrl,
                                 Version = "1.0"
                             };
