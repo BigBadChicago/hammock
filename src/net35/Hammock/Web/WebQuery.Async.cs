@@ -175,6 +175,10 @@ namespace Hammock.Web
 
         protected virtual void RegisterAbortTimer(WebRequest request, IAsyncResult result)
         {
+            if(request is MockHttpWebRequest)
+            {
+                return;
+            }
 #if SL4
             return;
 #endif

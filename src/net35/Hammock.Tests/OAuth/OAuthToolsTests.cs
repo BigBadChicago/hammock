@@ -216,5 +216,26 @@ namespace Hammock.Tests.OAuth
             Assert.AreEqual(expected, actual);
             Console.WriteLine(actual);
         }
+
+        [Test]
+        public void Can_strict_url_encode_complex_string()
+        {
+            const string expected = "%21%3F%22%3B%3A%3C%3E%5C%5C%7C%60%23%24%25%5E%26%2A%2B-_%7B%7D%5B%5D";
+            const string sequence = @"!?"";:<>\\|`#$%^&*+-_{}[]";
+
+            var actual = OAuthTools.UrlEncodeStrict(sequence);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Can_relax_url_encode_complex_string()
+        {
+            // Doesn't URL encode ! or * in this sequence
+            const string expected = "!%3F%22%3B%3A%3C%3E%5C%5C%7C%60%23%24%25%5E%26*%2B-_%7B%7D%5B%5D";
+            const string sequence = @"!?"";:<>\\|`#$%^&*+-_{}[]";
+
+            var actual = OAuthTools.UrlEncodeRelaxed(sequence);
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

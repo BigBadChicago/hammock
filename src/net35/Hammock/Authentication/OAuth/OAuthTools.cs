@@ -116,7 +116,7 @@ namespace Hammock.Authentication.OAuth
                     ret = ret.Replace(c.ToString(), c.ToString().PercentEncode());
                 }
             }
-            return ret;
+            return ret.Replace("%%", "%25%"); // Revisit to encode actual %'s
         }
 
         /// <summary>
