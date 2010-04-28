@@ -14,13 +14,13 @@ namespace Hammock.Tests
         public void Can_send_form_field_asynchronously()
         {
             ServicePointManager.Expect100Continue = false;
-
+            
             var client = new RestClient
             {
                 Authority = "http://api.twitter.com",
                 VersionPath = "1",
                 Credentials = BasicAuthForTwitter,
-                UserAgent = "Hammock"
+                UserAgent = "Hammock",
             };
 
             var request = new RestRequest

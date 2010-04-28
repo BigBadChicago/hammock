@@ -170,30 +170,83 @@ namespace Hammock.Web
             }
         }
 
-        protected virtual void RegisterAbortTimer(WebRequest request, IAsyncResult asyncResult)
+        // [DC] This is necessary to inform the client handle that a POST has timed out
+        private readonly List<WebQueryAsyncResult> _postHandles = new List<WebQueryAsyncResult>();
+
+        protected virtual void RegisterAbortTimer(WebRequest request, IAsyncResult result)
         {
 #if SL4
             return;
 #endif
+
+#if !Smartphone && !WindowsPhone
             // [DC] request.Timeout is ignored with async
             var timeout = RequestTimeout != null ? 
                 (int)RequestTimeout.Value.TotalMilliseconds
-                : 30000; // Default ReadWriteTimeout
+                : 300000; // Default ReadWriteTimeout
+
+            var isPost = result is WebQueryAsyncResult;
+            if (isPost)
+            {
+                _postHandles.Add((WebQueryAsyncResult)result);
+            }
+            var handle = isPost
+                             ? ((WebQueryAsyncResult) result).InnerResult.AsyncWaitHandle
+                             : result.AsyncWaitHandle;
 
             var state = new Pair<WebRequest, IAsyncResult>
                             {
                                 First = request,
-                                Second = asyncResult
+                                Second = result
                             };
-
-#if !Smartphone && !WindowsPhone
+            
             // Async operations ignore the WebRequest's Timeout property
-            ThreadPool.RegisterWaitForSingleObject(asyncResult.AsyncWaitHandle,
+            ThreadPool.RegisterWaitForSingleObject(handle,
                                                    TimedOutCallback,
-                                                   state, 
+                                                   state,
                                                    timeout, 
                                                    true /* executeOnlyOnce */);
 #endif
+        }
+
+        private void TimedOutCallback(object state, bool timedOut)
+        {
+            if (!timedOut)
+            {
+                return;
+            }
+
+            var pair = state as Pair<WebRequest, IAsyncResult>;
+            if (pair != null)
+            {
+                var request = pair.First;
+                var result = pair.Second;
+
+                TimedOut = true;
+                request.Abort();
+
+                // [DC] LSP violation necessary for POST functionality;
+                // [DC] We did not get far enough along to prepare a response
+                if (result is WebQueryAsyncResult)
+                {
+                    var response = new RestResponse
+                    {
+                        TimedOut = true,
+                        StatusCode = 0
+                    };
+#if TRACE
+                    // Just for cosmetic purposes
+                    Trace.WriteLine(String.Concat("RESPONSE: ", response.StatusCode));
+                    Trace.WriteLine("BODY:");
+#endif
+                    foreach(var postHandle in _postHandles)
+                    {
+                        postHandle.AsyncState = response;
+                        postHandle.Signal();
+                    }
+                    _postHandles.Clear();
+                }
+            }
         }
 
         protected virtual WebQueryAsyncResult ExecuteGetOrDeleteAsync(GetDeleteHeadOptions method,
@@ -240,43 +293,6 @@ namespace Hammock.Web
             return ExecuteGetOrDeleteAsync(cache, key, url, slidingExpiration, request, userState);
         }
         
-        private void TimedOutCallback(object state, bool timedOut)
-        {
-            if (!timedOut)
-            {
-                return;
-            }
-
-            var pair = state as Pair<WebRequest, IAsyncResult>;
-            if (pair != null)
-            {
-                var request = pair.First;
-                var result = pair.Second;
-
-                TimedOut = true;
-                request.Abort();
-
-                // [DC] LSP violation necessary for POST functionality;
-                // [DC] We did not get far enough along to prepare a response
-                if(result is WebQueryAsyncResult)
-                {
-                    var response = new RestResponse
-                                       {
-                                           TimedOut = true,
-                                           StatusCode = 0
-                                       };
-#if TRACE
-                    // Just for cosmetic purposes
-                    Trace.WriteLine(String.Concat("RESPONSE: ", response.StatusCode));
-                    Trace.WriteLine("BODY:");
-#endif
-                    var aborted = ((WebQueryAsyncResult)result);
-                    aborted.AsyncState = response;
-                    aborted.Signal();
-                }
-            }
-        }
-
         protected virtual void GetAsyncResponseCallback(IAsyncResult asyncResult)
         {
             object store;
@@ -695,13 +711,15 @@ namespace Hammock.Web
                 }
                 stream.Close();
 
-                request.BeginGetResponse(PostAsyncResponseCallback,
+                var inner = request.BeginGetResponse(PostAsyncResponseCallback,
                                          new Triplet<WebRequest, Triplet<ICache, object, string>, object>
                                              {
                                                  First = request,
                                                  Second = store,
                                                  Third = userState
                                              });
+
+                RegisterAbortTimer(request, new WebQueryAsyncResult() {InnerResult = inner});
             }
         }
 
@@ -814,7 +832,7 @@ namespace Hammock.Web
             OnQueryRequest(args);
 
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
-            var result = new WebQueryAsyncResult {InnerResult = inner};
+            var result = new WebQueryAsyncResult { InnerResult = inner };
             RegisterAbortTimer(request, result);
             return result;
         }

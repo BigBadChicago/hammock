@@ -159,7 +159,7 @@ namespace Hammock.Tests
         }
 
         [Test]
-        //[Timeout(10000)]
+        [Timeout(10000)]
         public void Can_timeout_on_asynchronous_get()
         {
             var client = new RestClient
@@ -201,7 +201,7 @@ namespace Hammock.Tests
             {
                 Path = "timeout.php"
             };
-            request.AddParameter("delay", "6");
+            request.AddParameter("delay", "60");
             request.Timeout = 3.Seconds();
 
             var callback = new RestCallback(
