@@ -830,7 +830,7 @@ namespace Hammock.Web
             var args = new WebQueryRequestEventArgs(url);
 
             OnQueryRequest(args);
-
+            
             var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
             var result = new WebQueryAsyncResult { InnerResult = inner };
             RegisterAbortTimer(request, result);
