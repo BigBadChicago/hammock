@@ -39,6 +39,26 @@ namespace Hammock
 
 #if SILVERLIGHT
         public virtual bool HasElevatedPermissions { get; set; }
+        /// <summary>
+        /// Used to set the name of the "Accept" header used by your Silverlight proxy.
+        /// </summary>
+        public virtual string SilverlightAcceptHeader { get; set;}
+        
+        /// <summary>
+        /// Used to set the name of the "Authorization" header used by your Silverlight proxy.
+        /// </summary>
+        public virtual string SilverlightAuthorizationHeader { get; set;}
+
+        /// <summary>
+        /// Used to set the name of the "Method" header used by your Silverlight proxy.
+        /// This passes the correct HTTP method to the header as all proxy calls use POST.
+        /// </summary>
+        public virtual string SilverlightMethodHeader { get; set; }
+
+        /// <summary>
+        /// Used to set the name of the "User-Agent" header used by your Silverlight proxy.
+        /// </summary>
+        public virtual string SilverlightUserAgentHeader { get; set;}
 #endif
 
 #if !Silverlight
@@ -2254,6 +2274,10 @@ namespace Hammock
 
 #if SILVERLIGHT
             query.HasElevatedPermissions = HasElevatedPermissions;
+            query.SilverlightAcceptHeader = SilverlightAcceptHeader;
+            query.SilverlightAuthorizationHeader = SilverlightAuthorizationHeader;
+            query.SilverlightMethodHeader = SilverlightMethodHeader;
+            query.SilverlightUserAgentHeader = SilverlightUserAgentHeader;
 #endif
             return query;
         }
