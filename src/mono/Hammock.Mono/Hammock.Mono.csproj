@@ -160,6 +160,8 @@
     <Compile Include="..\..\net35\Hammock\Retries\RetryCustomCondition.cs" />
     <Compile Include="..\..\net35\Hammock\Retries\RetryResultCondition.cs" />
     <Compile Include="..\..\net35\Hammock\Tasks\IRateLimitStatus.cs" />
+    <Compile Include="..\..\net35\Hammock\Tasks\ITaskState.cs" />
+    <Compile Include="..\..\net35\Hammock\Tasks\TaskState.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
