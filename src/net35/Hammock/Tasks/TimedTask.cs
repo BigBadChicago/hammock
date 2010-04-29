@@ -53,7 +53,7 @@ namespace Hammock.Tasks
                 {
                     Action(false);
                     count++;
-                    if (Iterations > 0 && count >= Iterations)
+                    if (Iterations > 0 && count > Iterations)
                     {
                         Stop();
                     }

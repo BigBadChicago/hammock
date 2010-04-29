@@ -40,48 +40,52 @@ namespace Hammock.Tests
         }
 
         [Test]
-        [Category("Tasks")]
         [Category("Async")]
+        [Category("Tasks")]
         public void Can_initiate_recurring_task()
         {
+            const int repeatTimes = 8;
+            var taskOptions = new TaskOptions
+            {
+                RepeatTimes = repeatTimes,
+                RepeatInterval = 3.Seconds(),
+            };
+
             var settings = GetSerializerSettings();
             var serializer = new HammockJsonDotNetSerializer(settings);
 
-            const int repeatTimes = 2;
-            var taskOptions = new TaskOptions
-                              {
-                                  RepeatTimes = repeatTimes,
-                                  RepeatInterval = 5.Seconds()
-                              };
-
             var client = new RestClient
-                             {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1",
-                                 Credentials = BasicAuthForTwitter,
-                                 Serializer = serializer,
-                                 Deserializer = serializer
-                             };
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                Credentials = BasicAuthForTwitter,
+                Serializer = serializer,
+                Deserializer = serializer
+            };
 
             var request = new RestRequest
-                              {
-                                  Path = "account/rate_limit_status.json",
-                                  TaskOptions = taskOptions,
-                                  ResponseEntityType = typeof(TwitterRateLimitStatus)
-                              };
+            {
+                Path = "account/rate_limit_status.json",
+                TaskOptions = taskOptions,
+                ResponseEntityType = typeof(TwitterRateLimitStatus)
+            };
 
+            var success = false;
             var repeatCount = 0;
             var async = client.BeginRequest(request,
                                             (req, resp, state) =>
-                                                {
-                                                    var rateLimit = resp.ContentEntity as TwitterRateLimitStatus;
-                                                    Assert.IsNotNull(rateLimit);
-                                                    repeatCount++;
-                                                });
-            Assert.IsNotNull(async);
-            client.EndRequest(async);
+                                            {
+                                                Interlocked.Increment(ref repeatCount);
 
-            Assert.AreEqual(repeatTimes, repeatCount, "Task manifest did not complete");
+                                                if (repeatCount == repeatTimes)
+                                                {
+                                                    success = true;
+                                                }
+                                            });
+            Assert.IsNotNull(async);
+            async.AsyncWaitHandle.WaitOne();
+            Assert.AreEqual(repeatTimes, repeatCount);
+            Assert.IsTrue(success, "Task manifest did not complete");
         }
 
         [Test]

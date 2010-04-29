@@ -21,9 +21,11 @@ namespace Hammock
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public abstract class RestBase : PropertyChangedBase 
+    public abstract class RestBase : PropertyChangedBase
     {
         private byte[] _postContent;
+        private TaskOptions _taskOptions;
+        private RetryPolicy _retryPolicy;
 
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
@@ -70,8 +72,33 @@ namespace Hammock
         public virtual IDeserializer Deserializer { get; set; }
         public virtual ICache Cache { get; set; }
         public virtual CacheOptions CacheOptions { get; set; }
-        public virtual RetryPolicy RetryPolicy { get; set; }
-        public virtual TaskOptions TaskOptions { get; set; }
+        public virtual RetryPolicy RetryPolicy
+        {
+            get { return _retryPolicy; }
+            set
+            {
+                if (_retryPolicy != value)
+                {
+                    _retryPolicy = value;
+                    RetryState = new TaskState();
+                }
+
+            }
+        }
+        public virtual TaskOptions TaskOptions
+        {
+            get { return _taskOptions; }
+            set
+            {
+                if (_taskOptions != value)
+                {
+                    _taskOptions = value;
+                    TaskState = new TaskState();
+                }
+            }
+        }
+        public virtual ITaskState TaskState { get; set; }
+        public virtual ITaskState RetryState { get; set; }
         public virtual StreamOptions StreamOptions { get; set; }
         public virtual Func<string> CacheKeyFunction { get; set; }
         public virtual DecompressionMethods DecompressionMethods { get; set; }

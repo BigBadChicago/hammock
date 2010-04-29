@@ -36,7 +36,7 @@ namespace Hammock
         private const string MockHttpMethod = "mockHttpMethod";
 
         public virtual string Authority { get; set; }
-        
+
 #if SILVERLIGHT
         public virtual bool HasElevatedPermissions { get; set; }
 #endif
@@ -109,6 +109,12 @@ namespace Hammock
                     url = BuildMockRequestUrl(request, query, url);
                 }
 
+                if (request.RetryState != null)
+                {
+                    request.RetryState.RepeatCount++;
+                    request.RetryState.LastRepeat = DateTime.Now;
+                }
+
                 WebException exception;
                 if (!RequestWithCache(request, query, url, out exception) &&
                     !RequestMultiPart(request, query, url, out exception))
@@ -128,7 +134,7 @@ namespace Hammock
                         _remainingRetries--;
                         if (_remainingRetries > 0)
                         {
-                            query.Result = new WebQueryResult { TimesTried = retryPolicy.RetryCount - _remainingRetries + 1};
+                            query.Result = new WebQueryResult { TimesTried = request.IterationCount };
                         }
                     }
                     else
@@ -879,44 +885,61 @@ namespace Hammock
 
                 asyncResult = beginRequest.Invoke();
             }
-
+            
+            
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
-                query.QueryResponse += (sender, args) =>
-                                           {
-                                               var current = query.Result;
-
-                                               if (retryPolicy != null)
+                if (request.IsFirstIteration)
+                {
+                    query.QueryResponse += (sender, args) =>
                                                {
-                                                   // [DC]: Query should already have exception applied
-                                                   var exception = query.Result.Exception;
-                                                   var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
-                                                   
-                                                   if (retry)
+                                                   var current = query.Result;
+
+                                                   if (retryPolicy != null)
                                                    {
-                                                       BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
-                                                       Interlocked.Decrement(ref _remainingRetries);
-                                                       current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
+                                                       // [DC]: Query should already have exception applied
+                                                       var exception = query.Result.Exception;
+                                                       var retry = _remainingRetries > 0 &&
+                                                                   ShouldRetry(retryPolicy, exception, current);
+
+                                                       if (retry)
+                                                       {
+                                                           request.RetryState.RepeatCount++;
+                                                           request.RetryState.LastRepeat = DateTime.Now;
+                                                           BeginRequestImpl(request, callback, query, url, true
+                                                               /* isInternal */, userState);
+                                                           Interlocked.Decrement(ref _remainingRetries);
+                                                       }
+                                                       else
+                                                       {
+                                                           _remainingRetries = 0;
+                                                       }
+                                                       current.TimesTried = request.IterationCount;
                                                    }
                                                    else
                                                    {
-                                                       current.TimesTried = retryPolicy.RetryCount - _remainingRetries; 
                                                        _remainingRetries = 0;
                                                    }
-                                               }
-                                               else
-                                               {
-                                                   _remainingRetries = 0;
-                                               }
 
-                                               query.Result = current;
+                                                   query.Result = current;
 
 
-                                               if (_remainingRetries == 0)
-                                               {
-                                                   CompleteWithQuery(query, request, callback, asyncResult);
-                                               }
-                                           };
+                                                   if (_remainingRetries == 0)
+                                                   {
+                                                       CompleteWithQuery(query, request, callback, asyncResult);
+                                                   }
+                                               };
+                }
+                if (request.TaskState != null)
+                {
+                    request.TaskState.RepeatCount++;
+                    request.TaskState.LastRepeat = DateTime.Now;
+                }
+                if (request.RetryState != null)
+                {
+                    request.RetryState.RepeatCount++;
+                    request.RetryState.LastRepeat = DateTime.Now;
+                }
             }
             return asyncResult;
         }
@@ -979,42 +1002,57 @@ namespace Hammock
                 asyncResult = beginRequest.Invoke();
             }
 
-            query.QueryResponse += (sender, args) =>
+            if (request.IsFirstIteration)
             {
-                var current = query.Result;
+                query.QueryResponse += (sender, args) =>
+                   {
+                       var current = query.Result;
 
-                if (retryPolicy != null)
-                {
-                    // [DC]: Query should already have exception applied
-                    var exception = query.Result.Exception;
-                    var retry = _remainingRetries > 0 && ShouldRetry(retryPolicy, exception, current);
+                       if (retryPolicy != null)
+                       {
+                           // [DC]: Query should already have exception applied
+                           var exception = query.Result.Exception;
+                           var retry = _remainingRetries > 0 &&
+                                       ShouldRetry(retryPolicy, exception, current);
 
-                    if (retry)
-                    {
-                        BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
-                        Interlocked.Decrement(ref _remainingRetries);
-                        current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
-                    }
-                    else
-                    {
-                        current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
-                        _remainingRetries = 0;
-                    }
-                }
-                else
-                {
-                    _remainingRetries = 0;
-                }
+                           if (retry)
+                           {
+                               request.RetryState.RepeatCount++;
+                               request.RetryState.LastRepeat = DateTime.Now;
+                               BeginRequestImpl(request, callback, query, url, true
+                                   /* isInternal */, userState);
+                               Interlocked.Decrement(ref _remainingRetries);
+                           }
+                           else
+                           {
+                               _remainingRetries = 0;
+                           }
+                           current.TimesTried = request.IterationCount;
+                       }
+                       else
+                       {
+                           _remainingRetries = 0;
+                       }
 
-                query.Result = current;
+                       query.Result = current;
 
-                // [DC]: Callback is for a final result, not a retry
-                if (_remainingRetries == 0)
-                {
-                    CompleteWithQuery(query, request, callback, asyncResult);
-                }
-            };
-
+                       // [DC]: Callback is for a final result, not a retry
+                       if (_remainingRetries == 0)
+                       {
+                           CompleteWithQuery(query, request, callback, asyncResult);
+                       }
+                   };
+            }
+            if (request.TaskState != null)
+            {
+                request.TaskState.RepeatCount++;
+                request.TaskState.LastRepeat = DateTime.Now;
+            }
+            if (request.RetryState != null)
+            {
+                request.RetryState.RepeatCount++;
+                request.RetryState.LastRepeat = DateTime.Now;
+            }
             return asyncResult;
         }
 #else
@@ -1082,12 +1120,25 @@ namespace Hammock
 
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
-                query.QueryResponse += (sender, args) => QueryResponseCallback(query, 
+                if (request.IsFirstIteration)
+                {
+                    query.QueryResponse += (sender, args) => QueryResponseCallback(query, 
                                                                                retryPolicy, 
                                                                                request, 
                                                                                callback, 
                                                                                url, 
                                                                                userState);
+                }
+                if (request.TaskState != null)
+                {
+                    request.TaskState.RepeatCount++;
+                    request.TaskState.LastRepeat = DateTime.Now;
+                }
+                if (request.RetryState != null)
+                {
+                    request.RetryState.RepeatCount++;
+                    request.RetryState.LastRepeat = DateTime.Now;
+                }
             }
         }
 
@@ -1147,13 +1198,25 @@ namespace Hammock
                 
                 beginRequest.Invoke();
             }
-
-            query.QueryResponse += (sender, args) => QueryResponseCallback(query,
+            if (request.IsFirstIteration)
+            {
+                query.QueryResponse += (sender, args) => QueryResponseCallback(query,
                                                                            retryPolicy,
                                                                            request,
                                                                            callback,
                                                                            url,
                                                                            userState);
+            }
+            if (request.TaskState != null)
+            {
+                request.TaskState.RepeatCount++;
+                request.TaskState.LastRepeat = DateTime.Now;
+            }
+            if (request.RetryState != null)
+            {
+                request.RetryState.RepeatCount++;
+                request.RetryState.LastRepeat = DateTime.Now;
+            }
         }
 
 
@@ -1176,13 +1239,12 @@ namespace Hammock
                 {
                     BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                     Interlocked.Decrement(ref _remainingRetries);
-                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                 }
                 else
                 {
-                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                     _remainingRetries = 0;
                 }
+                current.TimesTried = request.IterationCount;
             }
             else
             {
@@ -1216,13 +1278,13 @@ namespace Hammock
                 {
                     BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                     Interlocked.Decrement(ref _remainingRetries);
-                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                 }
                 else
                 {
-                    current.TimesTried = retryPolicy.RetryCount - _remainingRetries;
                     _remainingRetries = 0;
                 }
+                current.TimesTried = request.IterationCount;
+
             }
             else
             {
@@ -1370,11 +1432,11 @@ namespace Hammock
                 callback.Invoke(request, response, query.UserState);
             }
 
-            if(wasStreaming)
+            if (wasStreaming)
             {
                 _streamQuery = null;
             }
-            
+
             SignalTasks(request, result);
         }
 #else
@@ -1521,19 +1583,19 @@ namespace Hammock
             return result;
         }
 
-        private WebQueryAsyncResult GetStreamResult(RestBase request, 
-                                                    WebQuery query, 
-                                                    string url, 
-                                                    TimeSpan duration, 
+        private WebQueryAsyncResult GetStreamResult(RestBase request,
+                                                    WebQuery query,
+                                                    string url,
+                                                    TimeSpan duration,
                                                     int resultsPerCallback)
         {
-            if(!request.Method.HasValue)
+            if (!request.Method.HasValue)
             {
                 request.Method = WebMethod.Get;
             }
 
             WebQueryAsyncResult result;
-            switch(request.Method)
+            switch (request.Method)
             {
                 case WebMethod.Get:
                     result = query.ExecuteStreamGetAsync(url, duration, resultsPerCallback);
@@ -1818,8 +1880,8 @@ namespace Hammock
                                                       }
                                                       else
                                                       {
-                                                          callback(request, 
-                                                                   new RestResponse { SkippedDueToRateLimitingRule = true }, 
+                                                          callback(request,
+                                                                   new RestResponse { SkippedDueToRateLimitingRule = true },
                                                                    userState);
                                                       }
                                                   });
@@ -1915,10 +1977,10 @@ namespace Hammock
 #endif
 
 #if !WindowsPhone
-        private bool BeginRequestWithCache(RestBase request, 
-                                           WebQuery query, 
-                                           string url, 
-                                           out WebQueryAsyncResult result, 
+        private bool BeginRequestWithCache(RestBase request,
+                                           WebQuery query,
+                                           string url,
+                                           out WebQueryAsyncResult result,
                                            object userState)
         {
             var cache = GetCache(request);
@@ -2041,7 +2103,7 @@ namespace Hammock
                     response.IsMock = result.IsMock;
                     response.TimedOut = result.TimedOut;
                     response.TimesTried = result.TimesTried;
-                    if(result.WebResponse == null)
+                    if (result.WebResponse == null)
                     {
                         // [DC] WebResponse could be null, i.e. when streaming
                         return response;
@@ -2200,10 +2262,10 @@ namespace Hammock
         {
             lock (_streamingLock)
             {
-               if(_streamQuery != null)
-               {
-                   _streamQuery.IsStreaming = false;
-               }
+                if (_streamQuery != null)
+                {
+                    _streamQuery.IsStreaming = false;
+                }
             }
         }
 
