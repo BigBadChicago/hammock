@@ -8,7 +8,7 @@ using System.Security;
 [assembly: AssemblyTitle("Hammock")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Dimebrain")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Hammock")]
 [assembly: AssemblyCopyright("Copyright © Daniel Crenna and Jason Diller")]
 [assembly: AssemblyTrademark("")]
