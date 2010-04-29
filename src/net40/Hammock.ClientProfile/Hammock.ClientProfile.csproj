@@ -260,6 +260,9 @@
     <Compile Include="..\..\net35\Hammock\Tasks\ITaskOptions.cs">
       <Link>Tasks\ITaskOptions.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\Tasks\ITaskState.cs">
+      <Link>Tasks\ITaskState.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Tasks\ITimedTask.cs">
       <Link>Tasks\ITimedTask.cs</Link>
     </Compile>
@@ -271,6 +274,9 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Tasks\TaskOptions.cs">
       <Link>Tasks\TaskOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Tasks\TaskState.cs">
+      <Link>Tasks\TaskState.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Tasks\TimedTask.cs">
       <Link>Tasks\TimedTask.cs</Link>

@@ -13,7 +13,7 @@ namespace Hammock
 #if !Silverlight
     [Serializable]
 #endif
-    public class RestRequest  : RestBase
+    public class RestRequest : RestBase
     {
         private object _entity;
         private object _expectEntity;
@@ -23,7 +23,31 @@ namespace Hammock
         public virtual string ExpectStatusDescription { get; set; }
         public virtual string ExpectContent { get; set; }
         public virtual string ExpectContentType { get; set; }
-        
+
+        public virtual bool IsFirstIteration
+        {
+            get
+            {
+                return IterationCount == 0; 
+            }
+        }
+
+        public virtual int IterationCount
+        {
+            get
+            {
+                if (RetryState != null)
+                {
+                    return RetryState.RepeatCount;
+                }
+                if (TaskState != null)
+                {
+                    return TaskState.RepeatCount;
+                }
+                return 0;
+            }
+        }
+
         public RestRequest()
         {
             Initialize();
@@ -52,7 +76,7 @@ namespace Hammock
 
                 // [DC] Automatically posts an entity unless put is declared
                 RequestEntityType = _entity.GetType();
-                if(_entity != null && (Method != WebMethod.Post && Method != WebMethod.Put))
+                if (_entity != null && (Method != WebMethod.Post && Method != WebMethod.Put))
                 {
                     Method = WebMethod.Post;
                 }
@@ -87,7 +111,7 @@ namespace Hammock
             var path = Path.IsNullOrBlank()
                            ? client.Path.IsNullOrBlank() ? "" : client.Path
                            : Path;
-            
+
             var versionPath = VersionPath.IsNullOrBlank()
                                   ? client.VersionPath.IsNullOrBlank() ? "" : client.VersionPath
                                   : VersionPath;
@@ -96,7 +120,7 @@ namespace Hammock
             sb.Append(skipAuthority ? "" : client.Authority);
             sb.Append(skipAuthority ? "" : client.Authority.EndsWith("/") ? "" : "/");
             sb.Append(skipAuthority ? "" : versionPath.IsNullOrBlank() ? "" : versionPath);
-            if(!skipAuthority && !versionPath.IsNullOrBlank())
+            if (!skipAuthority && !versionPath.IsNullOrBlank())
             {
                 sb.Append(versionPath.EndsWith("/") ? "" : "/");
             }
@@ -108,7 +132,7 @@ namespace Hammock
             // [DC]: If the path came in with parameters attached, we should scrub those
             WebParameterCollection parameters;
             uri = uri.UriMinusQuery(out parameters);
-            foreach(var parameter in parameters)
+            foreach (var parameter in parameters)
             {
                 Parameters.Add(parameter);
             }

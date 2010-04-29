@@ -44,7 +44,7 @@ namespace Hammock.Tests
         [Category("Tasks")]
         public void Can_initiate_recurring_task()
         {
-            const int repeatTimes = 3;
+            const int repeatTimes = 8;
             var taskOptions = new TaskOptions
             {
                 RepeatTimes = repeatTimes,

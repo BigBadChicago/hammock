@@ -169,10 +169,12 @@
     <Compile Include="Tasks\IRateLimitingRule.cs" />
     <Compile Include="Tasks\IRateLimitStatus.cs" />
     <Compile Include="Tasks\ITaskOptions.cs" />
+    <Compile Include="Tasks\ITaskState.cs" />
     <Compile Include="Tasks\ITimedTask.cs" />
     <Compile Include="Tasks\RateLimitingRule.cs" />
     <Compile Include="Tasks\RateLimitType.cs" />
     <Compile Include="Tasks\TaskOptions.cs" />
+    <Compile Include="Tasks\TaskState.cs" />
     <Compile Include="Tasks\TimedTask.cs" />
     <Compile Include="Validation\ValidEmailSpecification.cs" />
     <Compile Include="Web\Mocks\MockWebRequestFactory.cs" />
