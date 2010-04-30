@@ -142,7 +142,7 @@ namespace Hammock.Authentication.OAuth
             AddAuthParameters(parameters, timestamp, nonce);
 
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, uri.ToString(), parameters);
-            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret);
+            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret, TokenSecret);
 
             var info = new OAuthWebQueryInfo
                            {

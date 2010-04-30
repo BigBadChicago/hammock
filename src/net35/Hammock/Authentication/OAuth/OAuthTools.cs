@@ -198,7 +198,7 @@ namespace Hammock.Authentication.OAuth
             var requestMethod = method.ToUpper().Then("&");
             var requestUrl = UrlEncodeRelaxed(ConstructRequestUrl(url.AsUri())).Then("&");
             var requestParameters = UrlEncodeRelaxed(NormalizeRequestParameters(parameters));
-
+            
             sb.Append(requestMethod);
             sb.Append(requestUrl);
             sb.Append(requestParameters);
