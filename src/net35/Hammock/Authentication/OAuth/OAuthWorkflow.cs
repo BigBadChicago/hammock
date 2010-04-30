@@ -156,10 +156,11 @@ namespace Hammock.Authentication.OAuth
                                Timestamp = timestamp,
                                Nonce = nonce,
                                Version = Version,
+                               Verifier = Verifier,
                                Callback = CallbackUrl,
                                UserAgent = "Hammock",
                                TokenSecret = TokenSecret,
-                               ConsumerSecret = ConsumerSecret
+                               ConsumerSecret = ConsumerSecret,
                            };
 
             return info;

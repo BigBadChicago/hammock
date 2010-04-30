@@ -24,10 +24,6 @@ namespace Hammock.Authentication.OAuth
         public virtual string Verifier { get; set; }
         public virtual string ClientUsername { get; set; }
         public virtual string ClientPassword { get; set; }
-
-        public virtual string RequestTokenUrl { get; set; }
-        public virtual string AccessTokenUrl { get; set; }
-        public virtual string AuthorizationUrl { get; set; }
         public virtual string CallbackUrl { get; set; }
         public virtual string Version { get; set; }
 
@@ -42,9 +38,6 @@ namespace Hammock.Authentication.OAuth
                                    ParameterHandling = ParameterHandling,
                                    SignatureMethod = SignatureMethod,
                                    SignatureTreatment = SignatureTreatment,
-                                   RequestTokenUrl = RequestTokenUrl,
-                                   AccessTokenUrl = AccessTokenUrl,
-                                   AuthorizationUrl = AuthorizationUrl,
                                    CallbackUrl = CallbackUrl,
                                    ClientPassword = ClientPassword,
                                    ClientUsername = ClientUsername,

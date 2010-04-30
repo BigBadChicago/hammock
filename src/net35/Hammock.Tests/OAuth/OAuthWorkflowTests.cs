@@ -47,7 +47,7 @@ namespace Hammock.Tests.OAuth
             return new OAuthWebQuery(info);
         }
 
-        private OAuthWebQuery GetAccessTokenQuery(string token, string pin)
+        private OAuthWebQuery GetAccessTokenQuery(string token, string verifier)
         {
             var oauth = new OAuthWorkflow
                             {
@@ -56,7 +56,7 @@ namespace Hammock.Tests.OAuth
                                 Token = token,
                                 SignatureMethod = OAuthSignatureMethod.HmacSha1,
                                 AccessTokenUrl = _accessTokenUrl,
-                                Verifier = pin,
+                                Verifier = verifier,
                                 Version = "1.0"
                             };
 

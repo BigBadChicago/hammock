@@ -455,7 +455,7 @@ namespace Hammock.Authentication.OAuth
             if (Method != WebMethod.Post && Method != WebMethod.Put)
             {
                 var builder = new StringBuilder();
-                bool first = true;
+                var first = true;
                 foreach (var param in parameters.Where(p => !p.Name.ToLower().StartsWith("oauth_")))
                 {
                     builder.Append(first ? "?" : "&");
@@ -479,6 +479,12 @@ namespace Hammock.Authentication.OAuth
             if(!info.ClientUsername.IsNullOrBlank() || !info.ClientPassword.IsNullOrBlank())
             {
                 // Not a protected resource request
+                return;
+            }
+
+            if(!string.IsNullOrEmpty(info.Verifier))
+            {
+                // This is an access token request
                 return;
             }
 
