@@ -97,6 +97,23 @@ namespace Hammock
                 }
             }
         }
+        public virtual bool IsFirstIteration
+        {
+            get
+            {
+                if (RetryState != null)
+                {
+                    return RetryState.RepeatCount == 0;
+                }
+                if (TaskState != null)
+                {
+                    return TaskState.RepeatCount == 0;
+                }
+                return true; 
+            }
+        }
+
+        
         public virtual ITaskState TaskState { get; set; }
         public virtual ITaskState RetryState { get; set; }
         public virtual StreamOptions StreamOptions { get; set; }
