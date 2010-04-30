@@ -222,6 +222,26 @@ namespace Hammock
             return true;
         }
 #endif
+        private void UpdateRepeatingRequestState(RestRequest request)
+        {
+            var taskState = request.TaskState ?? TaskState;
+            if (taskState != null)
+            {
+                taskState.RepeatCount++;
+                taskState.LastRepeat = DateTime.Now;
+            }
+        }
+
+        private void UpdateRetryState(RestRequest request)
+        {
+            var retryState = request.RetryState ?? RetryState;
+            if (retryState != null)
+            {
+                retryState.RepeatCount++;
+                retryState.LastRepeat = DateTime.Now;
+            }
+        }
+
         private static bool ShouldRetry(RetryPolicy retryPolicy,
                                         WebException exception,
                                         WebQueryResult current)
@@ -1062,25 +1082,7 @@ namespace Hammock
             return asyncResult;
         }
 
-        private void UpdateRepeatingRequestState(RestRequest request)
-        {
-            var taskState = request.TaskState ?? TaskState;
-            if (taskState != null)
-            {
-                taskState.RepeatCount++;
-                taskState.LastRepeat = DateTime.Now;
-            }
-        }
-
-        private void UpdateRetryState(RestRequest request)
-        {
-            var retryState = request.RetryState ?? RetryState;
-            if (retryState != null)
-            {
-                retryState.RepeatCount++;
-                retryState.LastRepeat = DateTime.Now;
-            }
-        }
+        
 #else
         // TODO BeginRequest and BeginRequest<T> have too much duplication
         private void BeginRequestImpl(RestRequest request,
@@ -1155,7 +1157,7 @@ namespace Hammock
                                                                                url, 
                                                                                userState);
                 }
-                UpdateRepeatingTaskState(request); 
+                UpdateRepeatingRequestState(request); 
                 UpdateRetryState(request);
             }
         }
@@ -1254,7 +1256,7 @@ namespace Hammock
                 {
                     _remainingRetries = 0;
                 }
-                current.TimesTried = request.IterationCount;
+                current.TimesTried = GetIterationCount(request);
             }
             else
             {
@@ -1293,7 +1295,7 @@ namespace Hammock
                 {
                     _remainingRetries = 0;
                 }
-                current.TimesTried = request.IterationCount;
+                current.TimesTried = GetIterationCount(request);
 
             }
             else
