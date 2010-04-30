@@ -129,11 +129,7 @@ namespace Hammock
                     url = BuildMockRequestUrl(request, query, url);
                 }
 
-                if (request.RetryState != null)
-                {
-                    request.RetryState.RepeatCount++;
-                    request.RetryState.LastRepeat = DateTime.Now;
-                }
+                UpdateRetryState(request);
 
                 WebException exception;
                 if (!RequestWithCache(request, query, url, out exception) &&
@@ -154,7 +150,7 @@ namespace Hammock
                         _remainingRetries--;
                         if (_remainingRetries > 0)
                         {
-                            query.Result = new WebQueryResult { TimesTried = request.IterationCount };
+                            query.Result = new WebQueryResult { TimesTried = GetIterationCount(request) };
                         }
                     }
                     else
@@ -226,6 +222,26 @@ namespace Hammock
             return true;
         }
 #endif
+        private void UpdateRepeatingRequestState(RestRequest request)
+        {
+            var taskState = request.TaskState ?? TaskState;
+            if (taskState != null)
+            {
+                taskState.RepeatCount++;
+                taskState.LastRepeat = DateTime.Now;
+            }
+        }
+
+        private void UpdateRetryState(RestRequest request)
+        {
+            var retryState = request.RetryState ?? RetryState;
+            if (retryState != null)
+            {
+                retryState.RepeatCount++;
+                retryState.LastRepeat = DateTime.Now;
+            }
+        }
+
         private static bool ShouldRetry(RetryPolicy retryPolicy,
                                         WebException exception,
                                         WebQueryResult current)
@@ -866,9 +882,12 @@ namespace Hammock
             }
 
             var retryPolicy = GetRetryPolicy(request);
-            _remainingRetries = (!isInternal && retryPolicy != null
-                                     ? retryPolicy.RetryCount
-                                     : 0);
+            bool inRetryScope = false;
+            if (!isInternal && retryPolicy != null)
+            {
+                _remainingRetries = retryPolicy.RetryCount;
+                inRetryScope = true;
+            }
 
             Func<WebQueryAsyncResult> beginRequest;
             WebQueryAsyncResult asyncResult;
@@ -905,11 +924,11 @@ namespace Hammock
 
                 asyncResult = beginRequest.Invoke();
             }
-            
-            
+
+
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
-                if (request.IsFirstIteration)
+                if (IsFirstIteration && request.IsFirstIteration)
                 {
                     query.QueryResponse += (sender, args) =>
                                                {
@@ -919,24 +938,24 @@ namespace Hammock
                                                    {
                                                        // [DC]: Query should already have exception applied
                                                        var exception = query.Result.Exception;
-                                                       var retry = _remainingRetries > 0 &&
+                                                       var retry = inRetryScope &&
+                                                                   _remainingRetries > 0 &&
                                                                    ShouldRetry(retryPolicy, exception, current);
 
                                                        if (retry)
                                                        {
-                                                           request.RetryState.RepeatCount++;
-                                                           request.RetryState.LastRepeat = DateTime.Now;
+                                                           UpdateRetryState(request);
                                                            BeginRequestImpl(request, callback, query, url, true
                                                                /* isInternal */, userState);
                                                            Interlocked.Decrement(ref _remainingRetries);
                                                        }
-                                                       else
+                                                       else if (inRetryScope)
                                                        {
                                                            _remainingRetries = 0;
                                                        }
-                                                       current.TimesTried = request.IterationCount;
+                                                       current.TimesTried = GetIterationCount(request);
                                                    }
-                                                   else
+                                                   else if (inRetryScope)
                                                    {
                                                        _remainingRetries = 0;
                                                    }
@@ -950,16 +969,7 @@ namespace Hammock
                                                    }
                                                };
                 }
-                if (request.TaskState != null)
-                {
-                    request.TaskState.RepeatCount++;
-                    request.TaskState.LastRepeat = DateTime.Now;
-                }
-                if (request.RetryState != null)
-                {
-                    request.RetryState.RepeatCount++;
-                    request.RetryState.LastRepeat = DateTime.Now;
-                }
+                UpdateRepeatingRequestState(request);
             }
             return asyncResult;
         }
@@ -985,9 +995,12 @@ namespace Hammock
             }
 
             var retryPolicy = GetRetryPolicy(request);
-            _remainingRetries = (!isInternal && retryPolicy != null
-                                     ? retryPolicy.RetryCount
-                                     : 0);
+            bool inRetryScope = false;
+            if (!isInternal && retryPolicy != null)
+            {
+                _remainingRetries = retryPolicy.RetryCount;
+                inRetryScope = true;
+            }
 
             Func<WebQueryAsyncResult> beginRequest;
             WebQueryAsyncResult asyncResult;
@@ -1021,60 +1034,55 @@ namespace Hammock
 
                 asyncResult = beginRequest.Invoke();
             }
-
-            if (request.IsFirstIteration)
+            if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
-                query.QueryResponse += (sender, args) =>
-                   {
-                       var current = query.Result;
-
-                       if (retryPolicy != null)
+                if (IsFirstIteration && request.IsFirstIteration)
+                {
+                    query.QueryResponse += (sender, args) =>
                        {
-                           // [DC]: Query should already have exception applied
-                           var exception = query.Result.Exception;
-                           var retry = _remainingRetries > 0 &&
-                                       ShouldRetry(retryPolicy, exception, current);
+                           var current = query.Result;
 
-                           if (retry)
+                           if (retryPolicy != null)
                            {
-                               request.RetryState.RepeatCount++;
-                               request.RetryState.LastRepeat = DateTime.Now;
-                               BeginRequestImpl(request, callback, query, url, true
-                                   /* isInternal */, userState);
-                               Interlocked.Decrement(ref _remainingRetries);
+                               // [DC]: Query should already have exception applied
+                               var exception = query.Result.Exception;
+                               var retry = inRetryScope &&
+                                           _remainingRetries > 0 &&
+                                           ShouldRetry(retryPolicy, exception, current);
+
+                               if (retry)
+                               {
+                                   UpdateRetryState(request);
+                                   BeginRequestImpl(request, callback, query, url, true
+                                       /* isInternal */, userState);
+                                   Interlocked.Decrement(ref _remainingRetries);
+                               }
+                               else if (inRetryScope)
+                               {
+                                   _remainingRetries = 0;
+                               }
+                               current.TimesTried = GetIterationCount(request);
                            }
-                           else
+                           else if (inRetryScope)
                            {
                                _remainingRetries = 0;
                            }
-                           current.TimesTried = request.IterationCount;
-                       }
-                       else
-                       {
-                           _remainingRetries = 0;
-                       }
 
-                       query.Result = current;
+                           query.Result = current;
 
-                       // [DC]: Callback is for a final result, not a retry
-                       if (_remainingRetries == 0)
-                       {
-                           CompleteWithQuery(query, request, callback, asyncResult);
-                       }
-                   };
-            }
-            if (request.TaskState != null)
-            {
-                request.TaskState.RepeatCount++;
-                request.TaskState.LastRepeat = DateTime.Now;
-            }
-            if (request.RetryState != null)
-            {
-                request.RetryState.RepeatCount++;
-                request.RetryState.LastRepeat = DateTime.Now;
+                           // [DC]: Callback is for a final result, not a retry
+                           if (_remainingRetries == 0)
+                           {
+                               CompleteWithQuery(query, request, callback, asyncResult);
+                           }
+                       };
+                }
+                UpdateRepeatingRequestState(request);
             }
             return asyncResult;
         }
+
+        
 #else
         // TODO BeginRequest and BeginRequest<T> have too much duplication
         private void BeginRequestImpl(RestRequest request,
@@ -1140,7 +1148,7 @@ namespace Hammock
 
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
-                if (request.IsFirstIteration)
+                if (request.IsFirstIteration && IsFirstIteration)
                 {
                     query.QueryResponse += (sender, args) => QueryResponseCallback(query, 
                                                                                retryPolicy, 
@@ -1149,16 +1157,8 @@ namespace Hammock
                                                                                url, 
                                                                                userState);
                 }
-                if (request.TaskState != null)
-                {
-                    request.TaskState.RepeatCount++;
-                    request.TaskState.LastRepeat = DateTime.Now;
-                }
-                if (request.RetryState != null)
-                {
-                    request.RetryState.RepeatCount++;
-                    request.RetryState.LastRepeat = DateTime.Now;
-                }
+                UpdateRepeatingRequestState(request); 
+                UpdateRetryState(request);
             }
         }
 
@@ -1218,7 +1218,7 @@ namespace Hammock
                 
                 beginRequest.Invoke();
             }
-            if (request.IsFirstIteration)
+            if (IsFirstIteration && request.IsFirstIteration)
             {
                 query.QueryResponse += (sender, args) => QueryResponseCallback(query,
                                                                            retryPolicy,
@@ -1227,16 +1227,8 @@ namespace Hammock
                                                                            url,
                                                                            userState);
             }
-            if (request.TaskState != null)
-            {
-                request.TaskState.RepeatCount++;
-                request.TaskState.LastRepeat = DateTime.Now;
-            }
-            if (request.RetryState != null)
-            {
-                request.RetryState.RepeatCount++;
-                request.RetryState.LastRepeat = DateTime.Now;
-            }
+            UpdateRepeatingRequestState(request);
+            UpdateRetryState(request);
         }
 
 
@@ -1264,7 +1256,7 @@ namespace Hammock
                 {
                     _remainingRetries = 0;
                 }
-                current.TimesTried = request.IterationCount;
+                current.TimesTried = GetIterationCount(request);
             }
             else
             {
@@ -1303,7 +1295,7 @@ namespace Hammock
                 {
                     _remainingRetries = 0;
                 }
-                current.TimesTried = request.IterationCount;
+                current.TimesTried = GetIterationCount(request);
 
             }
             else
@@ -2304,6 +2296,21 @@ namespace Hammock
                 toCancel.AddRange(_tasks.Values);
                 toCancel.ForEach(t => t.Stop());
             }
+        }
+
+        public int GetIterationCount(RestRequest request)
+        {
+            var retryState = request.RetryState ?? RetryState;
+            var taskState = request.TaskState ?? TaskState;
+            if (retryState != null)
+            {
+                return retryState.RepeatCount;
+            }
+            if (taskState != null)
+            {
+                return taskState.RepeatCount;
+            }
+            return 0;
         }
 
     }

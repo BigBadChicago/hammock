@@ -23,31 +23,7 @@ namespace Hammock
         public virtual string ExpectStatusDescription { get; set; }
         public virtual string ExpectContent { get; set; }
         public virtual string ExpectContentType { get; set; }
-
-        public virtual bool IsFirstIteration
-        {
-            get
-            {
-                return IterationCount == 0; 
-            }
-        }
-
-        public virtual int IterationCount
-        {
-            get
-            {
-                if (RetryState != null)
-                {
-                    return RetryState.RepeatCount;
-                }
-                if (TaskState != null)
-                {
-                    return TaskState.RepeatCount;
-                }
-                return 0;
-            }
-        }
-
+        
         public RestRequest()
         {
             Initialize();
