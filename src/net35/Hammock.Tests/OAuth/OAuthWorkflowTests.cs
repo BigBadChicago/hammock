@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using Hammock.Authentication.OAuth;
 using Hammock.Web;
@@ -85,10 +87,10 @@ namespace Hammock.Tests.OAuth
             Assert.Greater(startSecret, 0);
 
             // Step 2 - Redirect to authorize this request token on Twitter
-            var token = requestTokenResponse.Substring(startToken + "oauth_token=".Length,
-                                                       requestTokenResponse.Length - startSecret -
-                                                       "&oauth_token_secret".Length);
-            var tokenSecret = requestTokenResponse.Substring(startSecret + "&oauth_token_secret=".Length);
+            var parameters = GetQueryParameters(requestTokenResponse);
+            var token = parameters["oauth_token"];
+            var tokenSecret = parameters["oauth_token_secret"];
+            
             Console.WriteLine("Token: " + token);
             Console.WriteLine("Token Secret: " + tokenSecret);
             Console.WriteLine();
@@ -120,15 +122,26 @@ namespace Hammock.Tests.OAuth
             Assert.IsNotNull(accessTokenResponse);
             startToken = accessTokenResponse.IndexOf("oauth_token=");
             startSecret = accessTokenResponse.IndexOf("&oauth_token_secret=");
+            
+            Assert.GreaterOrEqual(startToken, 0);
+            Assert.Greater(startSecret, 0);
 
-            token = accessTokenResponse.Substring(startToken + "oauth_token=".Length,
-                                                  requestTokenResponse.Length - startSecret -
-                                                  "&oauth_token_secret".Length);
-            tokenSecret = accessTokenResponse.Substring(startSecret + "&oauth_token_secret=".Length);
+            parameters = GetQueryParameters(requestTokenResponse);
+            token = parameters["oauth_token"];
+            tokenSecret = parameters["oauth_token_secret"];
 
             Console.WriteLine("Token: {0}", token);
             Console.WriteLine("Token Secret: {0}", tokenSecret);
             Console.WriteLine();
+        }
+
+        public static Dictionary<string, string> GetQueryParameters(string response)
+        {
+            var parts = response.Split(new[] { '&' });
+            return parts.Select(
+                part => part.Split(new[] { '=' })).ToDictionary(
+                    pair => pair[0], pair => pair[1]
+                );
         }
 
         [Test]
