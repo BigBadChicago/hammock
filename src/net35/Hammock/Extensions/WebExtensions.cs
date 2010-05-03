@@ -57,8 +57,8 @@ namespace Hammock.Extensions
 
             sb.Append(uri.Scheme)
                 .Append("://")
-                .Append(port)
                 .Append(uri.Host)
+                .Append(port)
                 .Append(uri.AbsolutePath);
 
             return new Uri(sb.ToString());

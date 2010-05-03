@@ -9,6 +9,7 @@ namespace Hammock.Authentication.OAuth
     {
         public virtual string Token { get; set; }
         public virtual string TokenSecret { get; set; }
+        public virtual string Verifier { get; set; }
         public virtual bool CallbackConfirmed { get; set; }
         public virtual string UserId { get; set; }
         public virtual string ScreenName { get; set; }
