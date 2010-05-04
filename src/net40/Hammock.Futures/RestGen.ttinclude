@@ -1,0 +1,175 @@
+﻿<#@ import namespace="Newtonsoft.Json" #>
+<#@ import namespace="Hammock.Web" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#+
+// Defines meta-data needed to generate a REST wrapper
+internal class ServiceDefinition
+{
+	public string Name { get; set; }
+	public string Namespace { get; set; }
+	public string ModelNamespace { get; set; }
+	public string Authority { get; set; }
+	public string Description { get; set; }
+	public string UserAgent { get; set; }
+	public IEnumerable<Endpoint> Endpoints { get; set; }
+	
+	public bool UsesBasicAuth
+	{
+		get
+		{
+			return true;
+		}
+	}
+	
+	public bool UsesOAuth
+	{
+		get
+		{
+			return true;
+		}
+	}
+	
+	public IEnumerable<string> Segments
+	{
+		get
+		{
+			var list = new List<string>();
+			if(Endpoints == null) return list;
+			
+			foreach(Endpoint endpoint in Endpoints)
+			{
+				var pathSegments = endpoint.YieldPathSegments(this);
+				if(pathSegments == null) continue;		
+				
+				list.AddRange(pathSegments);
+			}
+			return list;
+		}
+	}
+	
+	public IEnumerable<string> YieldModelClasses()
+	{
+		foreach(Endpoint endpoint in Endpoints)
+		{
+			var modelClass = endpoint.Model;
+			if(endpoint.Model.StartsWith("IEnumerable<"))
+			{
+				var regex = new Regex("IEnumerable<(\\w*)>");
+				var match = regex.Match(modelClass);
+            	modelClass = match.Groups[1].Value;
+			}
+			yield return modelClass;
+		}
+	}
+}
+
+// Defines an external API endpoint
+internal class Endpoint
+{
+	public string Model { get; set; }
+	public string Path { get; set; }	
+	public string Methods { get; set; }
+	public string FriendlyName { get; set; }
+	public string Parameters { get; set; }
+	
+	public IEnumerable<Parameter> YieldParameters()
+	{
+		if(string.IsNullOrWhiteSpace(Parameters))
+		{
+			yield break;
+		}
+		var parameters = Parameters.Split(new []{"&"}, StringSplitOptions.RemoveEmptyEntries);
+		foreach(string parameter in parameters)
+		{
+			var item = new Parameter();
+			var value = parameter;
+			if(parameter.Contains("*="))
+			{
+				item.IsRequired = true;
+				value = value.Replace("*=", "=");
+			}
+			
+			var regex = new Regex("{(\\w*)}");
+			var match = regex.Match(value);
+            var type = match.Groups[1].Value;
+			item.Type = type;
+			
+			var end = value.IndexOf("=");
+			item.Name = value.Substring(0, end);
+			
+			yield return item;
+		}
+	}
+	
+	public IEnumerable<string> YieldPathSegments(ServiceDefinition def)
+	{
+		if(def.Authority == null) yield break;
+		
+		var authority = def.Authority.Trim();
+		if(!authority.EndsWith("/")) authority = string.Concat(authority, "/");
+		var path = string.Concat(authority, Path.Trim());
+		
+		Debug.WriteLine("path");
+		var uri = new Uri(path, UriKind.Absolute);
+		foreach(var segment in uri.Segments)
+		{
+			yield return segment;	
+		}
+	}
+	
+	public IEnumerable<WebMethod> YieldWebMethods()
+	{
+		if(string.IsNullOrWhiteSpace(Methods))
+		{
+			yield break;
+		}
+		
+		var methods = Methods.Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
+		foreach(var method in methods)
+		{
+			switch(method.ToUpper().Trim())
+			{
+				case "GET":
+					yield return WebMethod.Get;
+					break;
+				case "POST":
+					yield return WebMethod.Post;
+					break;
+				case "PUT":
+					yield return WebMethod.Put;
+					break;
+				case "DELETE":
+					yield return WebMethod.Delete;
+					break;
+				case "HEAD":
+					yield return WebMethod.Head;
+					break;
+				case "OPTIONS":
+					yield return WebMethod.Options;
+					break;
+			}
+		}		
+	}
+}
+
+// Defines an API parameter option
+internal class Parameter
+{
+	public bool IsRequired { get; set; }
+	public string Name { get; set; }
+	public string Type { get; set; }
+	public int MaxLength { get; set; }
+}
+
+// Useful utilities
+internal class Utilities
+{
+	public static string PascalCase(string input)
+	{
+		var flatten = input.Trim().ToLowerInvariant();
+		return flatten[0].ToString().ToUpperInvariant() + flatten.Substring(1);
+	}
+}
+#>

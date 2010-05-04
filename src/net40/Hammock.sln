@@ -21,6 +21,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.Sil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.WindowsPhone", "ICSharpCode.SharpZipLib.WindowsPhone\ICSharpCode.SharpZipLib.WindowsPhone.csproj", "{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C5464696-A1DF-45C0-B968-B8BD30439AAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuthOutOfBrowser", "OAuthOutOfBrowser\OAuthOutOfBrowser.csproj", "{037550E9-E00B-442C-8039-EB5C2C5DD84C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Futures", "Hammock.Futures\Hammock.Futures.csproj", "{400467EB-896E-48F9-8846-186C3D0D565D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +69,14 @@ Global
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{037550E9-E00B-442C-8039-EB5C2C5DD84C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{037550E9-E00B-442C-8039-EB5C2C5DD84C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{037550E9-E00B-442C-8039-EB5C2C5DD84C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{037550E9-E00B-442C-8039-EB5C2C5DD84C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{400467EB-896E-48F9-8846-186C3D0D565D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{400467EB-896E-48F9-8846-186C3D0D565D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{400467EB-896E-48F9-8846-186C3D0D565D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{400467EB-896E-48F9-8846-186C3D0D565D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,5 +85,6 @@ Global
 		{5953279F-F478-4D5F-9906-03D56CE2DA2D} = {5C8A9B7C-5129-453C-AD09-EE170E36A1E6}
 		{B96C231F-B8CA-4426-AC65-19D2826CC965} = {5C8A9B7C-5129-453C-AD09-EE170E36A1E6}
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E} = {5C8A9B7C-5129-453C-AD09-EE170E36A1E6}
+		{037550E9-E00B-442C-8039-EB5C2C5DD84C} = {C5464696-A1DF-45C0-B968-B8BD30439AAA}
 	EndGlobalSection
 EndGlobal
