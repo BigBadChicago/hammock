@@ -20,7 +20,7 @@ namespace Hammock.Web.Mocks
 #if !SILVERLIGHT
         public override long ContentLength { get; set; }
 #else
-        public long ContentLength { get; set; }
+        public new long ContentLength { get; set; }
 #endif
         public override string ContentType { get; set; }
 

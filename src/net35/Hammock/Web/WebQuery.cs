@@ -49,7 +49,7 @@ namespace Hammock.Web
         
         public virtual WebMethod Method { get; set; }
         public virtual string Proxy { get; set; }
-        public virtual string AuthorizationHeader { get; protected set; }
+        public virtual string AuthorizationHeader { get; internal set; }
         public DecompressionMethods DecompressionMethods { get; set; }
         public virtual TimeSpan? RequestTimeout { get; set; }
         public virtual WebQueryResult Result { get; internal set; }
@@ -68,7 +68,9 @@ namespace Hammock.Web
 #if !Silverlight
         public virtual ServicePoint ServicePoint { get; set; }
         public virtual bool KeepAlive { get; set; }
+        public virtual bool FollowRedirects { get; internal set; }
 #endif
+
         private WebResponse _webResponse;
         public virtual WebResponse WebResponse
         {
@@ -178,7 +180,7 @@ namespace Hammock.Web
         }
 
         [Conditional("TRACE")]
-        private static void TraceResponse(Uri uri, string version, NameValueCollection headers, int statusCode, string statusDescription, string response)
+        private static void TraceResponse(Uri uri, string version, System.Net.WebHeaderCollection headers, int statusCode, string statusDescription, string response)
         {
             Trace.WriteLine(
                 String.Concat("\r\n--RESPONSE:", " ", uri)
@@ -400,6 +402,7 @@ namespace Hammock.Web
             {
                 SetWebProxy(request);
             }
+            request.AllowAutoRedirect = FollowRedirects;
 #endif
 
             if (!UserAgent.IsNullOrBlank())

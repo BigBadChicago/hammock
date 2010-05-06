@@ -49,7 +49,7 @@ namespace Hammock
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
         public virtual IWebCredentials Credentials { get; set; }
-
+        
         protected RestBase()
         {
             Initialize();
@@ -64,6 +64,7 @@ namespace Hammock
 
 #if !Silverlight
         public virtual ServicePoint ServicePoint { get; set; }
+        public virtual bool? FollowRedirects { get; set; }
 #endif
         public virtual string Proxy { get; set; }
         public virtual TimeSpan? Timeout { get; set; }

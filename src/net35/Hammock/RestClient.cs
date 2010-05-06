@@ -495,6 +495,14 @@ namespace Hammock
             return policy;
         }
 
+#if !SILVERLIGHT
+        private bool GetFollowRedirects(RestBase request)
+        {
+            var redirects = request.FollowRedirects ?? FollowRedirects ?? false;
+            return redirects;
+        }
+#endif
+
         private TaskOptions GetTaskOptions(RestBase request)
         {
             var options = request.TaskOptions ?? TaskOptions;
@@ -2202,7 +2210,9 @@ namespace Hammock
             query.RequestTimeout = GetTimeout(request);
             query.DecompressionMethods = request.DecompressionMethods | DecompressionMethods;
             query.PostContent = GetPostContent(request);
-
+#if !SILVERLIGHT
+            query.FollowRedirects = GetFollowRedirects(request);
+#endif
             SerializeEntityBody(query, request);
         }
 
