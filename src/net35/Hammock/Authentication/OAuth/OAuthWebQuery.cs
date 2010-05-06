@@ -342,7 +342,7 @@ namespace Hammock.Authentication.OAuth
                                                        ))
             {
                 parameters++;
-                var format = parameters < Parameters.Count ? "{0}=\"{1}\"," : "{0}=\"{1}\"";
+                var format = parameters < Parameters.Count - 1 ? "{0}=\"{1}\"," : "{0}=\"{1}\"";
                 sb.Append(format.FormatWith(parameter.Name, parameter.Value));
             }
 
