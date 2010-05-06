@@ -90,7 +90,7 @@ namespace Hammock.Authentication.OAuth
             content = PostProcessPostParameters(request, uri);
 #if TRACE
             Trace.WriteLine(String.Concat(
-                "BODY: ", Encoding.UTF8.GetString(content, 0, content.Length))
+                "\r\n", Encoding.UTF8.GetString(content, 0, content.Length))
                 );
 #endif
 
@@ -215,14 +215,11 @@ namespace Hammock.Authentication.OAuth
                 case OAuthParameterHandling.HttpAuthorizationHeader:
                     SetAuthorizationHeader(request, "Authorization");
 
-                    // [DC]: Avoid escaping side effect of URI
-                    var query = uri.Query.UrlDecode();
-
                     // Only use the POST parameters that exist in the body
 #if SILVERLIGHT
-                    var postParameters = new WebParameterCollection(query.ParseQueryString());
+                    var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
 #else
-                    var postParameters = new WebParameterCollection(query.ParseQueryString());
+                    var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
 #endif
                     // Append any leftover values to the POST body
                     var nonAuthParameters = GetPostParametersValue(postParameters, true /* escapeParameters */);
@@ -264,8 +261,8 @@ namespace Hammock.Authentication.OAuth
 #endif
             url = url.Then(uri.AbsolutePath);
             return url;
-        }
 
+        }
         private static string GetPostParametersValue(ICollection<WebPair> postParameters, bool escapeParameters)
         {
             var body = "";

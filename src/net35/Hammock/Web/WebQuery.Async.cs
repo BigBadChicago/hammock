@@ -241,7 +241,7 @@ namespace Hammock.Web
 #if TRACE
                     // Just for cosmetic purposes
                     Trace.WriteLine(String.Concat("RESPONSE: ", response.StatusCode));
-                    Trace.WriteLine("BODY:");
+                    Trace.WriteLine("\r\n");
 #endif
                     foreach(var postHandle in _postHandles)
                     {
@@ -723,7 +723,7 @@ namespace Hammock.Web
                                                  Third = userState
                                              });
 
-                RegisterAbortTimer(request, new WebQueryAsyncResult() {InnerResult = inner});
+                RegisterAbortTimer(request, new WebQueryAsyncResult { InnerResult = inner });
             }
         }
 
@@ -1011,7 +1011,8 @@ namespace Hammock.Web
             return result;
         }
 
-        private object ResponseAsHttpWebResponse(out int statusCode, 
+        private object ResponseAsHttpWebResponse(out string version, 
+                                                 out int statusCode, 
                                                  out string statusDescription, 
                                                  out string contentType, 
                                                  out long contentLength, 
@@ -1024,6 +1025,7 @@ namespace Hammock.Web
 
             if(httpWebResponse == null)
             {
+                version = null;
                 statusCode = 0;
                 statusDescription = null;
                 contentType = null;
@@ -1033,6 +1035,11 @@ namespace Hammock.Web
                 return null;
             }
 
+#if !SILVERLIGHT
+            version = string.Concat("HTTP/", httpWebResponse.ProtocolVersion);
+#else
+            version = "HTTP/1.1";
+#endif
             statusCode = Convert.ToInt32(httpWebResponse.StatusCode, CultureInfo.InvariantCulture);
             statusDescription = httpWebResponse.StatusDescription;
             contentType = httpWebResponse.ContentType;
@@ -1073,7 +1080,8 @@ namespace Hammock.Web
             return httpWebResponse;
         }
 
-        private void CastWebResponse(out int statusCode, 
+        private void CastWebResponse(out string version,
+                                     out int statusCode, 
                                      out string statusDescription, 
                                      out System.Net.WebHeaderCollection headers,
                                      out string contentType, 
@@ -1081,7 +1089,7 @@ namespace Hammock.Web
                                      out Uri responseUri)
         {
             var response = ResponseAsHttpWebResponse(
-                out statusCode, out statusDescription, 
+                out version, out statusCode, out statusDescription, 
                 out contentType, out contentLength, 
                 out responseUri, out headers
                 );

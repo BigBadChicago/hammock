@@ -108,14 +108,12 @@ namespace Hammock.Authentication.OAuth
         {
             // [JD]: We need to escape the apostrophe as well or the signature will fail
             var original = value;
-            var ret = value;
-            foreach (var c in original)
-            {
-                if (!Unreserved.Contains(c) && c != '%')
-                {
-                    ret = ret.Replace(c.ToString(), c.ToString().PercentEncode());
-                }
-            }
+            var ret = original.Where(
+                c => !Unreserved.Contains(c) && c != '%').Aggregate(
+                    value, (current, c) => current.Replace(
+                          c.ToString(), c.ToString().PercentEncode()
+                          ));
+
             return ret.Replace("%%", "%25%"); // Revisit to encode actual %'s
         }
 

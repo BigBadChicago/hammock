@@ -53,8 +53,7 @@ namespace Hammock.Extensions
 
         public static string UrlEncode(this string value)
         {
-            // This is more correct than HttpUtility; 
-            // it escapes spaces as %20, not +
+            // [DC] This is more correct than HttpUtility; it escapes spaces as %20, not +
             return Uri.EscapeDataString(value);
         }
 
@@ -91,70 +90,17 @@ namespace Hammock.Extensions
 
         public static IDictionary<string, string> ParseQueryString(this string query)
         {
-            return ParseQueryString(query, Encoding.UTF8);
-        }
-
-        // From http://anonsvn.mono-project.com/viewvc/trunk/mcs/class/System.Web/System.Web/HttpUtility.cs
-        public static IDictionary<string, string> ParseQueryString(this string query, Encoding encoding)
-        {
-            var result = new Dictionary<string, string>();
-            if (query.Length == 0)
-                return result;
-
-            var decoded = HttpUtility.HtmlDecode(query);
-            var decodedLength = decoded.Length;
-            var namePos = 0;
-            var first = true;
-            while (namePos <= decodedLength)
+            if(query.Equals(string.Empty))
             {
-                int valuePos = -1, valueEnd = -1;
-                for (var q = namePos; q < decodedLength; q++)
-                {
-                    if (valuePos == -1 && decoded[q] == '=')
-                    {
-                        valuePos = q + 1;
-                    }
-                    else if (decoded[q] == '&')
-                    {
-                        valueEnd = q;
-                        break;
-                    }
-                }
-
-                if (first)
-                {
-                    first = false;
-                    if (decoded[namePos] == '?')
-                        namePos++;
-                }
-
-                string name;
-                if (valuePos == -1)
-                {
-                    name = null;
-                    valuePos = namePos;
-                }
-                else
-                {
-                    name = UrlDecode(decoded.Substring(namePos, valuePos - namePos - 1));
-                }
-                if (valueEnd < 0)
-                {
-                    namePos = -1;
-                    valueEnd = decoded.Length;
-                }
-                else
-                {
-                    namePos = valueEnd + 1;
-                }
-                string value = UrlDecode(decoded.Substring(valuePos, valueEnd - valuePos));
-
-                if (name != null)
-                    result.Add(name, value);
-                if (namePos == -1)
-                    break;
+                return new Dictionary<string, string>();
             }
-            return result;
+            // [DC]: This method does not URL decode, and cannot handle decoded input
+            if (query.StartsWith("?")) query = query.Substring(1);
+            var parts = query.Split(new[] { '&' });
+            return parts.Select(
+                part => part.Split(new[] { '=' })).ToDictionary(
+                    pair => pair[0], pair => pair[1]
+                );
         }
 
         private const RegexOptions Options =

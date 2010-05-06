@@ -99,21 +99,21 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Authority = "http://is.gd",
+                Authority = "http://bit.ly",
                 UserAgent = "Hammock"
             };
 
+            // http://bit.ly/ay9par
             var request = new RestRequest
             {
-                Path = "bF9rh",
+                Path = "ay9par",
                 Method = WebMethod.Head
             };
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
 
-            var longUrl = response.Headers["X-Pingback"];
-            Assert.AreEqual("http://tweetsharp.com/xmlrpc.php", longUrl);
+            Assert.AreEqual("http://tweetsharp.codeplex.com/", response.ResponseUri.ToString());
         }
 
         [Test]

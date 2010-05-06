@@ -42,7 +42,7 @@ namespace Hammock
         /// <summary>
         /// Used to set the name of the "Accept" header used by your Silverlight proxy.
         /// </summary>
-        public virtual string SilverlightAcceptHeader { get; set;}
+        public virtual string SilverlightAcceptEncodingHeader { get; set;}
         
         /// <summary>
         /// Used to set the name of the "Authorization" header used by your Silverlight proxy.
@@ -852,7 +852,7 @@ namespace Hammock
                 Trace.WriteLine(trace);
             }
             Trace.WriteLine(String.Concat(
-                "BODY: ", restResponse.Content)
+                "\r\n", restResponse.Content)
                 );
 #endif
         }
@@ -2266,7 +2266,7 @@ namespace Hammock
 
 #if SILVERLIGHT
             query.HasElevatedPermissions = HasElevatedPermissions;
-            query.SilverlightAcceptHeader = SilverlightAcceptHeader;
+            query.SilverlightAcceptEncodingHeader = SilverlightAcceptEncodingHeader;
             query.SilverlightAuthorizationHeader = SilverlightAuthorizationHeader;
             query.SilverlightMethodHeader = SilverlightMethodHeader;
             query.SilverlightUserAgentHeader = SilverlightUserAgentHeader;

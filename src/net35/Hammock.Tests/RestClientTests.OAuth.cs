@@ -194,8 +194,7 @@ namespace Hammock.Tests
             };
 
             var update = Uri.EscapeDataString(string.Format(
-                "something #requiring #encoding @! at {0}", DateTime.Now.ToShortTimeString()
-                                                            ));
+                "something #requiring #encoding% @! && at {0}", DateTime.Now.ToShortTimeString()));
                        
             var path = string.Format(
                 "http://api.twitter.com/1/statuses/update.json?status={0}", 

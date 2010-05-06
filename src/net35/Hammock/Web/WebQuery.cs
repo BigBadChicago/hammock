@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -61,7 +62,7 @@ namespace Hammock.Web
         public virtual string SilverlightAuthorizationHeader { get; set; }
         public virtual string SilverlightMethodHeader { get; set; }
         public virtual string SilverlightUserAgentHeader { get; set; }
-        public virtual string SilverlightAcceptHeader { get; set; }        
+        public virtual string SilverlightAcceptEncodingHeader { get; set; }        
 #endif
         
 #if !Silverlight
@@ -151,7 +152,8 @@ namespace Hammock.Web
             Result.Response = e.Response;
             Result.RequestHttpMethod = Method.ToUpper();
             Result.IsMock = WebResponse is MockHttpWebResponse;
-            Result.TimedOut = TimedOut; 
+            Result.TimedOut = TimedOut;
+            string version;
             int statusCode;
             string statusDescription;
             System.Net.WebHeaderCollection headers;
@@ -159,27 +161,38 @@ namespace Hammock.Web
             long contentLength;
             Uri responseUri;
             CastWebResponse(
-                out statusCode, out statusDescription, out headers, 
+                out version, out statusCode, out statusDescription, out headers, 
                 out contentType, out contentLength, out responseUri
                 );
-#if TRACE
-            Trace.WriteLine(String.Concat("RESPONSE: ", statusCode, " ", statusDescription));
-            Trace.WriteLineIf(headers.AllKeys.Count() > 0, "HEADERS:");
-            foreach (var trace in headers.AllKeys.Select(
-                key => String.Concat("\t", key, ": ", headers[key])))
-            {
-                Trace.WriteLine(trace);
-            }
-            Trace.WriteLine(String.Concat(
-                "BODY: ",e.Response)
+
+            TraceResponse(
+                responseUri, version, headers, statusCode, statusDescription, e.Response
                 );
-#endif
+
             Result.WebResponse = WebResponse;
             Result.ResponseHttpStatusCode = statusCode;
             Result.ResponseHttpStatusDescription = statusDescription;
             Result.ResponseType = contentType;
             Result.ResponseLength = contentLength;
             Result.ResponseUri = responseUri;
+        }
+
+        [Conditional("TRACE")]
+        private static void TraceResponse(Uri uri, string version, NameValueCollection headers, int statusCode, string statusDescription, string response)
+        {
+            Trace.WriteLine(
+                String.Concat("\r\n--RESPONSE:", " ", uri)
+                );
+            Trace.WriteLine(
+                String.Concat(version, " ", statusCode, " ", statusDescription)
+                );
+            foreach (var trace in headers.AllKeys.Select(
+                key => String.Concat(key, ": ", headers[key])))
+            {
+                Trace.WriteLine(trace);
+            }
+            Trace.WriteLine(String.Concat("\r\n ", response)
+                );
         }
 
         private void SetRequestResults(WebQueryRequestEventArgs e)
@@ -243,11 +256,9 @@ namespace Hammock.Web
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 #endif
             request.ContentType = "application/x-www-form-urlencoded";
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
-                );
-#endif
+
+            TraceRequest(request);
+
             HandleRequestMeta(request);
 
             var encoding = Encoding.UTF8;
@@ -255,7 +266,7 @@ namespace Hammock.Web
 
 #if TRACE
             Trace.WriteLine(String.Concat(
-                "BODY: ", content)
+                "\r\n", content)
                 );
 #endif
 
@@ -285,12 +296,8 @@ namespace Hammock.Web
 #else
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 #endif
-            
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
-                );
-#endif
+
+            TraceRequest(request);
 
             HandleRequestMeta(request);
 
@@ -302,7 +309,7 @@ namespace Hammock.Web
                 request.ContentType = Entity.ContentType;
 #if TRACE
                 Trace.WriteLine(String.Concat(
-                    "BODY: ", entity)
+                    "\r\n", entity)
                     );
 #endif
                 
@@ -339,11 +346,8 @@ namespace Hammock.Web
             request.Method = method.ToUpper();
 #endif
             AuthenticateRequest(request);
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "REQUEST: ", request.Method, " ", request.RequestUri)
-                );
-#endif
+
+            TraceRequest(request);
             
             HandleRequestMeta(request);
 
@@ -418,13 +422,13 @@ namespace Hammock.Web
                     switch (DecompressionMethods)
                     {
                         case DecompressionMethods.GZip:
-                            request.Accept = "gzip";
+                            request.Headers["AcceptEncoding"] = "gzip";
                             break;
                         case DecompressionMethods.Deflate:
-                            request.Accept = "deflate";
+                            request.Headers["AcceptEncoding"] = "deflate";
                             break;
                         case DecompressionMethods.GZip | DecompressionMethods.Deflate:
-                            request.Accept = "gzip,deflate";
+                            request.Headers["AcceptEncoding"] = "gzip,deflate";
                             break;
                     }
                 }
@@ -433,13 +437,13 @@ namespace Hammock.Web
                     switch (DecompressionMethods)
                     {
                         case DecompressionMethods.GZip:
-                            request.Headers[SilverlightAcceptHeader] = "gzip";
+                            request.Headers[SilverlightAcceptEncodingHeader] = "gzip";
                             break;
                         case DecompressionMethods.Deflate:
-                            request.Headers[SilverlightAcceptHeader] = "deflate";
+                            request.Headers[SilverlightAcceptEncodingHeader] = "deflate";
                             break;
                         case DecompressionMethods.GZip | DecompressionMethods.Deflate:
-                            request.Headers[SilverlightAcceptHeader] = "gzip,deflate";
+                            request.Headers[SilverlightAcceptEncodingHeader] = "gzip,deflate";
                             break;
                     }
                 }
@@ -498,11 +502,11 @@ namespace Hammock.Web
                     if(header.Key.EqualsIgnoreCase("User-Agent"))
                     {
                         // [DC]: User-Agent is still restricted in elevated mode
-                        request.Headers[SilverlightUserAgentHeader] = UserAgent;
+                        request.Headers[SilverlightUserAgentHeader ?? "X-UserAgent"] = UserAgent;
                         continue;
                     }
 
-                    if(header.Key.EqualsIgnoreCase("Accept"))
+                    if(header.Key.EqualsIgnoreCase("Accept-Encoding"))
                     {
                         if (HasElevatedPermissions)
                         {
@@ -510,7 +514,7 @@ namespace Hammock.Web
                         }
                         else
                         {
-                            request.Headers[SilverlightAcceptHeader] = UserAgent;
+                            request.Headers[SilverlightAcceptEncodingHeader] = UserAgent;
                         }
                         continue;
                     }
@@ -543,9 +547,8 @@ namespace Hammock.Web
             }
 
 #if TRACE
-            Trace.WriteLineIf(request.Headers.AllKeys.Count() > 0, "HEADERS:");
             foreach (var trace in request.Headers.AllKeys.Select(
-                key => String.Concat("\t", key, ": ", request.Headers[key])))
+                key => String.Concat(key, ": ", request.Headers[key])))
             {
                 Trace.WriteLine(trace);
             }
@@ -950,9 +953,8 @@ namespace Hammock.Web
             request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 
-#if TRACE
-            Trace.WriteLine(String.Concat("REQUEST: ", method.ToUpper(), " ", url));
-#endif
+            TraceRequest(request);
+
             HandleRequestMeta(request);
 
 #if !Smartphone 
@@ -970,6 +972,25 @@ namespace Hammock.Web
             request.ContentLength = bytes.Length;
 #endif
             return request;
+        }
+
+        [Conditional("TRACE")]
+        private static void TraceRequest(WebRequest request)
+        {
+            var version = request is HttpWebRequest ?
+#if SILVERLIGHT
+                "HTTP/v1.1" :
+#else
+                string.Concat("HTTP/", ((HttpWebRequest)request).ProtocolVersion) :
+#endif
+ "HTTP/v1.1";
+
+            Trace.WriteLine(
+                String.Concat("--REQUEST: ", request.RequestUri.Scheme, "://", request.RequestUri.Host)
+                );
+            Trace.WriteLine(
+                String.Concat(request.Method, " ", request.RequestUri.AbsolutePath, " ", version)
+                );
         }
 
         protected static StringBuilder BuildMultiPartFormRequestParameters(Encoding encoding, string boundary, IEnumerable<HttpPostParameter> parameters)
