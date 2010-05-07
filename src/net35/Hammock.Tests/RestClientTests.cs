@@ -112,8 +112,9 @@ namespace Hammock.Tests
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
-
-            Assert.AreEqual("http://tweetsharp.codeplex.com/", response.ResponseUri.ToString());
+            Assert.AreEqual(
+                "http://tweetsharp.codeplex.com/", response.Headers["Location"]
+                );
         }
 
         [Test]
