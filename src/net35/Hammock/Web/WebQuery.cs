@@ -992,7 +992,7 @@ namespace Hammock.Web
                 String.Concat("--REQUEST: ", request.RequestUri.Scheme, "://", request.RequestUri.Host)
                 );
             Trace.WriteLine(
-                String.Concat(request.Method, " ", request.RequestUri.AbsolutePath, " ", version)
+                String.Concat(request.Method, " ", request.RequestUri.PathAndQuery, " ", version)
                 );
         }
 
