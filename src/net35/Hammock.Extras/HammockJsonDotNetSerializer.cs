@@ -1,15 +1,75 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Hammock.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Hammock.Extras
 {
-    public class HammockJsonDotNetSerializer : Utf8Serializer, ISerializer, IDeserializer
+    /// <summary>
+    /// Resolves all property names to JSON conventional standard,
+    /// i.e. JSON name "this_is_a_property" will map to the class property ThisIsAProperty.
+    /// </summary>
+    public class JsonConventionResolver : DefaultContractResolver
+    {
+        protected override IList<JsonProperty> CreateProperties(JsonObjectContract contract)
+        {
+            var properties = base.CreateProperties(contract);
+
+            foreach (var property in properties)
+            {
+                property.PropertyName = PascalCaseToElement(property.PropertyName);
+            }
+
+            return properties;
+        }
+
+        private static string PascalCaseToElement(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
+            var result = new StringBuilder();
+
+            result.Append(char.ToLowerInvariant(input[0]));
+            for (var i = 1; i < input.Length; i++)
+            {
+                if (char.IsLower(input[i]))
+                {
+                    result.Append(input[i]);
+                }
+                else
+                {
+                    result.Append("_");
+                    result.Append(char.ToLowerInvariant(input[i]));
+                }
+            }
+
+            return result.ToString();
+        }
+    }
+
+    public class JsonDotNetSerializer : Utf8Serializer, ISerializer, IDeserializer
     {
         private readonly JsonSerializer _serializer;
 
-        public HammockJsonDotNetSerializer(JsonSerializerSettings settings)
+        public JsonDotNetSerializer()
+            : this(new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Ignore,
+                    NullValueHandling = NullValueHandling.Include,
+                    DefaultValueHandling = DefaultValueHandling.Include,
+                    ContractResolver = new JsonConventionResolver()
+                })
+        {
+
+        }
+
+        public JsonDotNetSerializer(JsonSerializerSettings settings)
         {
             _serializer = new JsonSerializer
                               {
