@@ -90,7 +90,34 @@ namespace Hammock.Tests
             var response = client.EndRequest(asyncResult);
             Assert.AreEqual(5, response.TimesTried);
             Assert.IsNotNull(response);
-            Thread.Sleep(5000);
+        }
+
+        [Test]
+        [Category("Async")]
+        [Category("Retries")]
+        public void Can_get_http_status_code_from_last_response()
+        {
+            var retryPolicy = new RetryPolicy { RetryCount = 3 };
+
+            //otherwise useless retry policy that always retries
+            retryPolicy.RetryOn(new AlwaysRetry());
+
+            var client = new RestClient
+            {
+                RetryPolicy = retryPolicy,
+                Authority = "http://api.twitter.com",
+                VersionPath = "1"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "statuses/home_timeline.json",
+                Credentials = BasicAuthForTwitter
+            };
+
+            var asyncResult = client.BeginRequest(request);
+            var response = client.EndRequest(asyncResult);
+            Assert.IsTrue(response.StatusCode > 0);
         }
     }
 }

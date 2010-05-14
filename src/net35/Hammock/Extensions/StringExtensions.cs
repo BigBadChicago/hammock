@@ -90,13 +90,16 @@ namespace Hammock.Extensions
 
         public static IDictionary<string, string> ParseQueryString(this string query)
         {
+            // [DC]: This method does not URL decode, and cannot handle decoded input
+            if (query.StartsWith("?")) query = query.Substring(1);
+            
             if(query.Equals(string.Empty))
             {
                 return new Dictionary<string, string>();
             }
-            // [DC]: This method does not URL decode, and cannot handle decoded input
-            if (query.StartsWith("?")) query = query.Substring(1);
+
             var parts = query.Split(new[] { '&' });
+            
             return parts.Select(
                 part => part.Split(new[] { '=' })).ToDictionary(
                     pair => pair[0], pair => pair[1]
