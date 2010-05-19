@@ -991,9 +991,14 @@ namespace Hammock.Web
             Trace.WriteLine(
                 String.Concat("--REQUEST: ", request.RequestUri.Scheme, "://", request.RequestUri.Host)
                 );
-            Trace.WriteLine(
-                String.Concat(request.Method, " ", request.RequestUri.PathAndQuery, " ", version)
+            var pathAndQuery = String.Concat(
+                request.RequestUri.AbsolutePath, string.IsNullOrEmpty(request.RequestUri.Query)
+                                                     ? ""
+                                                     : string.Concat("?", request.RequestUri.Query)
                 );
+            Trace.WriteLine(
+                String.Concat(request.Method, " ", pathAndQuery, " ", version
+                ));
         }
 
         protected static StringBuilder BuildMultiPartFormRequestParameters(Encoding encoding, string boundary, IEnumerable<HttpPostParameter> parameters)

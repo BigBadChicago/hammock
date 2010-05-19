@@ -52,7 +52,7 @@ namespace Hammock.Tests
             };
 
             var settings = GetSerializerSettings();
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {
@@ -103,7 +103,7 @@ namespace Hammock.Tests
                                   };
 
             var settings = GetSerializerSettings();
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {
@@ -164,7 +164,7 @@ namespace Hammock.Tests
             };
 
             var settings = GetSerializerSettings();
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {

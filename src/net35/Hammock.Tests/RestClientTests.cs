@@ -260,7 +260,7 @@ namespace Hammock.Tests
                                                 }
                               };
 
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {
@@ -320,7 +320,7 @@ namespace Hammock.Tests
         public void Can_use_client_standalone_with_type_sequentially()
         {
             var settings = GetSerializerSettings();
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {

@@ -28,7 +28,7 @@ namespace Hammock.Tests
                                                 }
             };
 
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {
@@ -71,7 +71,7 @@ namespace Hammock.Tests
         public void Can_request_mock_response_without_request_entity()
         {
             var settings = GetSerializerSettings();
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
                              {

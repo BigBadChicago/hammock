@@ -28,7 +28,7 @@ namespace Hammock.Tests
                                                 }
             };
 
-            var serializer = new HammockJsonDotNetSerializer(settings);
+            var serializer = new JsonDotNetSerializer(settings);
 
             var client = new RestClient
             {
