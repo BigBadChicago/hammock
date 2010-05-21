@@ -1,8 +1,16 @@
-#region License
-
-// TweetSharp
-// Copyright (c) 2010 Daniel Crenna and Jason Diller
-// 
+//
+// System.Net.WebHeaderCollection
+//
+// Authors:
+// 	Lawrence Pit (loz@cable.a2000.nl)
+//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//      Miguel de Icaza (miguel@novell.com)
+//
+// Copyright 2003 Ximian, Inc. (http://www.ximian.com)
+// Copyright 2007 Novell, Inc. (http://www.novell.com)
+//
+//
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -21,8 +29,8 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
-#endregion
 
 using System;
 using System.Collections;

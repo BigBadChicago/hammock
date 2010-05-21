@@ -1,8 +1,13 @@
-#region License
+//
+// DownloadDataCompletedEventArgs.cs
+//
+// Author:
+//	Atsushi Enomoto  <atsushi@ximian.com>
+//
+// (C) 2006 Novell, Inc. (http://www.novell.com)
+//
 
-// TweetSharp
-// Copyright (c) 2010 Daniel Crenna and Jason Diller
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -22,7 +27,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#endregion
 
 using System.ComponentModel;
 

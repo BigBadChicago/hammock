@@ -1,8 +1,11 @@
-#region License
-
-// TweetSharp
-// Copyright (c) 2010 Daniel Crenna and Jason Diller
-// 
+//
+// System.Net.HttpRequestHeader
+//
+// Author:
+//	Gonzalo Paniagua Javier (gonzalo@novell.com)
+//
+// Copyright (c) 2005 Novell, Inc. (http://www.novell.com)
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -21,8 +24,7 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-#endregion
+//
 
 namespace System.Net
 {

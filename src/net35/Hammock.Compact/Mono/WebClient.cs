@@ -1,8 +1,16 @@
-#region License
-
-// TweetSharp
-// Copyright (c) 2010 Daniel Crenna and Jason Diller
-// 
+//
+// System.Net.WebClient
+//
+// Authors:
+// 	Lawrence Pit (loz@cable.a2000.nl)
+//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//	Atsushi Enomoto (atsushi@ximian.com)
+//	Miguel de Icaza (miguel@ximian.com)
+//
+// Copyright 2003 Ximian, Inc. (http://www.ximian.com)
+// Copyright 2006, 2007 Novell, Inc. (http://www.novell.com)
+//
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -21,8 +29,36 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//
+// Notes on CancelAsync and Async methods:
+//
+//    WebClient.CancelAsync is implemented by calling Thread.Interrupt
+//    in our helper thread.   The various async methods have to cancel
+//    any ongoing requests by calling request.Abort () at that point.
+//    In a few places (UploadDataCore, UploadValuesCore,
+//    UploadFileCore) we catch the ThreadInterruptedException and
+//    abort the request there.
+//
+//    Higher level routines (the async callbacks) also need to catch
+//    the exception and raise the OnXXXXCompleted events there with
+//    the "canceled" flag set to true. 
+//
+//    In a few other places where these helper routines are not used
+//    (OpenReadAsync for example) catching the ThreadAbortException
+//    also must abort the request.
+//
+//    The Async methods currently differ in their implementation from
+//    the .NET implementation in that we manually catch any other
+//    exceptions and correctly raise the OnXXXXCompleted passing the
+//    Exception that caused the problem.   The .NET implementation
+//    does not seem to have a mechanism to flag errors that happen
+//    during downloads though.    We do this because we still need to
+//    catch the exception on these helper threads, or we would
+//    otherwise kill the application (on the 2.x profile, uncaught
+//    exceptions in threads terminate the application).
+//
 
-#endregion
 
 using System.Collections.Specialized;
 using System.ComponentModel;
