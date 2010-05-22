@@ -9,12 +9,12 @@ namespace Hammock.Authentication.OAuth
     public enum OAuthSignatureMethod
     {
 #if !SILVERLIGHT && !Smartphone && !ClientProfiles
-        [EnumMember] PlainText,
         [EnumMember] HmacSha1,
+        [EnumMember] PlainText,
         [EnumMember] RsaSha1
 #else
-        PlainText,
         HmacSha1,
+        PlainText,
         RsaSha1
 #endif
     }

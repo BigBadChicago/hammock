@@ -19,7 +19,7 @@ Hammock for Silverlight and Windows Phone 7
 --------------------------------------
 This target links to a port of SharpZipLib http://www.icsharpcode.net/opensource/sharpziplib as an independent 
 module that does not derive from, and is not based on, SharpZipLib. As such it is compliant with the special
- exception of SharpZipLib's GNU General Public License and may be used in commercial, closed-source applications.
+exception of SharpZipLib's GNU General Public License and may be used in commercial, closed-source applications.
 As the independent module, this is compliant with Hammock's MIT X11 Licence.
 
 Hammock Extras

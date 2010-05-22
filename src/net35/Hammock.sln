@@ -10,6 +10,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Compact", "Hammock.Compact\Hammock.Compact.csproj", "{1D74B8C0-E0CB-4B6A-83A5-BC123F98EC6C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{3A86F2B4-793D-429A-ACB6-69418AB5FCB9}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\README = ..\..\README
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Extras", "Hammock.Extras\Hammock.Extras.csproj", "{3BB0DC97-ECE3-4AC8-B2D0-E4C14D600179}"
 EndProject
