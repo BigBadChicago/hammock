@@ -72,13 +72,6 @@ namespace Hammock
 
         private readonly Dictionary<RestRequest, TimedTask> _tasks = new Dictionary<RestRequest, TimedTask>();
 
-        static RestClient()
-        {
-            WebRequest.RegisterPrefix(
-                MockProtocol, new MockWebRequestFactory()
-                );
-        }
-
 #if !Silverlight
         public virtual RestResponse Request(RestRequest request)
         {
@@ -108,6 +101,8 @@ namespace Hammock
             return BuildResponseFromResult<T>(null, query);
         }
 
+        private static bool _mockFactoryInitialized;
+
         private WebQuery RequestImpl(RestRequest request)
         {
             request = request ?? new RestRequest();
@@ -126,6 +121,12 @@ namespace Hammock
                 var url = uri.ToString();
                 if (RequestExpectsMock(request))
                 {
+                    if (!_mockFactoryInitialized)
+                    {
+                        WebRequest.RegisterPrefix(MockProtocol, new MockWebRequestFactory());
+                        _mockFactoryInitialized = true;
+                    }
+
                     url = BuildMockRequestUrl(request, query, url);
                 }
 
