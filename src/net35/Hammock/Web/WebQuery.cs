@@ -177,6 +177,7 @@ namespace Hammock.Web
             Result.ResponseType = contentType;
             Result.ResponseLength = contentLength;
             Result.ResponseUri = responseUri;
+            Result.Exception = e.Exception;
         }
 
         [Conditional("TRACE")]
