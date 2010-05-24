@@ -48,7 +48,7 @@ namespace Hammock.Extensions
             var query = uri.Query.ParseQueryString();
             foreach(var key in query.Keys)
             {
-                parameters.Add(key, query[key]);
+                parameters.Add(key, query[key].UrlDecode());
             }
 
             var port = uri.Scheme.Equals("http") && uri.Port != 80 || 
