@@ -103,18 +103,23 @@ namespace Hammock.Authentication.OAuth
 
         protected override WebRequest BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions method, string url)
         {
-            var uri = new Uri(url);
+            Uri uri;
+
+            // [DC]: Prior to this call, there should be no parameter encoding
+            url = PreProcessPostParameters(url, out uri);
+            url = AppendParameters(url, true, true); // Uses OAuthTools
+            
             switch (ParameterHandling)
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
                     // [DC]: Handled in authentication
                     break;
                 case OAuthParameterHandling.UrlOrPostParameters:
-                    uri = GetAddressWithOAuthParameters(uri);
+                    uri = GetAddressWithOAuthParameters(new Uri(url));
                     break;
             }
 
-            var request = WebRequest.Create(uri);
+            var request = WebRequest.Create(url);
 #if SILVERLIGHT
             var httpMethod = method.ToUpper();
             if (HasElevatedPermissions)
