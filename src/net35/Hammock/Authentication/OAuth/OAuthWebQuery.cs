@@ -405,13 +405,13 @@ namespace Hammock.Authentication.OAuth
 
         public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, DateTime absoluteExpiration, object userState)
         {
-            RecalculateProtectedResourceSignature(url);
+            //RecalculateProtectedResourceSignature(url);
             return base.RequestAsync(url, key, cache, absoluteExpiration, userState);
         }
 
         public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, TimeSpan slidingExpiration, object userState)
         {
-            RecalculateProtectedResourceSignature(url);
+            //RecalculateProtectedResourceSignature(url);
             return base.RequestAsync(url, key, cache, slidingExpiration, userState);
         }
 #else
