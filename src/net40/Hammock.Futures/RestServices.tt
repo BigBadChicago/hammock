@@ -21,9 +21,10 @@
 <#@ output extension=".generated.cs" #>
 <#@ include file="RestGen.ttinclude" #>
 
-<# var options = new {
+<# 
+var options = new {
 	ServiceDefinitionFile = Host.TemplateFile.Replace(".tt",".json"), // RestService.json
-	GenerateDtos = true, // Will generate IPropertyNotifyChanged and DataMembers for your classes
+	GenerateDtos = false, // Will generate IPropertyNotifyChanged and DataMembers for your classes
 };
 
 var assemblyPath = Host.ResolveAssemblyReference("$(TargetPath)");
@@ -33,7 +34,8 @@ string json = System.IO.File.ReadAllText(
 	options.ServiceDefinitionFile
 );
 
-List<ServiceDefinition> defs = JsonConvert.DeserializeObject<List<ServiceDefinition>>(json);#>
+List<ServiceDefinition> defs = JsonConvert.DeserializeObject<List<ServiceDefinition>>(json);
+#>
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,9 +66,10 @@ using <#= modelNamespace #>;
 //------------------------------------------------------------------------------
 #pragma warning restore 1591
 
-<# foreach(ServiceDefinition def in defs) {
-	var modelNamespace = options.GenerateDtos ? def.ModelNamespace + ".DataAccess" : def.ModelNamespace;
-	#>
+<# foreach(ServiceDefinition def in defs) { 
+var modelNamespace = options.GenerateDtos ? def.ModelNamespace + ".DataAccess" : def.ModelNamespace; 
+#>
+
 <# if(options.GenerateDtos) { #>
 namespace <#= modelNamespace #>
 {	<# foreach(var modelClass in def.YieldModelClasses().Distinct()) { #>

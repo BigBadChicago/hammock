@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Compat.Web;
 using System.Linq;
 using System.Net;
 using Hammock.Extensions;

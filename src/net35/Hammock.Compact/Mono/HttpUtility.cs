@@ -36,7 +36,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace System.Web
+namespace System.Compat.Web
 {
     public sealed class HttpUtility
     {

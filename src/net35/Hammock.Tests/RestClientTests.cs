@@ -118,6 +118,31 @@ namespace Hammock.Tests
         }
 
         [Test]
+        public void Can_post_url_for_shortening()
+        {
+            // http://tinyurl.com/api-create.php?url=
+
+            var url = "http://hammock.codeplex.com";
+
+            var client = new RestClient
+            {
+                Authority = "http://tinyurl.com",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "api-create.php",
+                Method = WebMethod.Get
+            };
+            request.AddParameter("url", url);
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Content.StartsWith("http://"));
+        }
+
+        [Test]
         public void Can_make_basic_auth_request_with_headers_synchronously()
         {
             var client = new RestClient

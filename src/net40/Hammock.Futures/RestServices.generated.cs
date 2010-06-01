@@ -14,7 +14,7 @@ using Hammock.Serialization;
 using Hammock.Authentication.Basic;
 using Hammock.Authentication.OAuth;
 
-using Twitter.Model.DataAccess;
+using Twitter.Model;
 
 #pragma warning disable 1591
 //------------------------------------------------------------------------------
@@ -26,57 +26,7 @@ using Twitter.Model.DataAccess;
 //------------------------------------------------------------------------------
 #pragma warning restore 1591
 
-namespace Twitter.Model.DataAccess
-{	
-#if !SILVERLIGHT
-	[Serializable]
-#endif
-	public partial class TwitterStatus : PropertyChangedBase
-	{			
-		private Int64 _id;
-#if !Smartphone
-		[DataMember]
-#endif
-		public virtual Int64 id
-		{
-			get
-			{
-				return _id;
-			}
-			set
-			{
-				if (_id == value)
-                {
-                    return;
-                }
 
-                _id = value;
-                OnPropertyChanged("id");
-			}
-		}		
-		private String _text;
-#if !Smartphone
-		[DataMember]
-#endif
-		public virtual String text
-		{
-			get
-			{
-				return _text;
-			}
-			set
-			{
-				if (_text == value)
-                {
-                    return;
-                }
-
-                _text = value;
-                OnPropertyChanged("text");
-			}
-		}
-	}
-}
 
 namespace Twitter
 {

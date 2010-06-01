@@ -4,6 +4,7 @@ using Hammock.Extensions;
 using Hammock.Web;
 #if !SILVERLIGHT
 using System.Web;
+using System.Compat.Web;
 #endif
 
 namespace Hammock.Authentication.OAuth
