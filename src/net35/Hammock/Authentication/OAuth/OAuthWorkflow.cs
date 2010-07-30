@@ -4,6 +4,9 @@ using Hammock.Extensions;
 using Hammock.Web;
 #if !SILVERLIGHT
 using System.Web;
+#endif
+
+#if ClientProfiles
 using System.Compat.Web;
 #endif
 

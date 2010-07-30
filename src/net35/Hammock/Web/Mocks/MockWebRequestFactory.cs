@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Compat.Web;
 using System.Linq;
 using System.Net;
 using Hammock.Extensions;
@@ -9,6 +8,10 @@ using System.Web;
 using System.Collections.Specialized;
 #else
 using Hammock.Silverlight.Compat;
+#endif
+
+#if ClientProfiles
+using System.Compat.Web;
 #endif
 
 #if SL3 || SL4
