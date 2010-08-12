@@ -73,7 +73,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Hammock\Hammock.csproj">
       <Project>{CD569558-9092-466B-8670-EA1B151150E0}</Project>
-      <Name>Hammock</Name>
+      <Name>Hammock %28.NET 4.0\Hammock%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

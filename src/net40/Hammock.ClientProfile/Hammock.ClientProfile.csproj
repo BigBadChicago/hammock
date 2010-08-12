@@ -47,12 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\net35\Hammock.Compact\Mono\HttpUtility.cs">
-      <Link>Mono\HttpUtility.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Compact\Mono\WebHeaderCollection.cs">
-      <Link>Mono\WebHeaderCollection.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Attributes\INamedAttribute.cs">
       <Link>Attributes\INamedAttribute.cs</Link>
     </Compile>
@@ -371,6 +365,8 @@
     <Compile Include="..\..\net35\Hammock\Web\WebQueryResult.cs">
       <Link>Web\WebQueryResult.cs</Link>
     </Compile>
+    <Compile Include="Mono\HttpUtility.cs" />
+    <Compile Include="Mono\WebHeaderCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

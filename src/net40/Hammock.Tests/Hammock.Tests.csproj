@@ -144,7 +144,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Hammock.Extras\Hammock.Extras.csproj">
       <Project>{7465B7B5-3E20-4EA2-8785-BDE71CAFB59D}</Project>
-      <Name>Hammock.Extras</Name>
+      <Name>Hammock.Extras %28.NET 4.0\Hammock.Extras%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\Hammock.Futures\Hammock.Futures.csproj">
       <Project>{400467EB-896E-48F9-8846-186C3D0D565D}</Project>
@@ -152,7 +152,7 @@
     </ProjectReference>
     <ProjectReference Include="..\Hammock\Hammock.csproj">
       <Project>{CD569558-9092-466B-8670-EA1B151150E0}</Project>
-      <Name>Hammock</Name>
+      <Name>Hammock %28.NET 4.0\Hammock%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
