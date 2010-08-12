@@ -6,6 +6,10 @@ using Hammock.Web;
 using System.Web;
 #endif
 
+#if ClientProfiles
+using System.Compat.Web;
+#endif
+
 namespace Hammock.Authentication.OAuth
 {
     /// <summary>

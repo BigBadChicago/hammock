@@ -3,11 +3,17 @@ using System.Net;
 using System.Linq;
 using Hammock.Extensions;
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !ClientProfiles
 using System.Web;
 using System.Collections.Specialized;
-#else
+#endif
+
+#if Silverlight
 using Hammock.Silverlight.Compat;
+#endif
+
+#if ClientProfiles
+using System.Collections.Specialized;
 using System.Compat.Web;
 #endif
 
