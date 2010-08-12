@@ -183,7 +183,7 @@ namespace Hammock.Tests
             };
 
             var repeatCount = 0;
-            var block = new AutoResetEvent(false);//signalled after first callback
+            var block = new AutoResetEvent(false); // signalled after first callback
             var async = client.BeginRequest(request,
                                             (req, resp, state) =>
                                             {

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Compat.Web;
-using System.Linq;
 using System.Net;
+using System.Linq;
 using Hammock.Extensions;
 
 #if !SILVERLIGHT
@@ -9,6 +8,7 @@ using System.Web;
 using System.Collections.Specialized;
 #else
 using Hammock.Silverlight.Compat;
+using System.Compat.Web;
 #endif
 
 #if SL3 || SL4
