@@ -90,6 +90,11 @@ namespace Hammock.Web
             }
         }
 
+        public virtual Byte[] ByteResponse
+        {
+            get; set;
+        }
+
         public virtual bool HasEntity { get; set; }
         public virtual byte[] PostContent { get; set; }
 
@@ -178,6 +183,8 @@ namespace Hammock.Web
             Result.ResponseLength = contentLength;
             Result.ResponseUri = responseUri;
             Result.Exception = e.Exception;
+            Result.ByteResponse = ByteResponse;
+            
         }
 
         [Conditional("TRACE")]
@@ -924,12 +931,30 @@ namespace Hammock.Web
             {
                 var response = request.GetResponse();
                 WebResponse = response;
-
+                
                 using (var stream = response.GetResponseStream())
                 {
-                    using (var reader = new StreamReader(stream))
+                    byte[] buffer = new byte[4096];
+
+                    string content;
+                    using (MemoryStream memoryStream = new MemoryStream())
                     {
-                        var result = reader.ReadToEnd();
+                        int count = 0;
+                        do
+                        {
+                            count = stream.Read(buffer, 0, buffer.Length);
+                            memoryStream.Write(buffer, 0, count);
+
+                        } while (count != 0);
+
+                        memoryStream.Position = 0;
+                        using (StreamReader sr = new StreamReader(memoryStream))
+                        {
+                            content = sr.ReadToEnd();
+                        }
+
+                        ByteResponse = memoryStream.ToArray();
+                        var result = content;
 
                         var responseArgs = new WebQueryResponseEventArgs(result);
                         OnQueryResponse(responseArgs);

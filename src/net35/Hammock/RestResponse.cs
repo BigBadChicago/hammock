@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using Hammock.Extensions;
 
@@ -14,6 +15,7 @@ namespace Hammock
 #endif
     public class RestResponseBase
     {
+        public virtual byte[] ByteResponse { get; set; }
         public virtual WebResponse InnerResponse { get; set; }
         public virtual WebException InnerException { get; set; }
         public virtual DateTime? RequestDate { get; set; }

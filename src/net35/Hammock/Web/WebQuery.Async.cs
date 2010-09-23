@@ -468,10 +468,14 @@ namespace Hammock.Web
             }
         }
 
-        private void StreamImpl(out Stream stream, 
-                               WebRequest request, WebResponse response, 
+        public delegate void NewStreamMessage(string message);
+        public event NewStreamMessage NewStreamMessageEvent;
+
+        private void StreamImpl(out Stream stream,
+                               WebRequest request, WebResponse response,
                                TimeSpan duration, int resultCount)
         {
+
             using (stream = response.GetResponseStream())
             {
                 if (stream == null)
@@ -479,76 +483,122 @@ namespace Hammock.Web
                     return;
                 }
 
+                this.NewStreamMessageEvent += new NewStreamMessage(WebQuery_NewStreamMessageEvent);
                 _isStreaming = true;
 
                 var count = 0;
                 var results = new List<string>();
                 var start = DateTime.UtcNow;
+                string bufferString = string.Empty;
 
-                using (var reader = new StreamReader(stream))
+                while (stream.CanRead)
                 {
-                    string line;
-
-                    while ((line = reader.ReadLine()).Length > 0)
+                    byte[] data = new byte[4096];
+                    int read;
+                    try
                     {
-                        if(!_isStreaming)
+                        while ((read = stream.Read(data, 0, data.Length)) > 0)
                         {
-                            // [DC] Streaming was cancelling out of band
+
+                            string readString = Encoding.UTF8.GetString(data, 0, read);
+                            bufferString = ProcessBuffer(bufferString + readString);
+                            if (!_isStreaming)
+                            {
+                                // [DC] Streaming was cancelling out of band
+                                EndStreaming(request);
+                                return;
+                            }
+
+                            if (readString.Equals(Environment.NewLine))
+                            {
+                                // Keep-Alive
+                                continue;
+                            }
+
+                            if (readString.Equals("<html>"))
+                            {
+                                // We're looking at a 401 or similar; construct error result?
+                                EndStreaming(request);
+                                return;
+                            }
+
+                            results.Add(readString);
+
+                            count++;
+                            if (count < resultCount)
+                            {
+                                // Result buffer
+                                continue;
+                            }
+
+                            var sb = new StringBuilder();
+                            foreach (var result in results)
+                            {
+                                sb.AppendLine(result);
+                            }
+
+                            results.Clear();
+
+                            count = 0;
+
+                            var now = DateTime.UtcNow;
+
+                            if (duration == new TimeSpan() || now.Subtract(start) < duration)
+                            {
+                                continue;
+                            }
+
+                            // Time elapsed
                             EndStreaming(request);
                             return;
                         }
-
-                        if (line.Equals(Environment.NewLine))
-                        {
-                            // Keep-Alive
-                            continue;
-                        }
-
-                        if (line.Equals("<html>"))
-                        {
-                            // We're looking at a 401 or similar; construct error result?
-                            EndStreaming(request);
-                            return;
-                        }
-
-                        results.Add(line);
-
-                        count++;
-                        if (count < resultCount)
-                        {
-                            // Result buffer
-                            continue;
-                        }
-
-                        var sb = new StringBuilder();
-                        foreach (var result in results)
-                        {
-                            sb.AppendLine(result);
-                        }
-
-                        var responseArgs = new WebQueryResponseEventArgs(sb.ToString());
-                        OnQueryResponse(responseArgs);
-                        results.Clear();
-
-                        count = 0;
-
-                        var now = DateTime.UtcNow;
-                        if (now.Subtract(start) < duration)
-                        {
-                            continue;
-                        }
-
-                        // Time elapsed
-                        EndStreaming(request);
-                        return;
                     }
-
+                    catch (Exception ex)
+                    {
+                        EndStreaming(request);
+                    }
                     // Stream dried up
+
                 }
                 EndStreaming(request);
             }
+
         }
 
+        void WebQuery_NewStreamMessageEvent(string message)
+        {
+            var responseArgs = new WebQueryResponseEventArgs(message);
+            OnQueryResponse(responseArgs);
+        }
+
+        private const char StreamResultDelimiter = '\r';
+        private string ProcessBuffer(string bufferString)
+        {
+            string buffer = bufferString;
+            int delimPos = buffer.IndexOf(StreamResultDelimiter);
+
+            while (delimPos >= 0)
+            {
+                string message = buffer.Substring(0, delimPos).Replace(StreamResultDelimiter.ToString(),"");
+                if (buffer.Length <= delimPos + 1)
+                {
+                    buffer = string.Empty;
+                }
+                else
+                {
+                    buffer = buffer.Substring(delimPos + 1);
+                }
+
+                if (message.Trim().Length > 1 && NewStreamMessageEvent != null)
+                {
+                    NewStreamMessageEvent(message);
+                }
+
+                delimPos = buffer.IndexOf(StreamResultDelimiter);
+            }
+
+            return buffer;
+        }
         private void EndStreaming(WebRequest request)
         {
             _isStreaming = false;

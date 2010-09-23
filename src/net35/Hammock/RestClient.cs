@@ -744,16 +744,31 @@ namespace Hammock
             var userState = tag.Third;
 
             string content;
+            MemoryStream m = new MemoryStream();
+
             using (var stream = webResponse.GetResponseStream())
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    content = reader.ReadToEnd();
+                    while (reader.Peek() >= 0)
+                    {
+                        m.WriteByte((byte)reader.Read());
+                    }
+                    
                 }
             }
+            m.Position = 0;
+            using (StreamReader reader = new StreamReader(m))
+            {
+                // Just read to the end.
+                content = reader.ReadToEnd();
+            }
+
+           
 
             var restResponse = new RestResponse<T>
                                    {
+                                       ByteResponse = m.ToArray(),
                                        Content = content,
                                        ContentType = webResponse.ContentType,
                                        ContentLength = webResponse.ContentLength,
@@ -801,16 +816,29 @@ namespace Hammock
             var userState = tag.Third;
 
             string content;
+            MemoryStream m = new MemoryStream();
+
             using (var stream = webResponse.GetResponseStream())
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    content = reader.ReadToEnd();
+                    while (reader.Peek() >= 0)
+                    {
+                        m.WriteByte((byte)reader.Read());
+                    }
+
                 }
+            }
+            m.Position = 0;
+            using (StreamReader reader = new StreamReader(m))
+            {
+                // Just read to the end.
+                content = reader.ReadToEnd();
             }
 
             var restResponse = new RestResponse
                                    {
+                                       ByteResponse = m.ToArray(),
                                        Content = content,
                                        ContentType = webResponse.ContentType,
                                        ContentLength = webResponse.ContentLength,
@@ -2108,6 +2136,7 @@ namespace Hammock
         private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
                 (response, result) =>
                 {
+                    response.ByteResponse = result.ByteResponse;
                     response.InnerResponse = result.WebResponse;
                     response.InnerException = result.Exception;
                     response.RequestDate = result.RequestDate;
@@ -2263,7 +2292,7 @@ namespace Hammock
             return entity;
         }
 
-        private WebQuery GetQueryFor(RestBase request, Uri uri)
+        public WebQuery GetQueryFor(RestBase request, Uri uri)
         {
             var method = GetWebMethod(request);
             var credentials = GetWebCredentials(request);

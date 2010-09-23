@@ -80,7 +80,7 @@ namespace Hammock
         public virtual Type ResponseEntityType { get; set; }
         public virtual Type RequestEntityType { get; set; }
 
-        protected internal Uri BuildEndpoint(RestClient client)
+        public Uri BuildEndpoint(RestClient client)
         {
             var sb = new StringBuilder();
 

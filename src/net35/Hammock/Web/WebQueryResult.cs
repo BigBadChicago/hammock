@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 
 namespace Hammock.Web
@@ -8,6 +9,7 @@ namespace Hammock.Web
 #endif
     public class WebQueryResult
     {
+        public virtual Byte[] ByteResponse { get; set; }
         // Set by WebQuery
         public virtual DateTime? RequestDate { get; set; }
         public virtual Uri RequestUri { get; set; }
