@@ -764,11 +764,9 @@ namespace Hammock
                 content = reader.ReadToEnd();
             }
 
-           
-
             var restResponse = new RestResponse<T>
                                    {
-                                       ByteResponse = m.ToArray(),
+                                       ResponseBytes = m.ToArray(),
                                        Content = content,
                                        ContentType = webResponse.ContentType,
                                        ContentLength = webResponse.ContentLength,
@@ -838,7 +836,6 @@ namespace Hammock
 
             var restResponse = new RestResponse
                                    {
-                                       ByteResponse = m.ToArray(),
                                        Content = content,
                                        ContentType = webResponse.ContentType,
                                        ContentLength = webResponse.ContentLength,
@@ -847,6 +844,7 @@ namespace Hammock
                                                         : 0,
                                        StatusDescription = restRequest.ExpectStatusDescription,
                                        ResponseUri = webResponse.ResponseUri,
+                                       ResponseBytes = m.ToArray(),
                                        IsMock = true
                                    };
 
@@ -2136,7 +2134,6 @@ namespace Hammock
         private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
                 (response, result) =>
                 {
-                    response.ByteResponse = result.ByteResponse;
                     response.InnerResponse = result.WebResponse;
                     response.InnerException = result.Exception;
                     response.RequestDate = result.RequestDate;
@@ -2145,6 +2142,7 @@ namespace Hammock
                     response.RequestKeptAlive = result.RequestKeptAlive;
                     response.ResponseDate = result.ResponseDate;
                     response.ResponseUri = result.ResponseUri;
+                    response.ResponseBytes = result.ByteResponse;
                     response.StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode;
                     response.StatusDescription = result.ResponseHttpStatusDescription;
                     response.Content = result.Response;

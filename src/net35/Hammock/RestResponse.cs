@@ -15,11 +15,11 @@ namespace Hammock
 #endif
     public class RestResponseBase
     {
-        public virtual byte[] ByteResponse { get; set; }
         public virtual WebResponse InnerResponse { get; set; }
         public virtual WebException InnerException { get; set; }
         public virtual DateTime? RequestDate { get; set; }
         public virtual DateTime? ResponseDate { get; set; }
+        public virtual byte[] ResponseBytes { get; set; }
         public virtual string RequestMethod { get; set; }
         public virtual bool RequestKeptAlive { get; set; }
         public virtual HttpStatusCode StatusCode { get; set; }
