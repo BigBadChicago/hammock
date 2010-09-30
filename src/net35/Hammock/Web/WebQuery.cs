@@ -753,6 +753,8 @@ namespace Hammock.Web
 
         protected abstract void AuthenticateRequest(WebRequest request);
 
+        public abstract string GetAuthorizationContent();
+
         private static string CreateCacheKey(string prefix, string url)
         {
             return !prefix.IsNullOrBlank() ? "{0}_{1}".FormatWith(prefix, url) : url;

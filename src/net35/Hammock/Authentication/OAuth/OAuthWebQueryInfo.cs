@@ -1,4 +1,3 @@
-using System;
 using Hammock.Attributes.Specialized;
 using Hammock.Web;
 

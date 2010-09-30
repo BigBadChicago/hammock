@@ -27,50 +27,68 @@ namespace Hammock.Authentication.OAuth
         public virtual string CallbackUrl { get; set; }
         public virtual string Version { get; set; }
 
-        public virtual WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method)
+        public OAuthCredentials()
+        {
+            
+        }
+
+        /// <summary>
+        /// A copy constructor for creating a credentials instance 
+        /// </summary>
+        /// <param name="workflow"></param>
+        public virtual WebQuery GetQueryFor(string url, 
+                                            WebParameterCollection parameters, 
+                                            IWebQueryInfo info, 
+                                            WebMethod method)
         {
             OAuthWebQueryInfo oauth;
 
             var workflow = new OAuthWorkflow
-                               {
-                                   ConsumerKey = ConsumerKey,
-                                   ConsumerSecret = ConsumerSecret,
-                                   ParameterHandling = ParameterHandling,
-                                   SignatureMethod = SignatureMethod,
-                                   SignatureTreatment = SignatureTreatment,
-                                   CallbackUrl = CallbackUrl,
-                                   ClientPassword = ClientPassword,
-                                   ClientUsername = ClientUsername,
-                                   Verifier = Verifier, 
-                                   Token = Token, 
-                                   TokenSecret = TokenSecret,
-                                   Version = Version ?? "1.0"
-                               };
+            {
+                ConsumerKey = ConsumerKey,
+                ConsumerSecret = ConsumerSecret,
+                ParameterHandling = ParameterHandling,
+                SignatureMethod = SignatureMethod,
+                SignatureTreatment = SignatureTreatment,
+                CallbackUrl = CallbackUrl,
+                ClientPassword = ClientPassword,
+                ClientUsername = ClientUsername,
+                Verifier = Verifier,
+                Token = Token,
+                TokenSecret = TokenSecret,
+                Version = Version ?? "1.0"
+            };
 
-            switch(Type)
+            switch (Type)
             {
                 case OAuthType.RequestToken:
                     workflow.RequestTokenUrl = url;
-                    oauth = workflow.BuildRequestTokenInfo(method, request.Parameters);
+                    oauth = workflow.BuildRequestTokenInfo(method, parameters);
                     break;
                 case OAuthType.AccessToken:
                     workflow.AccessTokenUrl = url;
-                    oauth = workflow.BuildAccessTokenInfo(method, request.Parameters);
+                    oauth = workflow.BuildAccessTokenInfo(method, parameters);
                     break;
                 case OAuthType.ClientAuthentication:
-                    request.Method = WebMethod.Post;
                     method = WebMethod.Post;
                     workflow.AccessTokenUrl = url;
-                    oauth = workflow.BuildClientAuthAccessTokenInfo(method, request.Parameters);
+                    oauth = workflow.BuildClientAuthAccessTokenInfo(method, parameters);
                     break;
                 case OAuthType.ProtectedResource:
-                    oauth = workflow.BuildProtectedResourceInfo(method, request.Parameters, url);
+                    oauth = workflow.BuildProtectedResourceInfo(method, parameters, url);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
             return new OAuthWebQuery(oauth);
+        }
+
+        public virtual WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method)
+        {
+            var query = GetQueryFor(url, request.Parameters, info, method);
+            request.Method = method;
+            return query;
         }
     }
 }

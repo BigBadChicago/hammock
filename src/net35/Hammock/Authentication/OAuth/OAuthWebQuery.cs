@@ -311,7 +311,19 @@ namespace Hammock.Authentication.OAuth
             }
         }
 
-
+        public override string GetAuthorizationContent()
+        {
+            switch (ParameterHandling)
+            {
+                case OAuthParameterHandling.HttpAuthorizationHeader:
+                    return GetAuthorizationHeader();
+                case OAuthParameterHandling.UrlOrPostParameters:
+                    return GetPostParametersValue(Parameters, false /* escapeParameters */);
+                default:
+                    return "";
+            }
+        }
+        
         protected override void SetAuthorizationHeader(WebRequest request, string header)
         {
             var authorization = GetAuthorizationHeader();

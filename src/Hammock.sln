@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.WindowsPhone", "net
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZipLib.WindowsPhone", "net40\ICSharpCode.SharpZipLib.WindowsPhone\ICSharpCode.SharpZipLib.WindowsPhone.csproj", "{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.WindowsPhone", "Demo.WindowsPhone\Demo.WindowsPhone.csproj", "{FFC49292-C364-4381-A380-407ABB796F6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		ClientProfiles|Any CPU = ClientProfiles|Any CPU
@@ -181,6 +183,18 @@ Global
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Mono|Any CPU.Build.0 = Release|Any CPU
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.ClientProfiles|Any CPU.ActiveCfg = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.ClientProfiles|Any CPU.Build.0 = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.ClientProfiles|Any CPU.Deploy.0 = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Mono|Any CPU.ActiveCfg = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Mono|Any CPU.Build.0 = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Mono|Any CPU.Deploy.0 = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFC49292-C364-4381-A380-407ABB796F6C}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
