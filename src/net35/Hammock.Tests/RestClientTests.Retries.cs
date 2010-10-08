@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net; 
 using Hammock.Retries;
 using NUnit.Framework;
 
@@ -18,18 +19,18 @@ namespace Hammock.Tests
             var client = new RestClient
                              {
                                  RetryPolicy = retryPolicy,
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1"
+                                 Authority = "http://empty-journey-80.heroku.com",
                              };
 
             var request = new RestRequest
                               {
-                                  Path = "statuses/home_timeline.json",
-                                  Credentials = BasicAuthForTwitter
+                                  Path = "/",
+                                  Credentials = BasicAuthForTestService
                               };
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         public class IsFour : RetryCustomCondition<int>
@@ -69,7 +70,7 @@ namespace Hammock.Tests
             var request = new RestRequest
             {
                 Path = "statuses/home_timeline.json",
-                Credentials = BasicAuthForTwitter
+                Credentials = OAuthForTwitterProtectedResource
             };
 
             var response = client.Request(request);

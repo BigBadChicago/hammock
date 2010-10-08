@@ -28,7 +28,7 @@ namespace Hammock.Tests
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 Path = "statuses/sample.json",
                 StreamOptions = options
             };
@@ -67,7 +67,7 @@ namespace Hammock.Tests
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 Path = "statuses/sample.json",
                 StreamOptions = options,
                 Method = WebMethod.Post
@@ -107,7 +107,7 @@ namespace Hammock.Tests
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 Path = "statuses/sample.json",
                 StreamOptions = options
             };

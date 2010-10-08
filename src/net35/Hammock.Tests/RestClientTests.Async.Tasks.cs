@@ -58,7 +58,7 @@ namespace Hammock.Tests
             {
                 Authority = "http://api.twitter.com",
                 VersionPath = "1",
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 Serializer = serializer,
                 Deserializer = serializer
             };
@@ -109,7 +109,7 @@ namespace Hammock.Tests
             {
                 Authority = "http://api.twitter.com",
                 VersionPath = "1",
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 Serializer = serializer,
                 Deserializer = serializer
             };
@@ -170,7 +170,7 @@ namespace Hammock.Tests
             {
                 Authority = "http://api.twitter.com",
                 VersionPath = "1",
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 Serializer = serializer,
                 Deserializer = serializer
             };

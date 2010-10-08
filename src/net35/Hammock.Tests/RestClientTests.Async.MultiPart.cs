@@ -19,7 +19,7 @@ namespace Hammock.Tests
             {
                 Authority = "http://api.twitter.com",
                 VersionPath = "1",
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 UserAgent = "Hammock",
             };
 
@@ -46,7 +46,7 @@ namespace Hammock.Tests
             {
                 Authority = "http://api.twitter.com",
                 VersionPath = "1",
-                Credentials = BasicAuthForTwitter,
+                Credentials = OAuthForTwitterProtectedResource,
                 UserAgent = "Hammock"
             };
 

@@ -13,8 +13,7 @@ namespace Hammock.Tests
         {
             var client = new RestClient
                              {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1",
+                                 Authority = "http://empty-journey-80.heroku.com",
                                  Cache = CacheFactory.AspNetCache,
                                  CacheKeyFunction = () => _twitterUsername,
                                  CacheOptions = new CacheOptions
@@ -26,8 +25,8 @@ namespace Hammock.Tests
 
             var request = new RestRequest
                               {
-                                  Credentials = BasicAuthForTwitter,
-                                  Path = "statuses/home_timeline.json",
+                                  Credentials = BasicAuthForTestService,
+                                  Path = "/",
                                   CacheKeyFunction = () => _twitterUsername + "asynctest"
                               };
 

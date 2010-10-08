@@ -62,14 +62,14 @@ namespace Hammock.Tests
             }
         }
 
-        public IWebCredentials BasicAuthForTwitter
+        public IWebCredentials BasicAuthForTestService
         {
             get
             {
                 var credentials = new BasicAuthCredentials
                                       {
-                                          Username = _twitterUsername,
-                                          Password = _twitterPassword
+                                          Username = "hammockuser",
+                                          Password = "GloriousRest"
                                       };
                 return credentials;
             }
@@ -80,18 +80,18 @@ namespace Hammock.Tests
         {
             var client = new RestClient
                              {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1"
+                                 Authority = "http://empty-journey-80.heroku.com",
                              };
 
             var request = new RestRequest
                               {
-                                  Credentials = BasicAuthForTwitter,
-                                  Path = "statuses/home_timeline.json"
+                                  Credentials = BasicAuthForTestService,
+                                  Path = "/"
                               };
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
         }
 
         [Test]
@@ -147,8 +147,7 @@ namespace Hammock.Tests
         {
             var client = new RestClient
                              {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1",
+                                 Authority = "http://empty-journey-80.heroku.com",
                                  UserAgent = "Hammock"
                              };
 
@@ -156,14 +155,15 @@ namespace Hammock.Tests
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
-                Path = "/statuses/home_timeline.json"
+                Credentials = BasicAuthForTestService,
+                Path = "/"
             };
 
             request.AddHeader("Only", "on this request");
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
         }
 
         [Test]
@@ -171,14 +171,13 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
-                VersionPath = "1",
+                Authority = "http://empty-journey-80.heroku.com",
                 UserAgent = "Hammock"
             };
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
+                Credentials = BasicAuthForTestService,
                 Path = "/statuses/home_timeline.json"
             };
 
@@ -188,6 +187,7 @@ namespace Hammock.Tests
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
         }
 
         [Test]
@@ -195,15 +195,14 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
-                VersionPath = "1",
+                Authority = "http://empty-journey-80.heroku.com",
                 UserAgent = "Hammock"
             };
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
-                Path = "/statuses/home_timeline.json"
+                Credentials = BasicAuthForTestService,
+                Path = "/"
             };
 
             client.AddParameter("client", "true");
@@ -211,6 +210,7 @@ namespace Hammock.Tests
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
         }
 
         [Test]
@@ -218,15 +218,14 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
-                VersionPath = "1",
+                Authority = "http://empty-journey-80.heroku.com",
                 UserAgent = "Hammock"
             };
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
-                Path = "/statuses/home_timeline.json"
+                Credentials = BasicAuthForTestService,
+                Path = "/"
             };
 
             // Since parameters should be unique, request should trump client
@@ -236,6 +235,7 @@ namespace Hammock.Tests
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
@@ -249,15 +249,14 @@ namespace Hammock.Tests
 
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
-                VersionPath = "1",
+                Authority = "http://empty-journey-80.heroku.com",
                 UserAgent = "Hammock"
             };
 
             var request = new RestRequest
             {
-                Credentials = BasicAuthForTwitter,
-                Path = "/statuses/update.json",
+                Credentials = BasicAuthForTestService,
+                Path = "/posty",
                 Method = WebMethod.Post
             };
 
@@ -265,6 +264,7 @@ namespace Hammock.Tests
             
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
         }
 
         [Test]
@@ -331,9 +331,8 @@ namespace Hammock.Tests
         {
             var client = new RestClient
                              {
-                                 Authority = "http://api.twitter.com",
-                                 VersionPath = "1",
-                                 Path = "statuses/public_timeline.json"
+                                 Authority = "http://empty-journey-80.heroku.com",
+                                 Path = "/"
                              };
 
             var response = client.Request();
