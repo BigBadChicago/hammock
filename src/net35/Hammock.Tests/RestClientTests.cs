@@ -178,7 +178,7 @@ namespace Hammock.Tests
             var request = new RestRequest
             {
                 Credentials = BasicAuthForTestService,
-                Path = "/statuses/home_timeline.json"
+                Path = "/"
             };
 
             // Headers don't have to have unique names
@@ -332,7 +332,7 @@ namespace Hammock.Tests
             var client = new RestClient
                              {
                                  Authority = "http://empty-journey-80.heroku.com",
-                                 Path = "/"
+                                 Path = "/ping"
                              };
 
             var response = client.Request();

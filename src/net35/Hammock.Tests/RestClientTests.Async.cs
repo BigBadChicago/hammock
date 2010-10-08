@@ -45,7 +45,7 @@ namespace Hammock.Tests
             var client = new RestClient
             {
                 Credentials = BasicAuthForTestService,
-                Authority = "http://emtpy-journey-80.heroku.com",
+                Authority = "http://empty-journey-80.heroku.com",
             };
 
             var request = new RestRequest
@@ -76,7 +76,7 @@ namespace Hammock.Tests
             var client = new RestClient
             {
                 Credentials = BasicAuthForTestService,
-                Authority = "http://empty-jouney-80.heroku.com"
+                Authority = "http://empty-journey-80.heroku.com"
             };
 
             var request = new RestRequest

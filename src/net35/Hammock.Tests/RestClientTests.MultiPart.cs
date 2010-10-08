@@ -21,7 +21,7 @@ namespace Hammock.Tests
 
             var request = new RestRequest
             {
-                Path = "/"
+                Path = "/posty"
             };
 
             request.AddField("email", "bob@example.com");
