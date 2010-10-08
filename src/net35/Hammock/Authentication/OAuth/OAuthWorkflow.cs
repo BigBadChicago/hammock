@@ -64,6 +64,33 @@ namespace Hammock.Authentication.OAuth
             return BuildRequestTokenInfo(method, null);
         }
 
+        public OAuthWorkflow()
+        {
+            
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="OAuthWorkflow" /> using
+        /// an <see cref="OAuthCredentials" /> instance.
+        /// </summary>
+        /// <param name="credentials">The credentials to copy</param>
+        public OAuthWorkflow(OAuthCredentials credentials)
+        {
+            ConsumerKey = credentials.ConsumerKey;
+            ConsumerSecret = credentials.ConsumerSecret;
+            ParameterHandling = credentials.ParameterHandling;
+            SignatureMethod = credentials.SignatureMethod;
+            SignatureTreatment = credentials.SignatureTreatment;
+
+            Token = credentials.Token;
+            TokenSecret = credentials.TokenSecret;
+            Verifier = credentials.Verifier;
+            ClientUsername = credentials.ClientUsername;
+            ClientPassword = credentials.ClientPassword;
+            CallbackUrl = credentials.CallbackUrl;
+            Version = credentials.Version;
+        }
+
         /// <summary>
         /// Generates a <see cref="OAuthWebQueryInfo"/> instance to pass to an
         /// <see cref="OAuthWebQuery" /> for the purpose of requesting an
@@ -268,7 +295,9 @@ namespace Hammock.Authentication.OAuth
 
             // [DC] Escape parameters at this point; do not escape again if recalculating
             var signatureBase = OAuthTools.ConcatenateRequestElements(method, url, copy);
-            var signature = OAuthTools.GetSignature(SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret, TokenSecret);
+            var signature = OAuthTools.GetSignature(
+                SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret, TokenSecret
+                );
 
             var info = new OAuthWebQueryInfo
                            {

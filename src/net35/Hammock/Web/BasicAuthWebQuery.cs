@@ -46,7 +46,7 @@ namespace Hammock.Web
                 return;
             }
 
-            var credentials = WebExtensions.ToBasicAuthorizationHeader(_username, _password);
+            string credentials = GetAuthorizationHeader();
             AuthorizationHeader = header;
 
 #if !SILVERLIGHT || WindowsPhone
@@ -63,9 +63,19 @@ namespace Hammock.Web
 #endif
         }
 
+        private string GetAuthorizationHeader()
+        {
+            return WebExtensions.ToBasicAuthorizationHeader(_username, _password);
+        }
+
         protected override void AuthenticateRequest(WebRequest request)
         {
             SetAuthorizationHeader(request, "Authorization");
+        }
+
+        public override string GetAuthorizationContent()
+        {
+            return GetAuthorizationHeader();
         }
     }
 }

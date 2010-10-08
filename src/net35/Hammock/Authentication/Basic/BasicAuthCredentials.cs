@@ -17,6 +17,16 @@ namespace Hammock.Authentication.Basic
                                     IWebQueryInfo info, 
                                     WebMethod method)
         {
+            return GetQueryForImpl(info);
+        }
+
+        public WebQuery GetQueryFor(string url, WebParameterCollection parameters, IWebQueryInfo info, WebMethod method)
+        {
+            return GetQueryForImpl(info);
+        }
+
+        private WebQuery GetQueryForImpl(IWebQueryInfo info)
+        {
             return HasAuth
                        ? new BasicAuthWebQuery(info, Username, Password)
                        : new BasicAuthWebQuery(info);
