@@ -872,6 +872,7 @@ namespace Hammock.Web
             byte[] content;
 
             var request = BuildMultiPartFormRequest(method, url, parameters, out content);
+
             var state = new Triplet<WebRequest, byte[], object>
                             {
                                 First = request,

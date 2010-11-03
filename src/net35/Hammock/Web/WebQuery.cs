@@ -974,9 +974,11 @@ namespace Hammock.Web
         }
 #endif
         protected virtual WebRequest BuildMultiPartFormRequest(PostOrPut method, string url,
-                                                                   IEnumerable<HttpPostParameter> parameters,
-                                                                   out byte[] bytes)
+                                                               IEnumerable<HttpPostParameter> parameters,
+                                                               out byte[] bytes)
         {
+            url = AppendParameters(url);
+
             var boundary = Guid.NewGuid().ToString();
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
