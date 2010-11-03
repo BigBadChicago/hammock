@@ -1004,6 +1004,14 @@ namespace Hammock.Web
             var request = BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions.Get, url);
             var state = OnGetStreamQueryRequest(url, request, duration, resultCount);
 
+#if SILVERLIGHT
+            HttpWebRequest httpRequest = request as HttpWebRequest;
+            if (httpRequest != null)
+            {
+                httpRequest.AllowReadStreamBuffering = false;
+            }
+#endif
+
             var inner = request.BeginGetResponse(AsyncStreamCallback, state);
             var result = new WebQueryAsyncResult { InnerResult = inner };
             return result;
@@ -1053,6 +1061,14 @@ namespace Hammock.Web
             byte[] content;
             var request = BuildPostOrPutWebRequest(PostOrPut.Post, url, out content);
             var state = OnPostStreamQueryRequest(url, request, content, duration, resultCount);
+
+#if SILVERLIGHT
+            HttpWebRequest httpRequest = request as HttpWebRequest;
+            if (httpRequest != null)
+            {
+                httpRequest.AllowReadStreamBuffering = false;
+            }
+#endif
 
             var inner = request.BeginGetRequestStream(PostAsyncStreamRequestCallback, state);
             var result = new WebQueryAsyncResult { InnerResult = inner };
