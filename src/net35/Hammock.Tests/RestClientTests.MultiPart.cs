@@ -14,21 +14,21 @@ namespace Hammock.Tests
 
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
-                VersionPath = "1",
-                Credentials = BasicAuthForTwitter,
+                Authority = "http://empty-journey-80.heroku.com",
+                Credentials = BasicAuthForTestService,
                 UserAgent = "Hammock"
             };
 
             var request = new RestRequest
             {
-                Path = "account/update_profile_image.json"
+                Path = "/posty"
             };
 
             request.AddField("email", "bob@example.com");
 
             var response = client.Request(request);
             Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace Hammock.Tests
                              {
                                  Authority = "http://api.twitter.com",
                                  VersionPath = "1",
-                                 Credentials = BasicAuthForTwitter,
+                                 Credentials = OAuthForTwitterProtectedResource,
                                  UserAgent = "Hammock"
                              };
 

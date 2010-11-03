@@ -48,14 +48,13 @@ namespace Hammock.Tests
             var client = new RestClient
             {
                 RetryPolicy = retryPolicy,
-                Authority = "http://api.twitter.com",
-                VersionPath = "1"
+                Authority = "http://empty-journey-80.heroku.com"
             };
 
             var request = new RestRequest
             {
-                Path = "statuses/home_timeline.json",
-                Credentials = BasicAuthForTwitter
+                Path = "/",
+                Credentials = BasicAuthForTestService
             };
 
             var asyncResult = client.BeginRequest(request);
@@ -83,7 +82,7 @@ namespace Hammock.Tests
             var request = new RestRequest
             {
                 Path = "statuses/home_timeline.json",
-                Credentials = BasicAuthForTwitter
+                Credentials = OAuthForTwitterProtectedResource
             };
 
             var asyncResult = client.BeginRequest(request);
@@ -112,7 +111,7 @@ namespace Hammock.Tests
             var request = new RestRequest
             {
                 Path = "statuses/home_timeline.json",
-                Credentials = BasicAuthForTwitter
+                Credentials = OAuthForTwitterProtectedResource
             };
 
             var asyncResult = client.BeginRequest(request);

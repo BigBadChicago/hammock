@@ -14,14 +14,13 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Credentials = BasicAuthForTwitter,
-                Authority = "http://api.twitter.com",
-                VersionPath = "1"
+                Credentials = BasicAuthForTestService,
+                Authority = "http://empty-journey-80.heroku.com"
             };
 
             var request = new RestRequest
             {
-                Path = "statuses/home_timeline.json"
+                Path = "/"
             };
 
             var callback = new RestCallback(
@@ -45,14 +44,13 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Credentials = BasicAuthForTwitter,
-                Authority = "http://api.twitter.com",
-                VersionPath = "1"
+                Credentials = BasicAuthForTestService,
+                Authority = "http://empty-journey-80.heroku.com",
             };
 
             var request = new RestRequest
             {
-                Path = "statuses/home_timeline.json"
+                Path = "/"
             };
 
             var callback = new RestCallback(
@@ -77,14 +75,13 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Credentials = BasicAuthForTwitter,
-                Authority = "http://api.twitter.com",
-                VersionPath = "1"
+                Credentials = BasicAuthForTestService,
+                Authority = "http://empty-journey-80.heroku.com"
             };
 
             var request = new RestRequest
             {
-                Path = "statuses/home_timeline.json"
+                Path = "/"
             };
 
             client.AddHeader("Always", "on the client");
