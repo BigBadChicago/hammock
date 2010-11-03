@@ -612,13 +612,19 @@ namespace Hammock.Web
 
         protected virtual string AppendParameters(string url)
         {
-            var parameters = 0;
-            foreach (var parameter in Parameters.Where(parameter => !(parameter is HttpPostParameter) || Method == WebMethod.Post))
+            var count = 0;
+
+            var parameters = Parameters.Where(
+                parameter => !(parameter is HttpPostParameter) || Method == WebMethod.Post).Where(
+                parameter => !string.IsNullOrEmpty(parameter.Name) && !string.IsNullOrEmpty(parameter.Value)
+                );
+
+            foreach (var parameter in parameters)
             {
                 // GET parameters in URL
-                url = url.Then(parameters > 0 || url.Contains("?") ? "&" : "?");
+                url = url.Then(count > 0 || url.Contains("?") ? "&" : "?");
                 url = url.Then("{0}={1}".FormatWith(parameter.Name, parameter.Value.UrlEncode()));
-                parameters++;
+                count++;
             }
 
             return url;
