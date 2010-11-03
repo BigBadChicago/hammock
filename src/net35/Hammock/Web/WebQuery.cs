@@ -28,6 +28,7 @@ namespace Hammock.Web
     {
         private static readonly object _sync = new object();
 
+        public virtual Encoding Encoding { get; protected internal set; }
         public virtual IWebQueryInfo Info { get; protected set; }
         public virtual string UserAgent { get; protected internal set; }
         public virtual WebHeaderCollection Headers { get; protected set; }
@@ -341,6 +342,7 @@ namespace Hammock.Web
             url = AppendParameters(url);
 
             var request = WebRequest.Create(url);
+
 #if SILVERLIGHT && !WindowsPhone
             var httpMethod = method.ToUpper();
             if (HasElevatedPermissions)
@@ -996,11 +998,12 @@ namespace Hammock.Web
 
             HandleRequestMeta(request);
 
-#if !Smartphone 
-            var encoding = Encoding.GetEncoding("iso-8859-1");
+#if !Smartphone
+            var encoding = Encoding ?? Encoding.GetEncoding("ISO-8859-1");
 #else
-            var encoding =  Encoding.GetEncoding(1252);
+            var encoding = Encoding ?? Encoding.GetEncoding(1252);
 #endif
+
             // [DC]: This will need to be refactored for larger uploads
             var contents = BuildMultiPartFormRequestParameters(encoding, boundary, parameters);
             var payload = contents.ToString();

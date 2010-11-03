@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Model;
@@ -27,6 +28,7 @@ namespace Hammock
         private TaskOptions _taskOptions;
         private RetryPolicy _retryPolicy;
 
+        protected internal virtual Encoding Encoding { get; set; }
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
         protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }

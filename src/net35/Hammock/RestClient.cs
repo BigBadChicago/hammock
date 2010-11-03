@@ -496,6 +496,12 @@ namespace Hammock
             return policy;
         }
 
+        private Encoding GetEncoding(RestBase request)
+        {
+            var encoding = request.Encoding ?? Encoding;
+            return encoding;
+        }
+
 #if !SILVERLIGHT
         private bool GetFollowRedirects(RestBase request)
         {
@@ -2238,6 +2244,8 @@ namespace Hammock
             query.RequestTimeout = GetTimeout(request);
             query.DecompressionMethods = request.DecompressionMethods | DecompressionMethods;
             query.PostContent = GetPostContent(request);
+            query.Encoding = GetEncoding(request);
+
 #if !SILVERLIGHT
             query.FollowRedirects = GetFollowRedirects(request);
 #endif
