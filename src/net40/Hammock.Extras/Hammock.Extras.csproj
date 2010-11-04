@@ -65,8 +65,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\net35\Hammock.Extras\HammockJsonDotNetSerializer.cs">
-      <Link>HammockJsonDotNetSerializer.cs</Link>
+    <Compile Include="..\..\net35\Hammock.Extras\Serialization\HammockJsonSerializer.cs">
+      <Link>Serialization\HammockJsonSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock.Extras\Serialization\HammockXmlSerializer.cs">
+      <Link>Serialization\HammockXmlSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock.Extras\Serialization\JsonConventionResolver.cs">
+      <Link>Serialization\JsonConventionResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock.Extras\Serialization\SerializerBase.cs">
+      <Link>Serialization\SerializerBase.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

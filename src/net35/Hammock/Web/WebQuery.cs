@@ -832,16 +832,15 @@ namespace Hammock.Web
             WebException ex = null;
             var ret = ExecuteWithCache(cache, url, key, (c, u) => ExecuteGetDeleteHeadOptions(method, cache, url, key, out ex));
             exception = ex;
-            return ret; 
-
+            return ret;
         }
 
         protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
-                                                    string url, 
-                                                    string key, 
-                                                    ICache cache, 
-                                                    DateTime absoluteExpiration, 
-                                                    out WebException exception)
+                                                             string url, 
+                                                             string key, 
+                                                             ICache cache, 
+                                                             DateTime absoluteExpiration, 
+                                                             out WebException exception)
         {
             WebException ex = null; 
             var ret = ExecuteWithCacheAndAbsoluteExpiration(cache, url, key, absoluteExpiration,

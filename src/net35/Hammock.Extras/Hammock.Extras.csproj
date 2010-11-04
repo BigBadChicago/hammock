@@ -72,8 +72,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HammockJsonDotNetSerializer.cs" />
+    <Compile Include="Serialization\JsonConventionResolver.cs" />
+    <Compile Include="Serialization\HammockJsonSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\SerializerBase.cs" />
+    <Compile Include="Serialization\HammockXmlSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Hammock\Hammock.csproj">
