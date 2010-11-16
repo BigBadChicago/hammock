@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
-using Hammock.Extras;
 using Hammock.Tasks;
 using Hammock.Tests.Helpers;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using JsonSerializer = Hammock.Extras.Serialization.JsonSerializer;
 
 namespace Hammock.Tests
 {
@@ -52,7 +52,7 @@ namespace Hammock.Tests
             };
 
             var settings = GetSerializerSettings();
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {
@@ -103,7 +103,7 @@ namespace Hammock.Tests
                                   };
 
             var settings = GetSerializerSettings();
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {
@@ -164,7 +164,7 @@ namespace Hammock.Tests
             };
 
             var settings = GetSerializerSettings();
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {

@@ -1,9 +1,20 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Hammock.Extras.Serialization
 {
     public class JsonSerializer : SerializerBase
     {
+        public JsonSerializer()
+        {
+            
+        }
+
+        public JsonSerializer(JsonSerializerSettings settings) : base(settings)
+        {
+            
+        }
+
         public override T Deserialize<T>(string content)
         {
             return DeserializeJson<T>(content);

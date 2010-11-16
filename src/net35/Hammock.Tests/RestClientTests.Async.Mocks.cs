@@ -1,6 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
-using Hammock.Extras;
+using Hammock.Extras.Serialization;
 using Hammock.Tests.Postmark;
 using NUnit.Framework;
 
@@ -28,7 +28,7 @@ namespace Hammock.Tests
                                                 }
             };
 
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {

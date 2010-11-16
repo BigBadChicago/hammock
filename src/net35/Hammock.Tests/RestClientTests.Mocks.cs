@@ -1,6 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
-using Hammock.Extras;
+using Hammock.Extras.Serialization;
 using Hammock.Tests.Postmark;
 using Hammock.Web;
 using NUnit.Framework;
@@ -28,7 +28,7 @@ namespace Hammock.Tests
                                                 }
             };
 
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {
@@ -71,7 +71,7 @@ namespace Hammock.Tests
         public void Can_request_mock_response_without_request_entity()
         {
             var settings = GetSerializerSettings();
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
                              {

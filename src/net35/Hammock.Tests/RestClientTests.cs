@@ -11,6 +11,7 @@ using Hammock.Tests.Postmark.Converters;
 using Hammock.Web;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using JsonSerializer = Hammock.Extras.Serialization.JsonSerializer;
 
 namespace Hammock.Tests
 {
@@ -122,7 +123,7 @@ namespace Hammock.Tests
         {
             // http://tinyurl.com/api-create.php?url=
 
-            var url = "http://hammock.codeplex.com";
+            const string url = "http://hammock.codeplex.com";
 
             var client = new RestClient
             {
@@ -272,6 +273,7 @@ namespace Hammock.Tests
         public void Can_make_basic_auth_request_post_with_json_entity_synchronously()
         {
             var settings = GetSerializerSettings();
+
             var message = new PostmarkMessage
                               {
                                   From = _postmarkFromAddress,
@@ -285,7 +287,7 @@ namespace Hammock.Tests
                                                 }
                               };
 
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {
@@ -344,7 +346,7 @@ namespace Hammock.Tests
         public void Can_use_client_standalone_with_type_sequentially()
         {
             var settings = GetSerializerSettings();
-            var serializer = new JsonDotNetSerializer(settings);
+            var serializer = new JsonSerializer(settings);
 
             var client = new RestClient
             {
