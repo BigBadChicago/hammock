@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Hammock.Authentication;
@@ -28,8 +29,21 @@ namespace Hammock
         private TaskOptions _taskOptions;
         private RetryPolicy _retryPolicy;
 
-        protected internal virtual Encoding Encoding { get; set; }
+        public WebParameterCollection GetAllHeaders()
+        {
+            var headers = new WebParameterCollection();
+            
+            var parameters = Headers.AllKeys.Select(key => new WebPair(key, Headers[key]));
+            foreach (var parameter in parameters)
+            {
+                headers.Add(parameter.Name, parameter.Value);
+            }
+
+            return headers;
+        }
+
         protected virtual internal NameValueCollection Headers { get; set; }
+        protected virtual internal Encoding Encoding { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
         protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }
         protected virtual internal byte[] PostContent
@@ -115,7 +129,6 @@ namespace Hammock
                 return true; 
             }
         }
-
         
         public virtual ITaskState TaskState { get; set; }
         public virtual ITaskState RetryState { get; set; }

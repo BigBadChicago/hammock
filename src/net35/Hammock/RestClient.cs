@@ -750,7 +750,7 @@ namespace Hammock
             var userState = tag.Third;
 
             string content;
-            MemoryStream m = new MemoryStream();
+            var m = new MemoryStream();
 
             using (var stream = webResponse.GetResponseStream())
             {
@@ -764,7 +764,7 @@ namespace Hammock
                 }
             }
             m.Position = 0;
-            using (StreamReader reader = new StreamReader(m))
+            using (var reader = new StreamReader(m))
             {
                 // Just read to the end.
                 content = reader.ReadToEnd();
