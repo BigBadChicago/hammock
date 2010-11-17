@@ -553,7 +553,7 @@ namespace Hammock.Web
                             return;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         EndStreaming(request);
                     }

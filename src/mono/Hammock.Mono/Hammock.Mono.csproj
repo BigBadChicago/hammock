@@ -163,6 +163,12 @@
     <Compile Include="..\..\net35\Hammock\Tasks\IRateLimitStatus.cs" />
     <Compile Include="..\..\net35\Hammock\Tasks\ITaskState.cs" />
     <Compile Include="..\..\net35\Hammock\Tasks\TaskState.cs" />
+    <Compile Include="..\..\net35\Hammock\Mono\HttpUtility.cs">
+      <Link>HttpUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Mono\WebHeaderCollection.cs">
+      <Link>WebHeaderCollection.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
