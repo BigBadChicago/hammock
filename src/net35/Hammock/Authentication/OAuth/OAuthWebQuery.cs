@@ -122,6 +122,10 @@ namespace Hammock.Authentication.OAuth
             var request = WebRequest.Create(url);
 #if SILVERLIGHT
             var httpMethod = method.ToUpper();
+
+#if WindowsPhone
+            HasElevatedPermissions = true;
+#endif
             if (HasElevatedPermissions)
             {
                 request.Method = httpMethod;

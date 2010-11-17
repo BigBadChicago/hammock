@@ -24,11 +24,11 @@ namespace Hammock.Silverlight.Compat
         public override Stream GetResponseStream()
         {
             Stream compressed = null;
-            if (_response.Headers["Accept-Encoding"].Contains("gzip"))
+            if (_response.Headers["Accept-Encoding"] != null && _response.Headers["Accept-Encoding"].Contains("gzip"))
             {
                 compressed = new GZipInputStream(_response.GetResponseStream());
             }
-            else if (_response.Headers["Accept-Encoding"].Contains("deflate"))
+            else if (_response.Headers["Accept-Encoding"] != null && _response.Headers["Accept-Encoding"].Contains("deflate"))
             {
                 compressed = new ZipInputStream(_response.GetResponseStream());
             }

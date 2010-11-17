@@ -1917,7 +1917,7 @@ namespace Hammock
             }
 
             var action = new Action(task.Start);
-            action.BeginInvoke(ar => { /* No callback */ }, null);
+            action.Invoke();
             return true;
         }
 #endif
