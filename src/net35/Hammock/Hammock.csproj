@@ -98,6 +98,8 @@
   <ItemGroup>
     <Compile Include="Authentication\IWebCredentials.cs" />
     <Compile Include="Extensions\OAuthExtensions.cs" />
+    <Compile Include="Mono\HttpUtility.cs" />
+    <Compile Include="Mono\WebHeaderCollection.cs" />
     <Compile Include="Web\Mocks\IMockable.cs" />
     <Compile Include="Authentication\OAuth\OAuthToken.cs" />
     <Compile Include="Model\PropertyChangedBase.cs" />

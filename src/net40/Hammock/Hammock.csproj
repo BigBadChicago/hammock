@@ -394,6 +394,8 @@
     <Compile Include="..\..\net35\Hammock\RestResponse.cs">
       <Link>RestResponse.cs</Link>
     </Compile>
+    <Compile Include="Mono\HttpUtility.cs" />
+    <Compile Include="Mono\WebHeaderCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

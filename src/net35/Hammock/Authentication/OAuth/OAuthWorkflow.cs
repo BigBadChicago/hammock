@@ -259,7 +259,7 @@ namespace Hammock.Authentication.OAuth
             // Include url parameters in query pool
             var uri = new Uri(url);
 #if !SILVERLIGHT
-            var urlParameters = HttpUtility.ParseQueryString(uri.Query);
+            var urlParameters = System.Compat.Web.HttpUtility.ParseQueryString(uri.Query);
 #else
             var urlParameters = uri.Query.ParseQueryString();
 #endif
