@@ -430,8 +430,12 @@ namespace Hammock.Web
 #if !SILVERLIGHT && !WindowsPhone
                 request.AutomaticDecompression = DecompressionMethods;
 #else
+
+#if !WindowsPhone
                 if (HasElevatedPermissions)
                 {
+#endif
+                
                     switch (DecompressionMethods)
                     {
                         case DecompressionMethods.GZip:
@@ -444,6 +448,7 @@ namespace Hammock.Web
                             request.Headers["AcceptEncoding"] = "gzip,deflate";
                             break;
                     }
+#if !WindowsPhone
                 }
                 else
                 {
@@ -460,6 +465,8 @@ namespace Hammock.Web
                             break;
                     }
                 }
+#endif
+
 #endif
             }
 #if !SILVERLIGHT

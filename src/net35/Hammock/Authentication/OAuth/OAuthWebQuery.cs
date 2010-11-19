@@ -47,7 +47,8 @@ namespace Hammock.Authentication.OAuth
 
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
-#if SILVERLIGHT
+
+#if SILVERLIGHT && !WindowsPhone
             var httpMethod = method == PostOrPut.Post ? "POST" : "PUT";;
             if (HasElevatedPermissions)
             {
@@ -333,12 +334,12 @@ namespace Hammock.Authentication.OAuth
             var authorization = GetAuthorizationHeader();
             AuthorizationHeader = authorization;
 
-#if !SILVERLIGHT
-            request.Headers["Authorization"] = AuthorizationHeader;
+#if !SILVERLIGHT || WindowsPhone
+            request.Headers[header] = AuthorizationHeader;
 #else
             if (HasElevatedPermissions)
             {
-                request.Headers[header] = AuthorizationHeader;
+                request.Headers[header] = credentials;
             }
             else
             {
