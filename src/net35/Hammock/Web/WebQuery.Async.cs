@@ -1083,7 +1083,8 @@ namespace Hammock.Web
                                                  out Uri responseUri, 
                                                  out System.Net.WebHeaderCollection headers)
         {
-            var httpWebResponse = WebResponse != null && WebResponse is HttpWebResponse
+            var httpWebResponse = WebResponse != null &&
+                                  (WebResponse is HttpWebResponse)
                                       ? (HttpWebResponse) WebResponse
                                       : null;
 

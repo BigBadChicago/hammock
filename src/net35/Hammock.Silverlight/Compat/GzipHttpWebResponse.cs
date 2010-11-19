@@ -5,11 +5,21 @@ using ICSharpCode.SharpZipLib.Silverlight.Zip;
 
 namespace Hammock.Silverlight.Compat
 {
-    public class GzipHttpWebResponse : WebResponse
+    public class GzipHttpWebResponse : HttpWebResponse
     {
         private const int ChunkSize = 2048;
-
+       
         private readonly HttpWebResponse _response;
+
+        public override HttpStatusCode StatusCode
+        {
+            get { return _response.StatusCode; }
+        }
+
+        public override string StatusDescription
+        {
+            get { return _response.StatusDescription; }
+        }
 
         public GzipHttpWebResponse(HttpWebResponse response)
         {
