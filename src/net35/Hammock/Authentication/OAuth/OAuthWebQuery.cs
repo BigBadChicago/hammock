@@ -339,7 +339,7 @@ namespace Hammock.Authentication.OAuth
 #else
             if (HasElevatedPermissions)
             {
-                request.Headers[header] = credentials;
+                request.Headers[header] = authorization;
             }
             else
             {

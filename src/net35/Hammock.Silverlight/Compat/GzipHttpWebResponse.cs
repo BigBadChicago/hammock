@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using ICSharpCode.SharpZipLib.Silverlight.GZip;
 using ICSharpCode.SharpZipLib.Silverlight.Zip;
@@ -10,6 +11,11 @@ namespace Hammock.Silverlight.Compat
         private const int ChunkSize = 2048;
        
         private readonly HttpWebResponse _response;
+
+        public override string Method
+        {
+            get { return _response.Method; }
+        }
 
         public override HttpStatusCode StatusCode
         {
