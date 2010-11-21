@@ -657,13 +657,25 @@ namespace Hammock
             return webResult.AsyncState as RestResponse;
         }
 
+        public virtual RestResponse EndRequest(IAsyncResult result, TimeSpan timeout)
+        {
+            var webResult = EndRequestImpl(result, timeout);
+            return webResult.AsyncState as RestResponse;
+        }
+
         public virtual RestResponse<T> EndRequest<T>(IAsyncResult result)
         {
             var webResult = EndRequestImpl<T>(result);
             return webResult.AsyncState as RestResponse<T>;
         }
 
-        private WebQueryAsyncResult EndRequestImpl(IAsyncResult result)
+        public virtual RestResponse<T> EndRequest<T>(IAsyncResult result, TimeSpan timeout)
+        {
+            var webResult = EndRequestImpl<T>(result, timeout);
+            return webResult.AsyncState as RestResponse<T>;
+        }
+
+        private WebQueryAsyncResult EndRequestImpl(IAsyncResult result, TimeSpan? timeout = null)
         {
             var webResult = result as WebQueryAsyncResult;
             if (webResult == null)
@@ -696,12 +708,19 @@ namespace Hammock
 
             if (!webResult.IsCompleted)
             {
-                webResult.AsyncWaitHandle.WaitOne();
+                if(timeout.HasValue)
+                {
+                    webResult.AsyncWaitHandle.WaitOne(timeout.Value);
+                }
+                else
+                {
+                    webResult.AsyncWaitHandle.WaitOne();
+                }
             }
             return webResult;
         }
 
-        private WebQueryAsyncResult EndRequestImpl<T>(IAsyncResult result)
+        private WebQueryAsyncResult EndRequestImpl<T>(IAsyncResult result, TimeSpan? timeout = null)
         {
             var webResult = result as WebQueryAsyncResult;
             if (webResult == null)
@@ -734,7 +753,14 @@ namespace Hammock
 
             if (!webResult.IsCompleted)
             {
-                webResult.AsyncWaitHandle.WaitOne();
+                if(timeout.HasValue)
+                {
+                    webResult.AsyncWaitHandle.WaitOne(timeout.Value);
+                }
+                else
+                {
+                    webResult.AsyncWaitHandle.WaitOne();
+                }
             }
             return webResult;
         }
