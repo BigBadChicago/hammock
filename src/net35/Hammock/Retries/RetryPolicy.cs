@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hammock.Extensions;
 
 namespace Hammock.Retries
 {
@@ -33,7 +34,8 @@ namespace Hammock.Retries
 
         public virtual void RetryOn(params IRetryCondition[] conditions)
         {
-            RetryOn(conditions.AsEnumerable());
+            var enumerable = conditions.ToList();
+            RetryOn(enumerable);
         }
     }
 }

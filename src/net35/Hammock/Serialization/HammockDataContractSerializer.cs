@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
+#if !NET20
 using System.Xml.Linq;
+#endif
 
 namespace Hammock.Serialization
 {

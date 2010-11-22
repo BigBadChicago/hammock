@@ -8,9 +8,9 @@ using System.Security;
 [assembly: AssemblyTitle("Hammock")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Apitize")]
 [assembly: AssemblyProduct("Hammock")]
-[assembly: AssemblyCopyright("Copyright © Daniel Crenna and Jason Diller")]
+[assembly: AssemblyCopyright("Copyright © 2010 Daniel Crenna and Jason Diller")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AllowPartiallyTrustedCallers]
@@ -21,7 +21,7 @@ using System.Security;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("90025308-f836-49cd-865f-39e0ea20c096")]
+[assembly: Guid("b86616db-abb6-4989-9464-67b1e948fdd1")]
 
 // Version information for an assembly consists of the following four values:
 //

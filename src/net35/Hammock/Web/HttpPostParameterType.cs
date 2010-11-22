@@ -8,7 +8,7 @@ namespace Hammock.Web
 #endif
     public enum HttpPostParameterType
     {
-#if !SILVERLIGHT && !Smartphone && !ClientProfiles
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20
         [EnumMember] Field,
         [EnumMember] File
 #else

@@ -8,7 +8,7 @@ namespace Hammock.Authentication.OAuth
 #endif
     public enum OAuthParameterHandling
     {
-#if !SILVERLIGHT && !Smartphone && !ClientProfiles
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20
         [EnumMember] HttpAuthorizationHeader,
         [EnumMember] UrlOrPostParameters
 #else
@@ -22,7 +22,7 @@ namespace Hammock.Authentication.OAuth
 #endif
     public enum OAuthSignatureTreatment
     {
-#if !SILVERLIGHT && !Smartphone && !ClientProfiles
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20
         [EnumMember]
         Escaped,
         [EnumMember]

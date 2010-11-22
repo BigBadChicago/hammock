@@ -8,11 +8,12 @@ using System.Security;
 [assembly: AssemblyTitle("Hammock")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Apitize")]
 [assembly: AssemblyProduct("Hammock")]
 [assembly: AssemblyCopyright("Copyright © Daniel Crenna and Jason Diller")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+[assembly: AllowPartiallyTrustedCallers]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
