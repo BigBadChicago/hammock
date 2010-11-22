@@ -653,7 +653,11 @@ namespace Hammock
 #if !WindowsPhone
         public virtual RestResponse EndRequest(IAsyncResult result)
         {
+#if !Mono
             var webResult = EndRequestImpl(result);
+#else
+			var webResult = EndRequestImpl(result, null);
+#endif
             return webResult.AsyncState as RestResponse;
         }
 
@@ -665,7 +669,11 @@ namespace Hammock
 
         public virtual RestResponse<T> EndRequest<T>(IAsyncResult result)
         {
+#if !Mono
             var webResult = EndRequestImpl<T>(result);
+#else
+			var webResult = EndRequestImpl<T>(result, null);
+#endif
             return webResult.AsyncState as RestResponse<T>;
         }
 
@@ -675,8 +683,13 @@ namespace Hammock
             return webResult.AsyncState as RestResponse<T>;
         }
 
+#if !Mono
         private WebQueryAsyncResult EndRequestImpl(IAsyncResult result, TimeSpan? timeout = null)
-        {
+		{
+#else
+		private WebQueryAsyncResult EndRequestImpl(IAsyncResult result, TimeSpan? timeout)
+		{					
+#endif
             var webResult = result as WebQueryAsyncResult;
             if (webResult == null)
             {
@@ -720,7 +733,11 @@ namespace Hammock
             return webResult;
         }
 
+#if !Mono
         private WebQueryAsyncResult EndRequestImpl<T>(IAsyncResult result, TimeSpan? timeout = null)
+#else
+		private WebQueryAsyncResult EndRequestImpl<T>(IAsyncResult result, TimeSpan? timeout)
+#endif
         {
             var webResult = result as WebQueryAsyncResult;
             if (webResult == null)
