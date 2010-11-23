@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using Hammock.Caching;
+using Hammock.Extensions;
 using Hammock.Web.Mocks;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -354,9 +355,11 @@ namespace Hammock.Web
             {
                 var result = HandleWebException(ex);
 
-                var responseArgs = new WebQueryResponseEventArgs(result) { Exception = ex };
-
-                OnQueryResponse(responseArgs);
+                if(result.IsNullOrBlank())
+                {
+                    var responseArgs = new WebQueryResponseEventArgs(result) { Exception = ex };
+                    OnQueryResponse(responseArgs);
+                }
             }
         }
 
