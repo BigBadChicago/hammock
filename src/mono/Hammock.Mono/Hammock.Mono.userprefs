@@ -1,10 +1,6 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="c:\Users\Dimebrain\Desktop\Src\hammock\src\net35\Hammock\Web\WebQuery.Async.cs" ctype="Workbench">
-    <Files>
-      <File FileName="c:\Users\Dimebrain\Desktop\Src\hammock\src\net35\Hammock\Authentication\OAuth\OAuthWorkflow.cs" Line="262" Column="40" />
-      <File FileName="c:\Users\Dimebrain\Desktop\Src\hammock\src\net35\Hammock\Web\WebQuery.Async.cs" Line="556" Column="37" />
-    </Files>
+  <MonoDevelop.Ide.Workbench ctype="Workbench">
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True" selected="True" />
