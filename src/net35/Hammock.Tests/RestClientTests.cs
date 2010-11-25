@@ -77,6 +77,18 @@ namespace Hammock.Tests
         }
 
         [Test]
+        public void Can_set_user_agent_from_client()
+        {
+            var client = new RestClient
+                             {
+                                 Authority = "http://empty-journey-80.heroku.com",
+                                 UserAgent = "Hammock"
+                             };
+            var response = client.Request();
+            Assert.IsNotNull(response);
+        }
+
+        [Test]
         public void Can_make_basic_auth_request_synchronously()
         {
             var client = new RestClient

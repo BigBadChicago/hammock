@@ -268,10 +268,10 @@ namespace Hammock.Web
 #endif
             request.ContentType = "application/x-www-form-urlencoded";
 
-            TraceRequest(request);
-
             HandleRequestMeta(request);
 
+            TraceRequest(request);
+            
             var encoding = Encoding.UTF8;
             content = PostContent ?? encoding.GetBytes(parameters);
 
@@ -307,11 +307,10 @@ namespace Hammock.Web
 #else
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
 #endif
-
-            TraceRequest(request);
-
             HandleRequestMeta(request);
 
+            TraceRequest(request);
+            
             if (Entity != null)
             {
                 var entity = Entity.Content;
@@ -359,10 +358,10 @@ namespace Hammock.Web
 #endif
             AuthenticateRequest(request);
 
-            TraceRequest(request);
-            
             HandleRequestMeta(request);
 
+            TraceRequest(request);
+            
             return request;
         }
 
@@ -376,15 +375,27 @@ namespace Hammock.Web
             else
             {
                 AppendHeaders(request);
-                if (!UserAgent.IsNullOrBlank())
-                {
+                SetUserAgent(request);
+            }
+        }
+
+        protected virtual void SetUserAgent(WebRequest request)
+        {
+            if (!UserAgent.IsNullOrBlank())
+            {
 #if SILVERLIGHT && !WindowsPhone
-                    // [DC] User-Agent is still restricted in elevated mode
-                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
+                // [DC] User-Agent is still restricted in elevated mode
+                request.Headers[SilverlightUserAgentHeader] = UserAgent;
 #else
-                    request.Headers["User-Agent"] = UserAgent;
-#endif
+                if(request is HttpWebRequest)
+                {
+                    ((HttpWebRequest) request).UserAgent = UserAgent;
                 }
+                else
+                {
+                    request.Headers["User-Agent"] = UserAgent;
+                }
+#endif
             }
         }
 
@@ -415,15 +426,7 @@ namespace Hammock.Web
             request.AllowAutoRedirect = FollowRedirects;
 #endif
 
-            if (!UserAgent.IsNullOrBlank())
-            {
-#if !SILVERLIGHT && !WindowsPhone
-                request.UserAgent = UserAgent;
-#else
-                // [DC]: User agent is still restricted in elevated permissions
-                request.Headers[SilverlightUserAgentHeader] = UserAgent;
-#endif
-            }
+            SetUserAgent(request);
 
             if (DecompressionMethods != DecompressionMethods.None)
             {
@@ -530,7 +533,7 @@ namespace Hammock.Web
                     {
                         if (HasElevatedPermissions)
                         {
-                            request.Headers[header.Key] = UserAgent;
+                            request.Headers[header.Key] = header.Value;
                         }
                         else
                         {
@@ -565,10 +568,12 @@ namespace Hammock.Web
                     AddHeader(header, request);
                 }
             }
+        }
 
+        private static void TraceHeaders(WebRequest request)
+        {
 #if TRACE
-            foreach (var trace in request.Headers.AllKeys.Select(
-                key => String.Concat(key, ": ", request.Headers[key])))
+            foreach (var trace in request.Headers.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key])))
             {
                 Trace.WriteLine(trace);
             }
@@ -999,11 +1004,11 @@ namespace Hammock.Web
 
             request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
-
-            TraceRequest(request);
-
+            
             HandleRequestMeta(request);
-
+            
+            TraceRequest(request);
+            
 #if !Smartphone
             var encoding = Encoding ?? Encoding.GetEncoding("ISO-8859-1");
 #else
@@ -1044,6 +1049,8 @@ namespace Hammock.Web
             Trace.WriteLine(
                 String.Concat(request.Method, " ", pathAndQuery, " ", version
                 ));
+
+            TraceHeaders(request);
         }
 
         protected static StringBuilder BuildMultiPartFormRequestParameters(Encoding encoding, string boundary, IEnumerable<HttpPostParameter> parameters)

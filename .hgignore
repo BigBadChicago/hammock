@@ -46,3 +46,4 @@ glob:src/net35/ICSharpCode.SharpZipLib.Silverlight.Tests/ClientBin/zh-Hant/*.*
 relre:/_ReSharper.Hammock.Silverlight/*
 relre:/_ReSharper.Hammock.WindowsPhone/*
 glob:src/mono/Hammock.Mono/Hammock.Mono.pidb
+glob:src/net40/Hammock.Tests/app.config

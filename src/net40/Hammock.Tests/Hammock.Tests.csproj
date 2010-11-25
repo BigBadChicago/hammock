@@ -152,12 +152,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\net35\Hammock.Tests\app.config">
-      <Link>app.config</Link>
-    </None>
     <None Include="..\..\net35\Hammock.Tests\app.config.example">
       <Link>app.config.example</Link>
     </None>
+    <None Include="app.config" />
     <None Include="key.snk" />
   </ItemGroup>
   <ItemGroup>

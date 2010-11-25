@@ -153,15 +153,7 @@ namespace Hammock.Authentication.OAuth
             else
             {
                 AppendHeaders(request);
-                if (!UserAgent.IsNullOrBlank())
-                {
-#if SILVERLIGHT
-                    // [DC] User-Agent is still restricted in elevated mode
-                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
-#else
-                    request.Headers["User-Agent"] = UserAgent;
-#endif
-                }
+                SetUserAgent(request);
             }
 
             return request;
