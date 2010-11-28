@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -24,7 +23,7 @@ using System.Net.Browser;
 
 namespace Hammock.Web
 {
-    public abstract partial class WebQuery
+    public abstract partial class WebQuery: IDisposable
     {
         private static readonly object _sync = new object();
 
@@ -91,11 +90,7 @@ namespace Hammock.Web
             }
         }
 
-        public virtual Byte[] ByteResponse
-        {
-            get; set;
-        }
-
+        protected virtual Stream ContentStream { get; set; }
         public virtual bool HasEntity { get; set; }
         public virtual byte[] PostContent { get; set; }
 
@@ -156,11 +151,12 @@ namespace Hammock.Web
 
         private void SetResponseResults(WebQueryResponseEventArgs e)
         {
+            Result.ContentStream = e.Response;
             Result.ResponseDate = DateTime.UtcNow;
-            Result.Response = e.Response;
             Result.RequestHttpMethod = Method.ToUpper();
             Result.IsMock = WebResponse is MockHttpWebResponse;
             Result.TimedOut = TimedOut;
+
             string version;
             int statusCode;
             string statusDescription;
@@ -174,7 +170,7 @@ namespace Hammock.Web
                 );
 
             TraceResponse(
-                responseUri, version, headers, statusCode, statusDescription, e.Response
+                responseUri, version, headers, statusCode, statusDescription
                 );
 
             Result.WebResponse = WebResponse;
@@ -184,12 +180,10 @@ namespace Hammock.Web
             Result.ResponseLength = contentLength;
             Result.ResponseUri = responseUri;
             Result.Exception = e.Exception;
-            Result.ByteResponse = ByteResponse;
-            
         }
 
         [Conditional("TRACE")]
-        private static void TraceResponse(Uri uri, string version, System.Net.WebHeaderCollection headers, int statusCode, string statusDescription, string response)
+        private static void TraceResponse(Uri uri, string version, System.Net.WebHeaderCollection headers, int statusCode, string statusDescription)
         {
             Trace.WriteLine(
                 String.Concat("\r\n--RESPONSE:", " ", uri)
@@ -202,8 +196,6 @@ namespace Hammock.Web
             {
                 Trace.WriteLine(trace);
             }
-            Trace.WriteLine(String.Concat("\r\n ", response)
-                );
         }
 
         private void SetRequestResults(WebQueryRequestEventArgs e)
@@ -570,14 +562,13 @@ namespace Hammock.Web
             }
         }
 
+        [Conditional("TRACE")]
         private static void TraceHeaders(WebRequest request)
         {
-#if TRACE
             foreach (var trace in request.Headers.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key])))
             {
                 Trace.WriteLine(trace);
             }
-#endif
         }
 
         private static void AddHeader(KeyValuePair<string, string> header, WebRequest request)
@@ -750,23 +741,23 @@ namespace Hammock.Web
             }
         }
 
-        protected string HandleWebException(WebException ex)
+        protected void HandleWebException(WebException exception)
         {
-            if (ex.Response is HttpWebResponse)
+            if (!(exception.Response is HttpWebResponse))
             {
-                WebResponse = ex.Response;
-
-                using (var reader = new StreamReader(WebResponse.GetResponseStream()))
-                {
-                    var result = reader.ReadToEnd();
-                    var args = new WebQueryResponseEventArgs(result, ex);
-
-                    OnQueryResponse(args);
-                    return result;
-                }
+                return;
             }
 
-            return string.Empty;
+            WebResponse = exception.Response;
+            var stream = WebResponse.GetResponseStream();
+
+            if (stream == null)
+            {
+                return;
+            }
+
+            var args = new WebQueryResponseEventArgs(stream, exception);
+            OnQueryResponse(args);
         }
 
         protected abstract void SetAuthorizationHeader(WebRequest request, string header);
@@ -780,74 +771,71 @@ namespace Hammock.Web
             return !prefix.IsNullOrBlank() ? "{0}_{1}".FormatWith(prefix, url) : url;
         }
 
-        protected virtual string ExecuteWithCache(ICache cache,
-                                                  string url,
-                                                  string key,
-                                                  Func<ICache, string, string> cacheScheme)
+        protected virtual void ExecuteWithCache(ICache cache,
+                                                string url,
+                                                string key,
+                                                Action<ICache, string> cacheScheme)
         {
-            var fetch = cache.Get<string>(CreateCacheKey(key, url));
+            var fetch = cache.Get<Stream>(CreateCacheKey(key, url));
             if (fetch != null)
             {
                 // [DC]: In order to build results, an event must still raise
                 var responseArgs = new WebQueryResponseEventArgs(fetch);
                 OnQueryResponse(responseArgs);
-                return fetch;
             }
-
-            var result = cacheScheme.Invoke(cache, url);
-            return result;
+            else
+            {
+                cacheScheme.Invoke(cache, url);
+            }
         }
 
-        protected virtual string ExecuteWithCacheAndAbsoluteExpiration(ICache cache,
+        protected virtual void ExecuteWithCacheAndAbsoluteExpiration(ICache cache,
                                                                        string url,
                                                                        string key,
                                                                        DateTime expiry,
-                                                                       Func<ICache, string, DateTime, string> cacheScheme)
+                                                                       Action<ICache, string, DateTime> cacheScheme)
         {
-            var fetch = cache.Get<string>(CreateCacheKey(key, url));
+            var fetch = cache.Get<Stream>(CreateCacheKey(key, url));
             if (fetch != null)
             {
                 // [DC]: In order to build results, an event must still raise
                 var responseArgs = new WebQueryResponseEventArgs(fetch);
                 OnQueryResponse(responseArgs);
-
-                return fetch;
             }
-
-            var result = cacheScheme.Invoke(cache, url, expiry);
-            return result;
+            else
+            {
+                cacheScheme.Invoke(cache, url, expiry);
+            }
         }
 
-        protected virtual string ExecuteWithCacheAndSlidingExpiration(ICache cache,
+        protected virtual void ExecuteWithCacheAndSlidingExpiration(ICache cache,
                                                                       string url,
                                                                       string key,
                                                                       TimeSpan expiry,
-                                                                      Func<ICache, string, TimeSpan, string>
-                                                                          cacheScheme)
+                                                                      Action<ICache, string, TimeSpan> cacheScheme)
         {
-            var fetch = cache.Get<string>(CreateCacheKey(key, url));
+            var fetch = cache.Get<Stream>(CreateCacheKey(key, url));
             if (fetch != null)
             {
                 // [DC]: In order to build results, an event must still raise
                 var responseArgs = new WebQueryResponseEventArgs(fetch);
                 OnQueryResponse(responseArgs);
-                return fetch;
             }
-
-            var result = cacheScheme.Invoke(cache, url, expiry);
-            return result;
+            else
+            {
+                cacheScheme.Invoke(cache, url, expiry);    
+            }
         }
 
 #if !SILVERLIGHT
-        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, string key, ICache cache, out WebException exception)
+        protected virtual void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, string key, ICache cache, out WebException exception)
         {
             WebException ex = null;
-            var ret = ExecuteWithCache(cache, url, key, (c, u) => ExecuteGetDeleteHeadOptions(method, cache, url, key, out ex));
+            ExecuteWithCache(cache, url, key, (c, u) => ExecuteGetDeleteHeadOptions(method, cache, url, key, out ex));
             exception = ex;
-            return ret;
         }
 
-        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
+        protected virtual void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
                                                              string url, 
                                                              string key, 
                                                              ICache cache, 
@@ -855,14 +843,13 @@ namespace Hammock.Web
                                                              out WebException exception)
         {
             WebException ex = null; 
-            var ret = ExecuteWithCacheAndAbsoluteExpiration(cache, url, key, absoluteExpiration,
+            ExecuteWithCacheAndAbsoluteExpiration(cache, url, key, absoluteExpiration,
                                                             (c, u, e) =>
                                                             ExecuteGetDeleteHeadOptions(method, cache, url, key, absoluteExpiration, out ex));
             exception = ex;
-            return ret; 
         }
 
-        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
+        protected virtual void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
                                                     string url, 
                                                     string key, 
                                                     ICache cache, 
@@ -870,47 +857,47 @@ namespace Hammock.Web
                                                     out WebException exception)
         {
             WebException ex = null; 
-            var ret = ExecuteWithCacheAndSlidingExpiration(cache, url, key, slidingExpiration,
+            ExecuteWithCacheAndSlidingExpiration(cache, url, key, slidingExpiration,
                                                            (c, u, e) =>
                                                            ExecuteGetDeleteHeadOptions(method, cache, url, key, slidingExpiration, out ex));
             exception = ex;
-            return ret; 
         }
 
-        private string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method,
-                                                   ICache cache, 
-                                                   string url, 
-                                                   string key, 
-                                                   out WebException exception)
+        private void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method,
+                                                 ICache cache, 
+                                                 string url, 
+                                                 string key, 
+                                                 out WebException exception)
         {
-            var result = ExecuteGetDeleteHeadOptions(method, url, out exception);
+            ExecuteGetDeleteHeadOptions(method, url, out exception);
             if (exception == null)
             {
-                cache.Insert(CreateCacheKey(key, url), result);
+                cache.Insert(CreateCacheKey(key, url), ContentStream);
             }
-            return result;
         }
 
-        private string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, ICache cache, string url, string key,
-                                                   DateTime absoluteExpiration, out WebException exception)
+        private void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, 
+                                                 ICache cache, 
+                                                 string url, 
+                                                 string key,
+                                                 DateTime absoluteExpiration, 
+                                                 out WebException exception)
         {
-            var result = ExecuteGetDeleteHeadOptions(method, url, out exception);
+            ExecuteGetDeleteHeadOptions(method, url, out exception);
             if (exception == null)
             {
-                cache.Insert(CreateCacheKey(key, url), result, absoluteExpiration);
+                cache.Insert(CreateCacheKey(key, url), ContentStream, absoluteExpiration);
             }
-            return result;
         }
 
-        private string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, ICache cache, string url, string key,
+        private void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, ICache cache, string url, string key,
                                                    TimeSpan slidingExpiration, out WebException exception)
         {
-            var result = ExecuteGetDeleteHeadOptions(method, url, out exception);
+            ExecuteGetDeleteHeadOptions(method, url, out exception);
             if (exception == null)
             {
-                cache.Insert(CreateCacheKey(key, url), result, slidingExpiration);
+                cache.Insert(CreateCacheKey(key, url), ContentStream, slidingExpiration);
             }
-            return result;
         }
 #endif  
 
@@ -935,7 +922,7 @@ namespace Hammock.Web
         }
 
 #if !SILVERLIGHT
-        protected virtual string ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, out WebException exception)
+        protected virtual void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, out WebException exception)
         {
             WebResponse = null;
             var request = BuildGetDeleteHeadOptionsWebRequest(method, url);
@@ -943,54 +930,33 @@ namespace Hammock.Web
             var requestArgs = new WebQueryRequestEventArgs(url);
             OnQueryRequest(requestArgs);
 
-            return ExecuteGetDeleteHeadOptions(request, out exception);
+            ExecuteGetDeleteHeadOptions(request, out exception);
         }
 
-        private string ExecuteGetDeleteHeadOptions(WebRequest request, out WebException exception)
+        private void ExecuteGetDeleteHeadOptions(WebRequest request, out WebException exception)
         {
             try
             {
+                // [DC] Avoid disposing until no longer needed to build results
                 var response = request.GetResponse();
                 WebResponse = response;
-                
-                using (var stream = response.GetResponseStream())
+
+                if (response != null)
                 {
-                    byte[] buffer = new byte[4096];
-
-                    string content;
-                    using (MemoryStream memoryStream = new MemoryStream())
-                    {
-                        int count = 0;
-                        do
-                        {
-                            count = stream.Read(buffer, 0, buffer.Length);
-                            memoryStream.Write(buffer, 0, count);
-
-                        } while (count != 0);
-
-                        memoryStream.Position = 0;
-                        using (StreamReader sr = new StreamReader(memoryStream))
-                        {
-                            content = sr.ReadToEnd();
-                        }
-
-                        ByteResponse = memoryStream.ToArray();
-                        var result = content;
-
-                        var responseArgs = new WebQueryResponseEventArgs(result);
-                        OnQueryResponse(responseArgs);
-
-                        exception = null;
-                        return result;
-                    }
+                    ContentStream = response.GetResponseStream();
+                    var args = new WebQueryResponseEventArgs(ContentStream);
+                    OnQueryResponse(args);
                 }
+
+                exception = null;
             }
             catch (WebException ex)
             {
                 exception = ex;
-                return HandleWebException(ex);
+                HandleWebException(ex);
             }
         }
+        
 #endif
         protected virtual WebRequest BuildMultiPartFormRequest(PostOrPut method, string url,
                                                                IEnumerable<HttpPostParameter> parameters,
@@ -1124,12 +1090,12 @@ namespace Hammock.Web
         }
 
 #if !SILVERLIGHT
-        protected virtual string ExecutePostOrPut(PostOrPut method, string url, out WebException exception)
+        protected virtual void ExecutePostOrPut(PostOrPut method, string url, out WebException exception)
         {
             WebResponse = null;
             exception = null;
-            byte[] content;
-            var request = BuildPostOrPutWebRequest(method, url, out content);
+            byte[] post;
+            var request = BuildPostOrPutWebRequest(method, url, out post);
 
             var requestArgs = new WebQueryRequestEventArgs(url);
             OnQueryRequest(requestArgs);
@@ -1138,40 +1104,37 @@ namespace Hammock.Web
             {
                 using (var stream = request.GetRequestStream())
                 {
-                    stream.Write(content, 0, content.Length);
+                    stream.Write(post, 0, post.Length);
                     stream.Close();
 
                     // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
                     WebResponse = response;
 
-                    using (var reader = new StreamReader(response.GetResponseStream()))
+                    if (response != null)
                     {
-                        var result = reader.ReadToEnd();
-
-                        var responseArgs = new WebQueryResponseEventArgs(result);
-                        OnQueryResponse(responseArgs);
-
-                        return result;
+                        ContentStream = response.GetResponseStream();
+                        var args = new WebQueryResponseEventArgs(ContentStream);
+                        OnQueryResponse(args);
                     }
                 }
             }
             catch (WebException ex)
             {
                 exception = ex; 
-                return HandleWebException(ex);
+                HandleWebException(ex);
             }
         }
 
-        protected virtual string ExecutePostOrPut(PostOrPut method, 
-                                                  string url, 
-                                                  IEnumerable<HttpPostParameter> parameters,
-                                                  out WebException exception)
+        protected virtual void ExecutePostOrPut(PostOrPut method, 
+                                                string url, 
+                                                IEnumerable<HttpPostParameter> parameters,
+                                                out WebException exception)
         {
             WebResponse = null;
             byte[] bytes;
             var request = BuildMultiPartFormRequest(method, url, parameters, out bytes);
-
+            
             try
             {
                 using (var requestStream = request.GetRequestStream())
@@ -1180,125 +1143,146 @@ namespace Hammock.Web
                     requestStream.Flush();
                     requestStream.Close();
 
-                    // Avoid disposing until no longer needed to build results
+                    // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
                     WebResponse = response;
 
-                    using (var reader = new StreamReader(response.GetResponseStream()))
+                    if (response != null)
                     {
-                        var result = reader.ReadToEnd();
-
-                        var responseArgs = new WebQueryResponseEventArgs(result);
-                        OnQueryResponse(responseArgs);
-
-                        WebResponse = response;
-                        exception = null;
-
-                        return result;
+                        ContentStream = response.GetResponseStream();
+                        var args = new WebQueryResponseEventArgs(ContentStream);
+                        OnQueryResponse(args);
                     }
+                    exception = null;
                 }
             }
             catch (WebException ex)
             {
                 exception = ex;
-                return HandleWebException(ex);
+                HandleWebException(ex);
             }
         }
 #endif
 
 #if !SILVERLIGHT
-        public virtual string Request(string url, out WebException exception)
+        public virtual void Request(string url, out WebException exception)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, out exception);
+                    break;
                 case WebMethod.Put:
-                    return ExecutePostOrPut(PostOrPut.Put, url, out exception);
+                    ExecutePostOrPut(PostOrPut.Put, url, out exception);
+                    break;
                 case WebMethod.Post:
-                    return ExecutePostOrPut(PostOrPut.Post, url, out exception);
+                    ExecutePostOrPut(PostOrPut.Post, url, out exception);
+                    break;
                 case WebMethod.Delete:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, out exception);
+                    break;
                 case WebMethod.Head:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, out exception);
+                    break;
                 case WebMethod.Options:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, out exception);
+                    break;
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
         }
 
-        public virtual string Request(string url, string key, ICache cache, out WebException exception)
+        public virtual void Request(string url, string key, ICache cache, out WebException exception)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, out exception);
+                    break;
                 case WebMethod.Put:
-                    return ExecutePostOrPut(PostOrPut.Put, url, key, cache, out exception);
+                    ExecutePostOrPut(PostOrPut.Put, url, key, cache, out exception);
+                    break;
                 case WebMethod.Post: 
-                    return ExecutePostOrPut(PostOrPut.Post, url, key, cache, out exception);
+                    ExecutePostOrPut(PostOrPut.Post, url, key, cache, out exception);
+                    break;
                 case WebMethod.Delete:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, out exception);
+                    break;
                 case WebMethod.Head:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache,  out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache,  out exception);
+                    break;
                 case WebMethod.Options:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, out exception);
+                    break;
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
         }
 
-        public virtual string Request(string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
+        public virtual void Request(string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, absoluteExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, absoluteExpiration, out exception);
+                    break;
                 case WebMethod.Put:
-                    return ExecutePostOrPut(PostOrPut.Put, url, key, cache, absoluteExpiration, out exception);
+                    ExecutePostOrPut(PostOrPut.Put, url, key, cache, absoluteExpiration, out exception);
+                    break;
                 case WebMethod.Post:
-                    return ExecutePostOrPut(PostOrPut.Post, url, key, cache, absoluteExpiration, out exception);
+                    ExecutePostOrPut(PostOrPut.Post, url, key, cache, absoluteExpiration, out exception);
+                    break;
                 case WebMethod.Delete:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, absoluteExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, absoluteExpiration, out exception);
+                    break;
                 case WebMethod.Head:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache, absoluteExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache, absoluteExpiration, out exception);
+                    break;
                 case WebMethod.Options:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, absoluteExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, absoluteExpiration, out exception);
+                    break;
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
         }
 
-        public virtual string Request(string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception)
+        public virtual void Request(string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception)
         {
             switch (Method)
             {
                 case WebMethod.Get:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, slidingExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Get, url, key, cache, slidingExpiration, out exception);
+                    break;
                 case WebMethod.Put:
-                    return ExecutePostOrPut(PostOrPut.Put, url, key, cache, slidingExpiration, out exception);
+                    ExecutePostOrPut(PostOrPut.Put, url, key, cache, slidingExpiration, out exception);
+                    break;
                 case WebMethod.Post:
-                    return ExecutePostOrPut(PostOrPut.Post, url, key, cache, slidingExpiration, out exception);
+                    ExecutePostOrPut(PostOrPut.Post, url, key, cache, slidingExpiration, out exception);
+                    break;
                 case WebMethod.Delete:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Delete, url, key, cache, slidingExpiration, out exception);
+                    break;
                 case WebMethod.Head:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache, slidingExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Head, url, key, cache, slidingExpiration, out exception);
+                    break;
                 case WebMethod.Options:
-                    return ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, slidingExpiration, out exception);
+                    ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions.Options, url, key, cache, slidingExpiration, out exception);
+                    break;
                 default:
                     throw new NotSupportedException("Unsupported web method");
             }
         }
 
-        public virtual string Request(string url, IEnumerable<HttpPostParameter> parameters, out WebException exception)
+        public virtual void Request(string url, IEnumerable<HttpPostParameter> parameters, out WebException exception)
         {
             switch (Method)
             {
                 case WebMethod.Put:
-                    return ExecutePostOrPut(PostOrPut.Put, url, parameters, out exception);
+                    ExecutePostOrPut(PostOrPut.Put, url, parameters, out exception);
+                    break;
                 case WebMethod.Post:
-                    return ExecutePostOrPut(PostOrPut.Post, url, parameters, out exception);
+                    ExecutePostOrPut(PostOrPut.Post, url, parameters, out exception);
+                    break;
                 default:
                     throw new NotSupportedException("Only HTTP POSTs and PUTs can use multi-part parameters");
             }
@@ -1590,126 +1574,79 @@ namespace Hammock.Web
 #endif
 
 #if !SILVERLIGHT
-        public virtual string ExecutePostOrPut(PostOrPut method, 
+        public virtual void ExecutePostOrPut(PostOrPut method, 
                                                string url, 
                                                string key, 
                                                ICache cache, 
                                                out WebException exception)
         {
             WebException ex = null; 
-            var ret = ExecuteWithCache(cache, url, key, (c, u) => ExecutePostOrPut(method, cache, url, key, out ex));
+            ExecuteWithCache(cache, url, key, (c, u) => ExecutePostOrPut(method, cache, url, key, out ex));
             exception = ex;
-            return ret; 
         }
 
-        public virtual string ExecutePostOrPut(PostOrPut method, string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
+        public virtual void ExecutePostOrPut(PostOrPut method, string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
         {
             WebException ex = null; 
-            var ret = ExecuteWithCacheAndAbsoluteExpiration(cache, url, key, absoluteExpiration,
+            ExecuteWithCacheAndAbsoluteExpiration(cache, url, key, absoluteExpiration,
                                                             (c, u, e) =>
                                                             ExecutePostOrPut(method, cache, url, key, absoluteExpiration, out ex));
             exception = ex;
-            return ret; 
-
         }
 
-        public virtual string ExecutePostOrPut(PostOrPut method, string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception )
+        public virtual void ExecutePostOrPut(PostOrPut method, string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception)
         {
             WebException ex = null; 
-            var ret = ExecuteWithCacheAndSlidingExpiration(cache, url, key, slidingExpiration,
+            ExecuteWithCacheAndSlidingExpiration(cache, url, key, slidingExpiration,
                                                            (c, u, e) =>
                                                            ExecutePostOrPut(method, cache, url, key, slidingExpiration, out ex));
-            exception = ex; 
-            return ret; 
+            exception = ex;
         }
 
-        private string ExecutePostOrPut(PostOrPut method, 
+        private void ExecutePostOrPut(PostOrPut method, 
                                         ICache cache, 
                                         string url, 
                                         string key, 
                                         out WebException exception)
         {
-            var result = ExecutePostOrPut(method, url, out exception);
+            ExecutePostOrPut(method, url, out exception);
             if (exception == null)
             {
-                cache.Insert(CreateCacheKey(key, url), result);
+                cache.Insert(CreateCacheKey(key, url), ContentStream);
             }
-            return result;
         }
 
-        private string ExecutePostOrPut(PostOrPut method, 
+        private void ExecutePostOrPut(PostOrPut method, 
                                         ICache cache, 
                                         string url, 
                                         string key,
                                         DateTime absoluteExpiration, 
                                         out WebException exception)
         {
-            var result = ExecutePostOrPut(method, url, out exception);
+            ExecutePostOrPut(method, url, out exception);
             if (exception == null)
             {
-                cache.Insert(CreateCacheKey(key, url), result, absoluteExpiration);
+                cache.Insert(CreateCacheKey(key, url), ContentStream, absoluteExpiration);
             }
-            return result;
         }
 
-        private string ExecutePostOrPut(PostOrPut method, ICache cache, string url, string key,
+        private void ExecutePostOrPut(PostOrPut method, ICache cache, string url, string key,
                                         TimeSpan slidingExpiration, out WebException exception)
         {
-            var result = ExecutePostOrPut(method, url, out exception);
+            ExecutePostOrPut(method, url, out exception);
             if (exception == null)
             {
-                cache.Insert(CreateCacheKey(key, url), result, slidingExpiration);
-            }
-            return result;
-        }
-
-        public static string QuickGet(string url)
-        {
-            return QuickGet(url, null, null, null);
-        }
-
-        public static string QuickGet(string url, string username, string password)
-        {
-            return QuickGet(url, null, username, password);
-        }
-
-        public static string QuickGet(string url, IDictionary<string, string> headers, string username, string password)
-        {
-            var request = WebRequest.Create(url);
-            if(!username.IsNullOrBlank() && !password.IsNullOrBlank())
-            {
-                request.Headers["Authorization"] = WebExtensions.ToBasicAuthorizationHeader(username, password);    
-            }
-
-            WebResponse response = null;
-
-            try
-            {
-                using (response = request.GetResponse())
-                {
-                    using (var stream = response.GetResponseStream())
-                    {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            return reader.ReadToEnd();
-                        }
-                    }
-                }
-            }
-            catch (WebException ex)
-            {
-                if (ex.Response is HttpWebResponse && response != null)
-                {
-                    using (var reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        var result = reader.ReadToEnd();
-                        return result;
-                    }
-                }
-
-                return string.Empty;
+                cache.Insert(CreateCacheKey(key, url), ContentStream, slidingExpiration);
             }
         }
 #endif
+
+        public void Dispose()
+        {
+            if(ContentStream != null)
+            {
+                ContentStream.Dispose();
+            }
+        }
     }
 }

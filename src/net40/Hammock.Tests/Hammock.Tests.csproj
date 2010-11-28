@@ -79,9 +79,6 @@
     <Compile Include="..\..\net35\Hammock.Tests\OAuth\OAuthToolsTests.cs">
       <Link>OAuth\OAuthToolsTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\OAuth\OAuthWorkflowTests.cs">
-      <Link>OAuth\OAuthWorkflowTests.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock.Tests\Postmark\Converters\NameValueCollectionConverter.cs">
       <Link>Postmark\Converters\NameValueCollectionConverter.cs</Link>
     </Compile>

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.IO;
 using System.Net;
 using Hammock.Authentication;
 using Hammock.Authentication.Basic;
-using Hammock.Extras;
 using Hammock.Tests.Converters;
 using Hammock.Tests.Postmark;
 using Hammock.Tests.Postmark.Converters;
@@ -37,19 +37,15 @@ namespace Hammock.Tests
         {
             _twitterUsername = ConfigurationManager.AppSettings["TwitterUsername"];
             _twitterPassword = ConfigurationManager.AppSettings["TwitterPassword"];
-
             _postmarkServerToken = ConfigurationManager.AppSettings["PostmarkServerToken"];
             _postmarkFromAddress = ConfigurationManager.AppSettings["PostmarkFromAddress"];
             _postmarkToAddress = ConfigurationManager.AppSettings["PostmarkToAddress"];
-
             _consumerKey = ConfigurationManager.AppSettings["OAuthConsumerKey"];
             _consumerSecret = ConfigurationManager.AppSettings["OAuthConsumerSecret"];
-
             _accessToken = ConfigurationManager.AppSettings["OAuthAccessToken"];
             _tokenSecret = ConfigurationManager.AppSettings["OAuthTokenSecret"];
 
             var ignore = ConfigurationManager.AppSettings["IgnoreStatusUpdateTests"];
-            //old school for compact fwk
             try
             {
                 if (!string.IsNullOrEmpty(ignore))
@@ -177,6 +173,44 @@ namespace Hammock.Tests
             var response = client.Request(request);
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode); 
+        }
+
+        [Test]
+        public void Can_get_content_as_stream()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com/1/",
+                FollowRedirects = true,
+                UserAgent = "Hammock"
+            };
+            
+            // http://api.twitter.com/version/users/profile_image/:screen_name.format
+            var request = new RestRequest { Path = "users/profile_image/danielcrenna.json" };
+            var response = client.Request(request);
+
+            Assert.IsNotNull(response.ContentStream);
+            var bytes = ReadFully(response.ContentStream);
+            Assert.IsNotNull(bytes);
+            Assert.AreEqual(response.ContentLength, bytes.LongLength);
+        }
+
+        [Test]
+        public void Can_get_content_as_bytes()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com/1/",
+                FollowRedirects = true,
+                UserAgent = "Hammock"
+            };
+
+            // http://api.twitter.com/version/users/profile_image/:screen_name.format
+            var request = new RestRequest { Path = "users/profile_image/danielcrenna.json" };
+            var response = client.Request(request);
+
+            Assert.IsNotNull(response.ContentBytes);
+            Assert.AreEqual(response.ContentLength, response.ContentBytes.LongLength);
         }
 
         [Test]
@@ -388,6 +422,57 @@ namespace Hammock.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
+
+        public static byte[] ReadFully(Stream stream)
+        {
+            return ReadFully(stream, 0);
+        }
+
+        // http://www.yoda.arachsys.com/csharp/readbinary.html
+        public static byte[] ReadFully(Stream stream, long initialLength)
+        {
+            // If we've been passed an unhelpful initial length, just
+            // use 32K.
+            if (initialLength < 1)
+            {
+                initialLength = 32768;
+            }
+
+            byte[] buffer = new byte[initialLength];
+            int read = 0;
+
+            int chunk;
+            while ((chunk = stream.Read(buffer, read, buffer.Length - read)) > 0)
+            {
+                read += chunk;
+
+                // If we've reached the end of our buffer, check to see if there's
+                // any more information
+                if (read == buffer.Length)
+                {
+                    int nextByte = stream.ReadByte();
+
+                    // End of stream? If so, we're done
+                    if (nextByte == -1)
+                    {
+                        return buffer;
+                    }
+
+                    // Nope. Resize the buffer, put in the byte we've just
+                    // read, and continue
+                    byte[] newBuffer = new byte[buffer.Length * 2];
+                    Array.Copy(buffer, newBuffer, buffer.Length);
+                    newBuffer[read] = (byte)nextByte;
+                    buffer = newBuffer;
+                    read++;
+                }
+            }
+            // Buffer is now too big. Shrink it.
+            byte[] ret = new byte[read];
+            Array.Copy(buffer, ret, read);
+            return ret;
+        }
+
     }
 }
 

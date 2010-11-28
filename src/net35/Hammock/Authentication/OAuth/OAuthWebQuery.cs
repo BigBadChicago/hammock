@@ -365,35 +365,35 @@ namespace Hammock.Authentication.OAuth
         }
        
 #if !SILVERLIGHT
-        public override string Request(string url, IEnumerable<HttpPostParameter> parameters, out WebException exception)
+        public override void Request(string url, IEnumerable<HttpPostParameter> parameters, out WebException exception)
         {
             RecalculateProtectedResourceSignature(url);
-            return base.Request(url, parameters, out exception);
+            base.Request(url, parameters, out exception);
         }
 
-        public override string Request(string url, out WebException exception)
+        public override void Request(string url, out WebException exception)
         {
             RecalculateProtectedResourceSignature(url);
             url = RestoreUrlParams(url, Parameters);
-            return base.Request(url, out exception);
+            base.Request(url, out exception);
         }
 
-        public override string Request(string url, string key, ICache cache, out WebException exception)
+        public override void Request(string url, string key, ICache cache, out WebException exception)
         {
             RecalculateProtectedResourceSignature(url);
-            return base.Request(url, key, cache, out exception);
+            base.Request(url, key, cache, out exception);
         }
 
-        public override string Request(string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
+        public override void Request(string url, string key, ICache cache, DateTime absoluteExpiration, out WebException exception)
         {
             RecalculateProtectedResourceSignature(url);
-            return base.Request(url, key, cache, absoluteExpiration, out exception);
+            base.Request(url, key, cache, absoluteExpiration, out exception);
         }
 
-        public override string Request(string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception)
+        public override void Request(string url, string key, ICache cache, TimeSpan slidingExpiration, out WebException exception)
         {
             RecalculateProtectedResourceSignature(url);
-            return base.Request(url, key, cache, slidingExpiration, out exception);
+            base.Request(url, key, cache, slidingExpiration, out exception);
         }
 #endif
 

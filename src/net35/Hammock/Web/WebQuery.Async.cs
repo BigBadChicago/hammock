@@ -43,7 +43,7 @@ namespace Hammock.Web
                                                             WebRequest request,
                                                             object userState)
         {
-            var fetch = cache.Get<string>(key);
+            var fetch = cache.Get<Stream>(key);
             if (fetch != null)
             {
                 var args = new WebQueryResponseEventArgs(fetch);
@@ -85,7 +85,7 @@ namespace Hammock.Web
                                                             WebRequest request,
                                                             object userState)
         {
-            var fetch = cache.Get<string>(key);
+            var fetch = cache.Get<Stream>(key);
             if (fetch != null)
             {
                 var args = new WebQueryResponseEventArgs(fetch);
@@ -132,7 +132,7 @@ namespace Hammock.Web
                                                             WebRequest request,
                                                             object userState)
         {
-            var fetch = cache.Get<string>(key);
+            var fetch = cache.Get<Stream>(key);
             if (fetch != null)
             {
                 var args = new WebQueryResponseEventArgs(fetch);
@@ -312,59 +312,34 @@ namespace Hammock.Web
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
 #endif
-                    using (var stream = response.GetResponseStream())
-                    {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            var result = reader.ReadToEnd();
-
-                            WebResponse = response;
-
-                            if (store != null)
-                            {
-                                // No expiration specified
-                                if (store is Pair<ICache, string>)
-                                {
-                                    var cache = store as Pair<ICache, string>;
-                                    cache.First.Insert(cache.Second, result);
-                                }
-
-                                // Absolute expiration specified
-                                if (store is Pair<ICache, Pair<string, DateTime>>)
-                                {
-                                    var cache = store as Pair<ICache, Pair<string, DateTime>>;
-                                    cache.First.Insert(cache.Second.First, result, cache.Second.Second);
-                                }
-
-                                // Sliding expiration specified
-                                if (store is Pair<ICache, Pair<string, TimeSpan>>)
-                                {
-                                    var cache = store as Pair<ICache, Pair<string, TimeSpan>>;
-                                    cache.First.Insert(cache.Second.First, result, cache.Second.Second);
-                                }
-                            }
-
-                            // Only send query when caching is complete
-                            var args = new WebQueryResponseEventArgs(result);
-                            OnQueryResponse(args);
-                        }
-                    }
+                    ContentStream = response.GetResponseStream();
                 }
             }
             catch (WebException ex)
             {
-                var result = HandleWebException(ex);
-
-                if(result.IsNullOrBlank())
-                {
-                    var responseArgs = new WebQueryResponseEventArgs(result) { Exception = ex };
-                    OnQueryResponse(responseArgs);
-                }
+                HandleWebException(ex);
             }
         }
 
         private static WebRequest GetAsyncCacheStore(IAsyncResult asyncResult, out object store)
         {
+            /*
+            var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
+            if (state == null)
+            {
+                throw new ArgumentNullException("asyncResult", 
+                                                "The asynchronous post failed to return its state");
+            }
+
+            var request = state.First;
+            if (request == null)
+            {
+                throw new ArgumentNullException("asyncResult", 
+                                                "The asynchronous post failed to return a request");
+            }
+             */
+
+
             WebRequest request;
 
             var noCache = asyncResult.AsyncState as Triplet<WebRequest, object, object>;
@@ -401,6 +376,8 @@ namespace Hammock.Web
         }
 
         private bool _isStreaming;
+        private readonly byte[] _endStreamBytes = Encoding.UTF8.GetBytes("END STREAMING");
+
         public virtual bool IsStreaming
         {
             get
@@ -454,10 +431,7 @@ namespace Hammock.Web
             }
             catch (WebException ex)
             {
-                var result = HandleWebException(ex);
-
-                var responseArgs = new WebQueryResponseEventArgs(result);
-                OnQueryResponse(responseArgs);
+                HandleWebException(ex);
             }
             finally
             {
@@ -471,7 +445,7 @@ namespace Hammock.Web
             }
         }
 
-        public delegate void NewStreamMessage(string message);
+        public delegate void NewStreamMessage(Stream message);
         public event NewStreamMessage NewStreamMessageEvent;
 
         private void StreamImpl(out Stream stream,
@@ -486,28 +460,28 @@ namespace Hammock.Web
                     return;
                 }
 
-                this.NewStreamMessageEvent += new NewStreamMessage(WebQuery_NewStreamMessageEvent);
+                NewStreamMessageEvent += WebQueryNewStreamMessageEvent;
                 _isStreaming = true;
 
                 var count = 0;
                 var results = new List<string>();
                 var start = DateTime.UtcNow;
-                string bufferString = string.Empty;
+                var bufferString = string.Empty;
 
                 while (stream.CanRead)
                 {
-                    byte[] data = new byte[4096];
-                    int read;
+                    var data = new byte[4096];
                     try
                     {
+                        int read;
                         while ((read = stream.Read(data, 0, data.Length)) > 0)
                         {
 
-                            string readString = Encoding.UTF8.GetString(data, 0, read);
+                            var readString = Encoding.UTF8.GetString(data, 0, read);
                             bufferString = ProcessBuffer(bufferString + readString);
                             if (!_isStreaming)
                             {
-                                // [DC] Streaming was cancelling out of band
+                                // [DC] Streaming was cancelled out of band
                                 EndStreaming(request);
                                 return;
                             }
@@ -568,45 +542,45 @@ namespace Hammock.Web
 
         }
 
-        void WebQuery_NewStreamMessageEvent(string message)
+        private void WebQueryNewStreamMessageEvent(Stream message)
         {
-            var responseArgs = new WebQueryResponseEventArgs(message);
-            OnQueryResponse(responseArgs);
+            var args = new WebQueryResponseEventArgs(message);
+            OnQueryResponse(args);
         }
 
         private const char StreamResultDelimiter = '\r';
+
         private string ProcessBuffer(string bufferString)
         {
-            string buffer = bufferString;
-            int delimPos = buffer.IndexOf(StreamResultDelimiter);
+            var buffer = bufferString;
+            var position = buffer.IndexOf(StreamResultDelimiter);
 
-            while (delimPos >= 0)
+            while (position >= 0)
             {
-                string message = buffer.Substring(0, delimPos).Replace(StreamResultDelimiter.ToString(),"");
-                if (buffer.Length <= delimPos + 1)
-                {
-                    buffer = string.Empty;
-                }
-                else
-                {
-                    buffer = buffer.Substring(delimPos + 1);
-                }
+                string message = buffer.Substring(0, position).Replace(StreamResultDelimiter.ToString(),"");
+                var messageBytes = Encoding.UTF8.GetBytes(message);
+
+                buffer = buffer.Length <= position + 1 ?
+                    string.Empty : buffer.Substring(position + 1);
 
                 if (message.Trim().Length > 1 && NewStreamMessageEvent != null)
                 {
-                    NewStreamMessageEvent(message);
+                    NewStreamMessageEvent(new MemoryStream(messageBytes));
                 }
 
-                delimPos = buffer.IndexOf(StreamResultDelimiter);
+                position = buffer.IndexOf(StreamResultDelimiter);
             }
 
             return buffer;
         }
+
         private void EndStreaming(WebRequest request)
         {
             _isStreaming = false;
-            var endArgs = new WebQueryResponseEventArgs("END STREAMING");
-            OnQueryResponse(endArgs);
+            
+            var stream = new MemoryStream(_endStreamBytes);
+            var args = new WebQueryResponseEventArgs(stream);
+            OnQueryResponse(args);
             request.Abort();
         }
 
@@ -662,7 +636,7 @@ namespace Hammock.Web
                     var prefix = cacheScheme.Second.Third;
                     var key = CreateCacheKey(prefix, url);
 
-                    var fetch = cache.Get<string>(key);
+                    var fetch = cache.Get<Stream>(key);
                     if (fetch != null)
                     {
                         var args = new WebQueryResponseEventArgs(fetch);
@@ -692,7 +666,7 @@ namespace Hammock.Web
                         var prefix = cacheScheme.Second.Second.Third;
                         var key = CreateCacheKey(prefix, url);
 
-                        var fetch = cache.Get<string>(key);
+                        var fetch = cache.Get<Stream>(key);
                         if (fetch != null)
                         {
                             var args = new WebQueryResponseEventArgs(fetch);
@@ -722,7 +696,7 @@ namespace Hammock.Web
                             var prefix = cacheScheme.Second.Second.Third;
                             var key = CreateCacheKey(prefix, url);
 
-                            var fetch = cache.Get<string>(key);
+                            var fetch = cache.Get<Stream>(key);
                             if (fetch != null)
                             {
                                 var args = new WebQueryResponseEventArgs(fetch);
@@ -779,19 +753,8 @@ namespace Hammock.Web
 
         protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
         {
-            var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
-            if (state == null)
-            {
-                throw new ArgumentNullException("asyncResult", 
-                                                "The asynchronous post failed to return its state");
-            }
-
-            var request = state.First;
-            if (request == null)
-            {
-                throw new ArgumentNullException("asyncResult", 
-                                                "The asynchronous post failed to return a request");
-            }
+            object store;
+            var request = GetAsyncCacheStore(asyncResult, out store);
 
             try
             {
@@ -807,34 +770,7 @@ namespace Hammock.Web
 #endif
                 WebResponse = response;
 
-                using (var reader = new StreamReader(response.GetResponseStream()))
-                {
-                    var result = reader.ReadToEnd();
-                    if (state.Second != null)
-                    {
-                        var cache = state.Second.First;
-                        var expiry = state.Second.Second;
-                        var url = request.RequestUri.ToString();
-
-                        var prefix = state.Second.Third;
-                        var key = CreateCacheKey(prefix, url);
-
-                        if (expiry is DateTime)
-                        {
-                            // absolute
-                            cache.Insert(key, result, (DateTime) expiry);
-                        }
-
-                        if (expiry is TimeSpan)
-                        {
-                            // sliding
-                            cache.Insert(key, result, (TimeSpan) expiry);
-                        }
-                    }
-
-                    var args = new WebQueryResponseEventArgs(result);
-                    OnQueryResponse(args);
-                }
+                ContentStream = response.GetResponseStream();
             }
             catch (WebException ex)
             {

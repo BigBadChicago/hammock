@@ -792,31 +792,25 @@ namespace Hammock
             var restRequest = tag.First;
             var userState = tag.Third;
 
-            string content;
             var m = new MemoryStream();
-
             using (var stream = webResponse.GetResponseStream())
             {
-                using (var reader = new StreamReader(stream))
+                if (stream != null)
                 {
-                    while (reader.Peek() >= 0)
+                    using (var reader = new StreamReader(stream))
                     {
-                        m.WriteByte((byte)reader.Read());
+                        while (reader.Peek() >= 0)
+                        {
+                            m.WriteByte((byte) reader.Read());
+                        }
                     }
-                    
                 }
             }
             m.Position = 0;
-            using (var reader = new StreamReader(m))
-            {
-                // Just read to the end.
-                content = reader.ReadToEnd();
-            }
-
+            
             var restResponse = new RestResponse<T>
                                    {
-                                       ResponseBytes = m.ToArray(),
-                                       Content = content,
+                                       ContentStream = m,
                                        ContentType = webResponse.ContentType,
                                        ContentLength = webResponse.ContentLength,
                                        StatusCode = restRequest.ExpectStatusCode.HasValue
@@ -862,30 +856,25 @@ namespace Hammock
             var restRequest = tag.First;
             var userState = tag.Third;
 
-            string content;
-            MemoryStream m = new MemoryStream();
-
+            var m = new MemoryStream();
             using (var stream = webResponse.GetResponseStream())
             {
-                using (var reader = new StreamReader(stream))
+                if (stream != null)
                 {
-                    while (reader.Peek() >= 0)
+                    using (var reader = new StreamReader(stream))
                     {
-                        m.WriteByte((byte)reader.Read());
+                        while (reader.Peek() >= 0)
+                        {
+                            m.WriteByte((byte) reader.Read());
+                        }
                     }
-
                 }
             }
             m.Position = 0;
-            using (StreamReader reader = new StreamReader(m))
-            {
-                // Just read to the end.
-                content = reader.ReadToEnd();
-            }
 
             var restResponse = new RestResponse
                                    {
-                                       Content = content,
+                                       ContentStream = m,
                                        ContentType = webResponse.ContentType,
                                        ContentLength = webResponse.ContentLength,
                                        StatusCode = restRequest.ExpectStatusCode.HasValue
@@ -893,7 +882,6 @@ namespace Hammock
                                                         : 0,
                                        StatusDescription = restRequest.ExpectStatusDescription,
                                        ResponseUri = webResponse.ResponseUri,
-                                       ResponseBytes = m.ToArray(),
                                        IsMock = true
                                    };
 
@@ -2163,7 +2151,7 @@ namespace Hammock
             var result = query.Result;
             var response = BuildBaseResponse(result);
 
-            DeserializeEntityBody(result, request, response);
+            DeserializeEntityBody(request, response);
             response.Tag = GetTag(request);
 
             return response;
@@ -2174,7 +2162,7 @@ namespace Hammock
             var result = query.Result;
             var response = BuildBaseResponse<T>(result);
 
-            DeserializeEntityBody(result, request, response);
+            DeserializeEntityBody(request, response);
             response.Tag = GetTag(request);
 
             return response;
@@ -2183,6 +2171,7 @@ namespace Hammock
         private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
                 (response, result) =>
                 {
+                    response.ContentStream = result.ContentStream;
                     response.InnerResponse = result.WebResponse;
                     response.InnerException = result.Exception;
                     response.RequestDate = result.RequestDate;
@@ -2191,10 +2180,8 @@ namespace Hammock
                     response.RequestKeptAlive = result.RequestKeptAlive;
                     response.ResponseDate = result.ResponseDate;
                     response.ResponseUri = result.ResponseUri;
-                    response.ResponseBytes = result.ByteResponse;
                     response.StatusCode = (HttpStatusCode)result.ResponseHttpStatusCode;
                     response.StatusDescription = result.ResponseHttpStatusDescription;
-                    response.Content = result.Response;
                     response.ContentType = result.ResponseType;
                     response.ContentLength = result.ResponseLength;
                     response.IsMock = result.IsMock;
@@ -2235,20 +2222,22 @@ namespace Hammock
             return response;
         }
 
-        private void DeserializeEntityBody(WebQueryResult result, RestRequest request, RestResponse response)
+        private void DeserializeEntityBody(RestRequest request, RestResponse response)
         {
             var deserializer = request.Deserializer ?? Deserializer;
-            if (deserializer != null && !result.Response.IsNullOrBlank() && request.ResponseEntityType != null)
+            
+            if (deserializer != null && request.ResponseEntityType != null && response.ContentStream != null)
             {
-                response.ContentEntity = deserializer.Deserialize(result.Response, request.ResponseEntityType);
+                response.ContentEntity = deserializer.Deserialize(response.Content, request.ResponseEntityType);
             }
         }
-        private void DeserializeEntityBody<T>(WebQueryResult result, RestBase request, RestResponse<T> response)
+
+        private void DeserializeEntityBody<T>(RestBase request, RestResponse<T> response)
         {
             var deserializer = request.Deserializer ?? Deserializer;
-            if (deserializer != null && !result.Response.IsNullOrBlank())
+            if (deserializer != null && response.ContentStream != null)
             {
-                response.ContentEntity = deserializer.Deserialize<T>(result.Response);
+                response.ContentEntity = deserializer.Deserialize<T>(response.Content);
             }
         }
 

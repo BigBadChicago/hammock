@@ -1,22 +1,23 @@
 using System;
+using System.IO;
 using System.Net;
 
 namespace Hammock.Web
 {
     public class WebQueryResponseEventArgs : EventArgs
     {
-        public WebQueryResponseEventArgs(string response)
+        public WebQueryResponseEventArgs(Stream response)
         {
             Response = response;
         }
 
-        public WebQueryResponseEventArgs(string response, WebException exception)
+        public WebQueryResponseEventArgs(Stream response, WebException exception)
         {
             Response = response;
             Exception = exception;
         }
 
-        public string Response { get; set; }
+        public Stream Response { get; set; }
         public WebException Exception { get; set; }
     }
 }
