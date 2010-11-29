@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OAuthOutOfBrowser")]
+[assembly: AssemblyTitle("Demo.WindowsPhone")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("OAuthOutOfBrowser")]
+[assembly: AssemblyProduct("Demo.WindowsPhone")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("7b51d550-b7f8-4313-b980-6be407c9cf47")]
+[assembly: Guid("e2d2d140-7e37-49a2-a885-dba65523944e")]
 
 // Version information for an assembly consists of the following four values:
 //

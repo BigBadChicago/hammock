@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -18,6 +19,16 @@ namespace Hammock.Tests
             _consumerSecret = ConfigurationManager.AppSettings["OAuthConsumerSecret"];
             _accessToken = ConfigurationManager.AppSettings["OAuthAccessToken"];
             _tokenSecret = ConfigurationManager.AppSettings["OAuthTokenSecret"];
+        }
+
+        [Test]
+        public void foo()
+        {
+            var client = new RestClient();
+            client.Authority = "http://stackauth.com/1.0/sites";
+            var response = client.Request();
+            Console.WriteLine(response.Content);
+
         }
     }
 }

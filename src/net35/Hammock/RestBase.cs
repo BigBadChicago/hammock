@@ -125,7 +125,7 @@ namespace Hammock
         public virtual ITaskState RetryState { get; set; }
         public virtual StreamOptions StreamOptions { get; set; }
         public virtual Func<string> CacheKeyFunction { get; set; }
-        public virtual DecompressionMethods DecompressionMethods { get; set; }
+        public virtual DecompressionMethods? DecompressionMethods { get; set; }
         public virtual IWebQueryInfo Info { get; set; }
         public virtual string Path { get; set; }
         public virtual object Tag { get; set; }

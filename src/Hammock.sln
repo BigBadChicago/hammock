@@ -1,16 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{3A86F2B4-793D-429A-ACB6-69418AB5FCB9}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\README = ..\..\README
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{D3CCC041-59CC-438B-9781-78F1F1D7272E}"
-	ProjectSection(SolutionItems) = preProject
-		BuildWindowsAndRunTests.proj = BuildWindowsAndRunTests.proj
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharpZipLib", "SharpZipLib", "{0D6CBA8E-3846-4559-AA4E-AEE3373A03CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock", "net35\Hammock\Hammock.csproj", "{6679078A-C585-4CB6-96E9-908DBDAA2716}"
@@ -58,6 +48,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".NET 2.0", ".NET 2.0", "{6052AEDE-F8B1-4E24-B791-DBB7FF9621D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock", "net20\Hammock\Hammock.csproj", "{80647B8C-E162-4E34-A758-590280F11B97}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9AE58B14-D363-4A3E-B9E3-005FCBCEA7AC}"
+	ProjectSection(SolutionItems) = preProject
+		net35\BuildWindowsAndRunTests.proj = net35\BuildWindowsAndRunTests.proj
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.WindowsPhone", "Demo.WindowsPhone\Demo.WindowsPhone.csproj", "{87A3613D-924C-4262-8038-261F9AD91863}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -203,6 +200,18 @@ Global
 		{80647B8C-E162-4E34-A758-590280F11B97}.Mono|Any CPU.Build.0 = Release|Any CPU
 		{80647B8C-E162-4E34-A758-590280F11B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80647B8C-E162-4E34-A758-590280F11B97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.ClientProfiles|Any CPU.ActiveCfg = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.ClientProfiles|Any CPU.Build.0 = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.ClientProfiles|Any CPU.Deploy.0 = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Mono|Any CPU.ActiveCfg = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Mono|Any CPU.Build.0 = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Mono|Any CPU.Deploy.0 = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87A3613D-924C-4262-8038-261F9AD91863}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -223,6 +232,7 @@ Global
 		{7090D3D7-90C3-4EB1-BB62-716046673F29} = {3FB92FF7-A9F8-4F15-864B-69E7EBC3E16B}
 		{DBEBA14C-000D-464E-8CC8-CF44CAE866F4} = {3FB92FF7-A9F8-4F15-864B-69E7EBC3E16B}
 		{3059FD1C-4B4B-4460-A0D4-53C84CCE6CAC} = {3FB92FF7-A9F8-4F15-864B-69E7EBC3E16B}
+		{87A3613D-924C-4262-8038-261F9AD91863} = {3FB92FF7-A9F8-4F15-864B-69E7EBC3E16B}
 		{5953279F-F478-4D5F-9906-03D56CE2DA2D} = {7090D3D7-90C3-4EB1-BB62-716046673F29}
 		{B96C231F-B8CA-4426-AC65-19D2826CC965} = {7090D3D7-90C3-4EB1-BB62-716046673F29}
 		{BF04A546-D681-4F5A-AC41-CFC67CAEC66E} = {7090D3D7-90C3-4EB1-BB62-716046673F29}

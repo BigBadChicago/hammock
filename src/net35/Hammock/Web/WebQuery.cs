@@ -25,6 +25,7 @@ namespace Hammock.Web
 {
     public abstract partial class WebQuery: IDisposable
     {
+        private const string AcceptEncodingHeader = "Accept-Encoding";
         private static readonly object _sync = new object();
         
         public virtual Encoding Encoding { get; protected internal set; }
@@ -50,7 +51,7 @@ namespace Hammock.Web
         public virtual WebMethod Method { get; set; }
         public virtual string Proxy { get; set; }
         public virtual string AuthorizationHeader { get; internal set; }
-        public DecompressionMethods DecompressionMethods { get; set; }
+        public DecompressionMethods? DecompressionMethods { get; set; }
         public virtual TimeSpan? RequestTimeout { get; set; }
         public virtual WebQueryResult Result { get; internal set; }
         public virtual object UserState { get; internal set; }
@@ -420,43 +421,60 @@ namespace Hammock.Web
 
             SetUserAgent(request);
 
-            if (DecompressionMethods != DecompressionMethods.None)
+            if (DecompressionMethods.HasValue)
             {
+                var decompressionMethods = DecompressionMethods.Value;
+
 #if !SILVERLIGHT && !WindowsPhone
-                request.AutomaticDecompression = DecompressionMethods;
+                request.AutomaticDecompression = decompressionMethods;
 #else
 
 #if !WindowsPhone
                 if (HasElevatedPermissions)
                 {
 #endif
-                
-                    switch (DecompressionMethods)
-                    {
-                        case DecompressionMethods.GZip:
-                            request.Headers["AcceptEncoding"] = "gzip";
-                            break;
-                        case DecompressionMethods.Deflate:
-                            request.Headers["AcceptEncoding"] = "deflate";
-                            break;
-                        case DecompressionMethods.GZip | DecompressionMethods.Deflate:
-                            request.Headers["AcceptEncoding"] = "gzip,deflate";
-                            break;
-                    }
+                /* SL3 profile prohibits setting Accept-Encoding :(
+                switch (decompressionMethods)
+                {
+                    case Silverlight.Compat.DecompressionMethods.GZip:
+                        request.Headers[AcceptEncodingHeader] = "gzip";
+                        break;
+                    case Silverlight.Compat.DecompressionMethods.Deflate:
+                        request.Headers[AcceptEncodingHeader] = "deflate";
+                        break;
+                    case Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate:
+                        request.Headers[AcceptEncodingHeader] = "gzip,deflate";
+                        break;
+                }
+                */
+
+                switch (decompressionMethods)
+                {
+                    case Silverlight.Compat.DecompressionMethods.GZip:
+                        request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = "gzip";
+                        break;
+                    case Silverlight.Compat.DecompressionMethods.Deflate:
+                        request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = "deflate";
+                        break;
+                    case Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate:
+                        request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = "gzip,deflate";
+                        break;
+                }
+
 #if !WindowsPhone
                 }
                 else
                 {
-                    switch (DecompressionMethods)
+                    switch (decompressionMethods)
                     {
-                        case DecompressionMethods.GZip:
-                            request.Headers[SilverlightAcceptEncodingHeader] = "gzip";
+                        case Silverlight.Compat.DecompressionMethods.GZip:
+                            request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = "gzip";
                             break;
-                        case DecompressionMethods.Deflate:
-                            request.Headers[SilverlightAcceptEncodingHeader] = "deflate";
+                        case Silverlight.Compat.DecompressionMethods.Deflate:
+                            request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = "deflate";
                             break;
-                        case DecompressionMethods.GZip | DecompressionMethods.Deflate:
-                            request.Headers[SilverlightAcceptEncodingHeader] = "gzip,deflate";
+                        case Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate:
+                            request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = "gzip,deflate";
                             break;
                     }
                 }
@@ -471,9 +489,7 @@ namespace Hammock.Web
                 request.Timeout = (int)RequestTimeout.Value.TotalMilliseconds;
                 request.ReadWriteTimeout = (int)RequestTimeout.Value.TotalMilliseconds;
             }
-#endif
-            
-#if !SILVERLIGHT
+
             if (KeepAlive)
             {
                 request.KeepAlive = true;
@@ -521,7 +537,7 @@ namespace Hammock.Web
                         continue;
                     }
 
-                    if(header.Key.EqualsIgnoreCase("Accept-Encoding"))
+                    if(header.Key.EqualsIgnoreCase(AcceptEncodingHeader))
                     {
                         if (HasElevatedPermissions)
                         {

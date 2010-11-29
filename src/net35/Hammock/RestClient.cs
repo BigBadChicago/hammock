@@ -484,6 +484,11 @@ namespace Hammock
             return request.Timeout ?? Timeout;
         }
 
+        private DecompressionMethods? GetDecompressionMethods(RestBase request)
+        {
+            return request.DecompressionMethods ?? DecompressionMethods;
+        }
+
         private WebMethod GetWebMethod(RestBase request)
         {
             var method = !request.Method.HasValue
@@ -1506,6 +1511,7 @@ namespace Hammock
 
             SignalTasks(request, result);
         }
+
         private void CompleteWithQuery(WebQuery query,
                                        RestRequest request,
                                        RestCallback callback,
@@ -2236,7 +2242,6 @@ namespace Hammock
         private void DeserializeEntityBody(RestRequest request, RestResponse response)
         {
             var deserializer = request.Deserializer ?? Deserializer;
-            
             if (deserializer != null && request.ResponseEntityType != null && response.ContentStream != null)
             {
                 response.ContentEntity = deserializer.Deserialize(response.Content, request.ResponseEntityType);
@@ -2285,7 +2290,7 @@ namespace Hammock
             query.Method = GetWebMethod(request);
             query.Proxy = GetProxy(request);
             query.RequestTimeout = GetTimeout(request);
-            query.DecompressionMethods = request.DecompressionMethods | DecompressionMethods;
+            query.DecompressionMethods = GetDecompressionMethods(request);
             query.PostContent = GetPostContent(request);
             query.Encoding = GetEncoding(request);
 

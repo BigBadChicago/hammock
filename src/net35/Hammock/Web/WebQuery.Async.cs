@@ -305,13 +305,43 @@ namespace Hammock.Web
                 using (response)
                 {
 #if SILVERLIGHT
-                    if(DecompressionMethods == DecompressionMethods.GZip || 
-                       DecompressionMethods == DecompressionMethods.Deflate)
+                    if (DecompressionMethods == Silverlight.Compat.DecompressionMethods.GZip ||
+                        DecompressionMethods == Silverlight.Compat.DecompressionMethods.Deflate ||
+                        DecompressionMethods == (Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate)
+                        )
                     {
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
 #endif
                     ContentStream = response.GetResponseStream();
+
+                    if (store != null)
+                    {
+                        // No expiration specified
+                        if (store is Pair<ICache, string>)
+                        {
+                            var cache = store as Pair<ICache, string>;
+                            cache.First.Insert(cache.Second, ContentStream);
+                        }
+
+                        // Absolute expiration specified
+                        if (store is Pair<ICache, Pair<string, DateTime>>)
+                        {
+                            var cache = store as Pair<ICache, Pair<string, DateTime>>;
+                            cache.First.Insert(cache.Second.First, ContentStream, cache.Second.Second);
+                        }
+
+                        // Sliding expiration specified
+                        if (store is Pair<ICache, Pair<string, TimeSpan>>)
+                        {
+                            var cache = store as Pair<ICache, Pair<string, TimeSpan>>;
+                            cache.First.Insert(cache.Second.First, ContentStream, cache.Second.Second);
+                        }
+                    }
+
+                    // Only send query when caching is complete
+                    var args = new WebQueryResponseEventArgs(ContentStream);
+                    OnQueryResponse(args);
                 }
             }
             catch (WebException ex)
@@ -419,8 +449,10 @@ namespace Hammock.Web
                 using (response = request.EndGetResponse(asyncResult))
                 {
 #if SILVERLIGHT
-                    if (DecompressionMethods == DecompressionMethods.GZip ||
-                        DecompressionMethods == DecompressionMethods.Deflate)
+                    if (DecompressionMethods == Silverlight.Compat.DecompressionMethods.GZip ||
+                        DecompressionMethods == Silverlight.Compat.DecompressionMethods.Deflate ||
+                        DecompressionMethods == (Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate)
+                        )
                     {
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
@@ -908,8 +940,20 @@ namespace Hammock.Web
 
         protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
         {
-            object store;
-            var request = GetAsyncCacheStore(asyncResult, out store);
+            var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
+            if (state == null)
+            {
+                throw new ArgumentNullException("asyncResult",
+                                                "The asynchronous post failed to return its state");
+            }
+
+            var request = state.First;
+            if (request == null)
+            {
+                throw new ArgumentNullException("asyncResult",
+                                                "The asynchronous post failed to return a request");
+            }
+
 
             try
             {
@@ -917,8 +961,10 @@ namespace Hammock.Web
                 var response = request.EndGetResponse(asyncResult);
 
 #if SILVERLIGHT
-                if (DecompressionMethods == DecompressionMethods.GZip ||
-                    DecompressionMethods == DecompressionMethods.Deflate)
+                if (DecompressionMethods == Silverlight.Compat.DecompressionMethods.GZip ||
+                    DecompressionMethods == Silverlight.Compat.DecompressionMethods.Deflate ||
+                    DecompressionMethods == (Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate)
+                    )
                 {
                     response = new GzipHttpWebResponse((HttpWebResponse)response);
                 }
@@ -926,6 +972,31 @@ namespace Hammock.Web
                 WebResponse = response;
 
                 ContentStream = response.GetResponseStream();
+                if (state.Second != null)
+                {
+                    var cache = state.Second.First;
+                    var expiry = state.Second.Second;
+                    var url = request.RequestUri.ToString();
+
+                    var prefix = state.Second.Third;
+                    var key = CreateCacheKey(prefix, url);
+
+                    if (expiry is DateTime)
+                    {
+                        // absolute
+                        cache.Insert(key, ContentStream, (DateTime)expiry);
+                    }
+
+                    if (expiry is TimeSpan)
+                    {
+                        // sliding
+                        cache.Insert(key, ContentStream, (TimeSpan)expiry);
+                    }
+                }
+
+                var args = new WebQueryResponseEventArgs(ContentStream);
+                OnQueryResponse(args);
+
             }
             catch (WebException ex)
             {
@@ -1102,7 +1173,7 @@ namespace Hammock.Web
             var state = OnGetStreamQueryRequest(url, request, duration, resultCount);
 
 #if SILVERLIGHT
-            HttpWebRequest httpRequest = request as HttpWebRequest;
+            var httpRequest = request as HttpWebRequest;
             if (httpRequest != null)
             {
                 httpRequest.AllowReadStreamBuffering = false;
@@ -1160,7 +1231,7 @@ namespace Hammock.Web
             var state = OnPostStreamQueryRequest(url, request, content, duration, resultCount);
 
 #if SILVERLIGHT
-            HttpWebRequest httpRequest = request as HttpWebRequest;
+            var httpRequest = request as HttpWebRequest;
             if (httpRequest != null)
             {
                 httpRequest.AllowReadStreamBuffering = false;
