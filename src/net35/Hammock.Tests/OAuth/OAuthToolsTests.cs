@@ -145,7 +145,7 @@ namespace Hammock.Tests.OAuth
                                              }
                                          });
             var workerThreads = new Thread[threads];
-            for (int i = 0; i < threads; i++)
+            for (var i = 0; i < threads; i++)
             {
                 workerThreads[i] = new Thread(ts) { IsBackground = false, Name = "thread" + i };
                 workerThreads[i].Start();
