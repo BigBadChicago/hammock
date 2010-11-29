@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using Hammock.Authentication.Basic;
 using NUnit.Framework;
 
@@ -56,7 +57,6 @@ namespace Hammock.Tests
             Assert.IsNotNull(response);
         }
 
-
         [Test]
         [Ignore("Makes a live update to a Twitter profile")]
         [Category("MultiPart")]
@@ -91,22 +91,27 @@ namespace Hammock.Tests
                 Authority = "http://yfrog.com/api",
                 UserAgent = "Hammock"
             };
+            client.FileProgress += RequestFileProgress;
 
             var request = new RestRequest
             {
                 Path = "upload"
             };
-
-            request.AddFile("media", "failwhale", "twitterProfilePhoto.jpg", "image/jpeg");
-       
-            request.AddField("username", _twitterUsername.ToLower() );
+            
+            request.AddFile("media", "failwhale", "failwhale.jpg", "image/jpeg");
+            request.AddField("username", _twitterUsername.ToLower());
             request.AddField("password", _twitterPassword);
             request.AddField("message", "Bazinga!");
             
-
             var response = client.Request(request);
             Assert.IsNotNull(response);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK); 
+        }
+
+        private static void RequestFileProgress(object sender, FileProgressEventArgs e)
+        {
+            Trace.WriteLine(e.FileName + ":" + e.BytesWritten + " / " + e.TotalBytes);
+            Assert.IsTrue(e.BytesWritten <= e.TotalBytes, "File upload process read too many bytes!");
         }
     }
 }

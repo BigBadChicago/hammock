@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -28,19 +29,6 @@ namespace Hammock
         private byte[] _postContent;
         private TaskOptions _taskOptions;
         private RetryPolicy _retryPolicy;
-
-        public WebParameterCollection GetAllHeaders()
-        {
-            var headers = new WebParameterCollection();
-            
-            var parameters = Headers.AllKeys.Select(key => new WebPair(key, Headers[key]));
-            foreach (var parameter in parameters)
-            {
-                headers.Add(parameter.Name, parameter.Value);
-            }
-
-            return headers;
-        }
 
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal Encoding Encoding { get; set; }
@@ -94,26 +82,29 @@ namespace Hammock
             get { return _retryPolicy; }
             set
             {
-                if (_retryPolicy != value)
+                if (_retryPolicy == value)
                 {
-                    _retryPolicy = value;
-                    RetryState = new TaskState();
+                    return;
                 }
-
+                _retryPolicy = value;
+                RetryState = new TaskState();
             }
         }
+
         public virtual TaskOptions TaskOptions
         {
             get { return _taskOptions; }
             set
             {
-                if (_taskOptions != value)
+                if (_taskOptions == value)
                 {
-                    _taskOptions = value;
-                    TaskState = new TaskState();
+                    return;
                 }
+                _taskOptions = value;
+                TaskState = new TaskState();
             }
         }
+
         public virtual bool IsFirstIteration
         {
             get
@@ -139,35 +130,47 @@ namespace Hammock
         public virtual string Path { get; set; }
         public virtual object Tag { get; set; }
 
-        public void AddHeader(string name, string value)
+        public virtual void AddHeader(string name, string value)
         {
             Headers.Add(name, value);
         }
 
-        public void AddParameter(string name, string value)
+        public virtual void AddParameter(string name, string value)
         {
             Parameters.Add(name, value);
         }
 
-        public void AddField(string name, string value)
+        public virtual void AddField(string name, string value)
         {
             var field = new HttpPostParameter(name, value);
             PostParameters.Add(field);
         }
 
-        public void AddFile(string name, string fileName, string filePath)
+        public virtual void AddFile(string name, string fileName, string filePath)
         {
             var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, "application/octet-stream");
             PostParameters.Add(parameter);
         }
 
-        public void AddFile(string name, string fileName, string filePath, string contentType)
+        public virtual void AddFile(string name, string fileName, string filePath, string contentType)
         {
             var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, contentType);
             PostParameters.Add(parameter);
         }
 
-        public void AddPostContent(byte[] content)
+        public virtual void AddFile(string name, string fileName, Stream stream)
+        {
+            var parameter = HttpPostParameter.CreateFile(name, fileName, stream, "application/octet-stream");
+            PostParameters.Add(parameter);
+        }
+
+        public virtual void AddFile(string name, string fileName, Stream stream, string contentType)
+        {
+            var parameter = HttpPostParameter.CreateFile(name, fileName, stream, contentType);
+            PostParameters.Add(parameter);
+        }
+
+        public virtual void AddPostContent(byte[] content)
         {
             if (PostContent == null)
             {
@@ -185,5 +188,12 @@ namespace Hammock
                 PostContent = final;
             }
         }
+    }
+
+    public class FileProgressEventArgs : EventArgs
+    {
+        public virtual string FileName { get; set; }
+        public virtual long BytesWritten { get; set; }
+        public virtual long TotalBytes { get; set; }
     }
 }

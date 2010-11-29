@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Hammock.Web
 {
     public class HttpPostParameter : WebParameter
@@ -7,10 +9,11 @@ namespace Hammock.Web
 
         }
 
-        public HttpPostParameterType Type { get; private set; }
-        public string FileName { get; private set; }
-        public string FilePath { get; private set; }
-        public string ContentType { get; private set; }
+        public virtual HttpPostParameterType Type { get; private set; }
+        public virtual string FileName { get; private set; }
+        public virtual string FilePath { get; private set; }
+        public virtual Stream FileStream { get; set; }
+        public virtual string ContentType { get; private set; }
        
         public static HttpPostParameter CreateFile(string name, 
                                                    string fileName, 
@@ -24,6 +27,22 @@ namespace Hammock.Web
                                     FilePath = filePath,
                                     ContentType = contentType,
                                 };
+
+            return parameter;
+        }
+
+        public static HttpPostParameter CreateFile(string name, 
+                                                   string fileName, 
+                                                   Stream fileStream, 
+                                                   string contentType)
+        {
+            var parameter = new HttpPostParameter(name, string.Empty)
+            {
+                Type = HttpPostParameterType.File,
+                FileName = fileName,
+                FileStream = fileStream,
+                ContentType = contentType,
+            };
 
             return parameter;
         }

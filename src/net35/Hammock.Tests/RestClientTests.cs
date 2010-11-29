@@ -210,6 +210,8 @@ namespace Hammock.Tests
             var response = client.Request(request);
 
             Assert.IsNotNull(response.ContentBytes);
+            Assert.IsNotNull(response.Content, "Stream wasn't safeguarded against closure!");
+
             Assert.AreEqual(response.ContentLength, response.ContentBytes.LongLength);
         }
 

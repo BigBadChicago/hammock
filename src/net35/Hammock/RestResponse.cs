@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using Hammock.Extensions;
-using Hammock.Web;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -21,7 +20,7 @@ namespace Hammock
         {
             get
             {
-                if(_contentBytes == null && ContentStream != null)
+                if(_content == null && ContentStream != null)
                 {
                     ContentStream = ReplaceContentStreamWithMemoryStream();
                     using (var reader = new StreamReader(ContentStream))
@@ -41,6 +40,7 @@ namespace Hammock
             {
                 if(_contentBytes == null && ContentStream != null)
                 {
+                    ContentStream = ReplaceContentStreamWithMemoryStream();
                     _contentBytes = ReadFully(ContentStream);
                     if(ContentStream.CanSeek)
                     {
@@ -122,28 +122,13 @@ namespace Hammock
             return ret;
         }
 
-        private string GetContentFromStream()
-        {
-            string content = null;
-            if (ContentStream != null)
-            {
-                // [DC]: Fixes reported issue with streaming
-                // [DC]: The original stream is no longer viable; replace with a memory stream
-                ContentStream = ReplaceContentStreamWithMemoryStream();
-
-                using (var reader = new StreamReader(ContentStream))
-                {
-                    content = reader.ReadToEnd();
-                }
-
-                ContentStream.Position = 0;
-            }
-
-            return content;
-        }
-
         private Stream ReplaceContentStreamWithMemoryStream()
         {
+            if(ContentStream is DurableMemoryStream)
+            {
+                return ContentStream;
+            }
+
             var buffer = new byte[4096];
             var stream = new MemoryStream();
             var count = 0;

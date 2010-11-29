@@ -7,7 +7,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using Hammock.Caching;
-using Hammock.Extensions;
 using Hammock.Web.Mocks;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -619,7 +618,7 @@ namespace Hammock.Web
         protected virtual void PostAsyncRequestCallback(IAsyncResult asyncResult)
         {
             WebRequest request;
-            byte[] content;
+            byte[] post;
             object userState;
             Triplet<ICache, object, string> store;
 
@@ -645,14 +644,14 @@ namespace Hammock.Web
                     }
 
                     request = cacheScheme.First;
-                    content = cacheScheme.Second.First;
+                    post = cacheScheme.Second.First;
                     userState = cacheScheme.Third;
                     store = new Triplet<ICache, object, string>
-                                {
-                                    First = cache,
-                                    Second = null,
-                                    Third = prefix
-                                };
+                    {
+                        First = cache,
+                        Second = null,
+                        Third = prefix
+                    };
                 }
                 else
                     // Absolute expiration specified
@@ -675,14 +674,14 @@ namespace Hammock.Web
                         }
 
                         request = cacheScheme.First;
-                        content = cacheScheme.Second.First;
+                        post = cacheScheme.Second.First;
                         userState = cacheScheme.Third;
                         store = new Triplet<ICache, object, string>
-                                    {
-                                        First = cache,
-                                        Second = expiry,
-                                        Third = prefix
-                                    };
+                        {
+                            First = cache,
+                            Second = expiry,
+                            Third = prefix
+                        };
                     }
                     else
                         // Sliding expiration specified
@@ -705,14 +704,14 @@ namespace Hammock.Web
                             }
 
                             request = cacheScheme.First;
-                            content = cacheScheme.Second.First;
+                            post = cacheScheme.Second.First;
                             userState = cacheScheme.Third;
                             store = new Triplet<ICache, object, string>
-                                        {
-                                            First = cache,
-                                            Second = expiry,
-                                            Third = prefix
-                                        };
+                            {
+                                First = cache,
+                                Second = expiry,
+                                Third = prefix
+                            };
                         }
                         else
                         {
@@ -724,7 +723,7 @@ namespace Hammock.Web
             else
             {
                 request = state.First;
-                content = state.Second;
+                post = state.Second;
                 userState = state.Third;
                 store = null;
             }
@@ -732,12 +731,168 @@ namespace Hammock.Web
             // No cached response
             using (var stream = request.EndGetRequestStream(asyncResult))
             {
-                if (content != null)
+                if (post != null)
                 {
-                    stream.Write(content, 0, content.Length);
+                    stream.Write(post, 0, post.Length);
                     stream.Flush();
                 }
                 stream.Close();
+
+#if TRACE
+                var encoding = Encoding ?? new UTF8Encoding();
+                if (post != null)
+                {
+                    Trace.WriteLine(encoding.GetString(post, 0, post.Length));
+                }
+#endif
+                var inner = request.BeginGetResponse(PostAsyncResponseCallback,
+                                         new Triplet<WebRequest, Triplet<ICache, object, string>, object>
+                                         {
+                                             First = request,
+                                             Second = store,
+                                             Third = userState
+                                         });
+
+                RegisterAbortTimer(request, new WebQueryAsyncResult { InnerResult = inner });
+            }
+        }
+
+        protected virtual void PostAsyncRequestCallbackMultiPart(IAsyncResult asyncResult)
+        {
+            WebRequest request;
+            string boundary;
+            IEnumerable<HttpPostParameter> parameters;
+            object userState;
+            Triplet<ICache, object, string> store;
+
+            var state = asyncResult.AsyncState as Triplet<WebRequest, Pair<string, IEnumerable<HttpPostParameter>>, object>;
+            if (state == null)
+            {
+                // No expiration specified
+                if (asyncResult is Triplet<WebRequest, Triplet<Pair<string, IEnumerable<HttpPostParameter>>, ICache, string>, object>)
+                {
+                    #region No Expiration
+                    var cacheScheme = (Triplet<WebRequest, Triplet<Pair<string, IEnumerable<HttpPostParameter>>, ICache, string>, object>)asyncResult;
+                    var cache = cacheScheme.Second.Second;
+
+                    var url = cacheScheme.First.RequestUri.ToString();
+                    var prefix = cacheScheme.Second.Third;
+                    var key = CreateCacheKey(prefix, url);
+
+                    var fetch = cache.Get<Stream>(key);
+                    if (fetch != null)
+                    {
+                        var args = new WebQueryResponseEventArgs(fetch);
+                        OnQueryResponse(args);
+                        return;
+                    }
+
+                    request = cacheScheme.First;
+                    boundary = cacheScheme.Second.First.First;
+                    parameters = cacheScheme.Second.First.Second;
+                    userState = cacheScheme.Third;
+                    store = new Triplet<ICache, object, string>
+                                {
+                                    First = cache,
+                                    Second = null,
+                                    Third = prefix
+                                };
+                    #endregion
+                }
+                else
+                    // Absolute expiration specified
+                    if (asyncResult is Triplet<WebRequest, Pair<Pair<string, IEnumerable<HttpPostParameter>>, Triplet<ICache, DateTime, string>>, object>)
+                    {
+                        #region Absolute Expiration
+                        var cacheScheme = (Triplet<WebRequest, Pair<Pair<string, IEnumerable<HttpPostParameter>>, Triplet<ICache, DateTime, string>>, object>)asyncResult;
+                        var url = cacheScheme.First.RequestUri.ToString();
+                        var cache = cacheScheme.Second.Second.First;
+                        var expiry = cacheScheme.Second.Second.Second;
+
+                        var prefix = cacheScheme.Second.Second.Third;
+                        var key = CreateCacheKey(prefix, url);
+
+                        var fetch = cache.Get<Stream>(key);
+                        if (fetch != null)
+                        {
+                            var args = new WebQueryResponseEventArgs(fetch);
+                            OnQueryResponse(args);
+                            return;
+                        }
+
+                        request = cacheScheme.First;
+                        boundary = cacheScheme.Second.First.First;
+                        parameters = cacheScheme.Second.First.Second;
+                        userState = cacheScheme.Third;
+                        store = new Triplet<ICache, object, string>
+                                    {
+                                        First = cache,
+                                        Second = expiry,
+                                        Third = prefix
+                                    };
+                        #endregion
+                    }
+                    else
+                        // Sliding expiration specified
+                        if (asyncResult is Triplet<WebRequest, Pair<Pair<string, IEnumerable<HttpPostParameter>>, Triplet<ICache, TimeSpan, string>>, object>)
+                        {
+                            #region Sliding Expiration
+                            var cacheScheme = (Triplet<WebRequest, Pair<Pair<string, IEnumerable<HttpPostParameter>>, Triplet<ICache, TimeSpan, string>>, object>)asyncResult;
+                            var url = cacheScheme.First.RequestUri.ToString();
+                            var cache = cacheScheme.Second.Second.First;
+                            var expiry = cacheScheme.Second.Second.Second;
+
+                            var prefix = cacheScheme.Second.Second.Third;
+                            var key = CreateCacheKey(prefix, url);
+
+                            var fetch = cache.Get<Stream>(key);
+                            if (fetch != null)
+                            {
+                                var args = new WebQueryResponseEventArgs(fetch);
+                                OnQueryResponse(args);
+                                return;
+                            }
+
+                            request = cacheScheme.First;
+                            boundary = cacheScheme.Second.First.First;
+                            parameters = cacheScheme.Second.First.Second;
+                            userState = cacheScheme.Third;
+                            store = new Triplet<ICache, object, string>
+                                        {
+                                            First = cache,
+                                            Second = expiry,
+                                            Third = prefix
+                                        };
+                            #endregion
+                        }
+                        else
+                        {
+                            // Unrecognized state signature
+                            throw new ArgumentNullException("asyncResult",
+                                                            "The asynchronous post failed to return its state");
+                        }
+            }
+            else
+            {
+                request = state.First;
+                boundary = state.Second.First;
+                parameters = state.Second.Second;
+                userState = state.Third;
+                store = null;
+            }
+
+#if !Smartphone
+            var encoding = Encoding ?? Encoding.GetEncoding("ISO-8859-1");
+#else
+            var encoding = Encoding ?? Encoding.GetEncoding(1252);
+#endif
+
+            // No cached response
+            using (var requestStream = request.EndGetRequestStream(asyncResult))
+            {
+                WriteMultiPartImpl(
+                        parameters, boundary, encoding, requestStream
+                        );
 
                 var inner = request.BeginGetResponse(PostAsyncResponseCallback,
                                          new Triplet<WebRequest, Triplet<ICache, object, string>, object>
@@ -808,21 +963,24 @@ namespace Hammock.Web
         {
             WebResponse = null;
 
-            byte[] content;
+            string boundary;
+            var request = BuildMultiPartFormRequest(method, url, parameters, out boundary);
 
-            var request = BuildMultiPartFormRequest(method, url, parameters, out content);
-
-            var state = new Triplet<WebRequest, byte[], object>
+            var state = new Triplet<WebRequest, Pair<string, IEnumerable<HttpPostParameter>>, object>
                             {
                                 First = request,
-                                Second = content,
+                                Second = new Pair<string, IEnumerable<HttpPostParameter>>
+                                             {
+                                                 First = boundary,
+                                                 Second = parameters
+                                             },
                                 Third = userState
                             };
             var args = new WebQueryRequestEventArgs(url);
 
             OnQueryRequest(args);
             
-            var inner = request.BeginGetRequestStream(PostAsyncRequestCallback, state);
+            var inner = request.BeginGetRequestStream(PostAsyncRequestCallbackMultiPart, state);
             var result = new WebQueryAsyncResult { InnerResult = inner };
             RegisterAbortTimer(request, result);
             return result;

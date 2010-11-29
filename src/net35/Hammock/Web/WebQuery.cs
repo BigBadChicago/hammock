@@ -26,7 +26,7 @@ namespace Hammock.Web
     public abstract partial class WebQuery: IDisposable
     {
         private static readonly object _sync = new object();
-
+        
         public virtual Encoding Encoding { get; protected internal set; }
         public virtual IWebQueryInfo Info { get; protected set; }
         public virtual string UserAgent { get; protected internal set; }
@@ -921,6 +921,15 @@ namespace Hammock.Web
             }
         }
 
+        internal virtual event EventHandler<PostProgressEventArgs> PostProgress;
+        internal virtual void OnPostProgress(PostProgressEventArgs args)
+        {
+            var handler = PostProgress;
+            if (handler != null)
+            {
+                handler(this, args);
+            }
+        }
 #if !SILVERLIGHT
         protected virtual void ExecuteGetDeleteHeadOptions(GetDeleteHeadOptions method, string url, out WebException exception)
         {
@@ -958,13 +967,11 @@ namespace Hammock.Web
         }
         
 #endif
-        protected virtual WebRequest BuildMultiPartFormRequest(PostOrPut method, string url,
-                                                               IEnumerable<HttpPostParameter> parameters,
-                                                               out byte[] bytes)
+        protected virtual WebRequest BuildMultiPartFormRequest(PostOrPut method, string url, IEnumerable<HttpPostParameter> parameters, out string boundary)
         {
             url = AppendParameters(url);
 
-            var boundary = Guid.NewGuid().ToString();
+            boundary = Guid.NewGuid().ToString();
             var request = WebRequest.Create(url);
             AuthenticateRequest(request);
 
@@ -972,24 +979,8 @@ namespace Hammock.Web
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             
             HandleRequestMeta(request);
-            
             TraceRequest(request);
             
-#if !Smartphone
-            var encoding = Encoding ?? Encoding.GetEncoding("ISO-8859-1");
-#else
-            var encoding = Encoding ?? Encoding.GetEncoding(1252);
-#endif
-
-            // [DC]: This will need to be refactored for larger uploads
-            var contents = BuildMultiPartFormRequestParameters(encoding, boundary, parameters);
-            var payload = contents.ToString();
-            
-            bytes = encoding.GetBytes(payload);
-
-#if !SILVERLIGHT
-            request.ContentLength = bytes.Length;
-#endif
             return request;
         }
 
@@ -1019,76 +1010,6 @@ namespace Hammock.Web
             TraceHeaders(request);
         }
 
-        protected static StringBuilder BuildMultiPartFormRequestParameters(Encoding encoding, string boundary, IEnumerable<HttpPostParameter> parameters)
-        {
-            var header = string.Format("--{0}", boundary);
-            var footer = string.Format("--{0}--", boundary);
-            var contents = new StringBuilder();
-
-            foreach (var parameter in parameters)
-            {
-                contents.AppendLine(header);
-#if TRACE
-                Trace.WriteLine(header);
-#endif
-                switch (parameter.Type)
-                {
-                    case HttpPostParameterType.File:
-                        {
-#if !Smartphone && !SILVERLIGHT
-                            var fileBytes = File.ReadAllBytes(parameter.FilePath);
-#else
-                            byte[] fileBytes;
-                            var info = new FileInfo(parameter.FilePath);
-                            using (var fs = new FileStream(parameter.FilePath, FileMode.Open, FileAccess.Read))
-                            {
-                                using (var br = new BinaryReader(fs))
-                                {
-                                    fileBytes = br.ReadBytes((int) info.Length);
-                                }
-                            }
-#endif
-                            const string fileMask = "Content-Disposition: file; name=\"{0}\"; filename=\"{1}\"";
-                            var fileHeader = fileMask.FormatWith(parameter.Name, parameter.FileName);
-                            var fileData = encoding.GetString(fileBytes, 0, fileBytes.Length);
-                            var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
-
-                            contents.AppendLine(fileHeader);
-                            contents.AppendLine(fileLine);
-                            contents.AppendLine();
-                            contents.AppendLine(fileData);
-
-#if TRACE
-                            Trace.WriteLine(fileHeader);
-                            Trace.WriteLine(fileLine);
-                            Trace.WriteLine("");
-                            Trace.WriteLine(String.Concat("[FILE DATA][", encoding, "]"));
-#endif
-                            break;
-                        }
-                    case HttpPostParameterType.Field:
-                        {
-                            var fieldLine = "Content-Disposition: form-data; name=\"{0}\"".FormatWith(parameter.Name);
-                            contents.AppendLine(fieldLine);
-                            contents.AppendLine();
-                            contents.AppendLine(parameter.Value);
-#if TRACE
-                            Trace.WriteLine(fieldLine);
-                            Trace.WriteLine("");
-                            Trace.WriteLine(parameter.Value);
-#endif
-                            break;
-                        }
-                }
-            }
-
-            contents.AppendLine(footer);
-#if TRACE
-            Trace.WriteLine(footer);
-#endif
-            return contents;
-        }
-
 #if !SILVERLIGHT
         protected virtual void ExecutePostOrPut(PostOrPut method, string url, out WebException exception)
         {
@@ -1106,6 +1027,11 @@ namespace Hammock.Web
                 {
                     stream.Write(post, 0, post.Length);
                     stream.Close();
+
+#if TRACE
+                    var encoding = Encoding ?? new UTF8Encoding();
+                    Trace.WriteLine(encoding.GetString(post));
+#endif
 
                     // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
@@ -1132,16 +1058,22 @@ namespace Hammock.Web
                                                 out WebException exception)
         {
             WebResponse = null;
-            byte[] bytes;
-            var request = BuildMultiPartFormRequest(method, url, parameters, out bytes);
-            
+
+            string boundary;
+            var request = BuildMultiPartFormRequest(method, url, parameters, out boundary);
+
+#if !Smartphone
+            var encoding = Encoding ?? Encoding.GetEncoding("ISO-8859-1");
+#else
+            var encoding = Encoding ?? Encoding.GetEncoding(1252);
+#endif
             try
             {
                 using (var requestStream = request.GetRequestStream())
                 {
-                    requestStream.Write(bytes, 0, bytes.Length);
-                    requestStream.Flush();
-                    requestStream.Close();
+                    WriteMultiPartImpl(
+                        parameters, boundary, encoding, requestStream
+                        );
 
                     // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
@@ -1150,9 +1082,13 @@ namespace Hammock.Web
                     if (response != null)
                     {
                         ContentStream = response.GetResponseStream();
-                        var args = new WebQueryResponseEventArgs(ContentStream);
-                        OnQueryResponse(args);
+                        if (ContentStream != null)
+                        {
+                            var args = new WebQueryResponseEventArgs(ContentStream);
+                            OnQueryResponse(args);
+                        }
                     }
+
                     exception = null;
                 }
             }
@@ -1163,6 +1099,89 @@ namespace Hammock.Web
             }
         }
 #endif
+
+        private static void Write(Encoding encoding, Stream requestStream, string input)
+        {
+            var newLineBytes = encoding.GetBytes(input);
+            requestStream.Write(newLineBytes, 0, newLineBytes.Length);
+        }
+
+        private void WriteMultiPartImpl(IEnumerable<HttpPostParameter> parameters, string boundary, Encoding encoding, Stream requestStream)
+        {
+            var header = string.Format("--{0}", boundary);
+            var footer = string.Format("--{0}--", boundary);
+
+            foreach (var parameter in parameters)
+            {
+                Write(encoding, requestStream, header);
+#if TRACE
+                Trace.WriteLine(header);
+#endif
+                switch (parameter.Type)
+                {
+                    case HttpPostParameterType.File:
+                        {
+                            const string fileMask = "Content-Disposition: file; name=\"{0}\"; filename=\"{1}\"";
+                            var fileHeader = fileMask.FormatWith(parameter.Name, parameter.FileName);
+                            var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
+
+                            Write(encoding, requestStream, fileHeader);
+                            Write(encoding, requestStream, fileLine);
+                            Write(encoding, requestStream, Environment.NewLine);
+#if TRACE
+                            Trace.WriteLine(fileHeader);
+                            Trace.WriteLine(fileLine);
+                            Trace.WriteLine("");
+                            Trace.WriteLine("[FILE DATA]");
+#endif
+                            using (var fs = parameter.FileStream ?? new FileStream(parameter.FilePath, FileMode.Open, FileAccess.Read))
+                            {
+                                var written = default(long);
+                                using (var br = new BinaryReader(fs))
+                                {
+                                    while (written < fs.Length)
+                                    {
+                                        var buffer = br.ReadBytes(8192);
+                                        requestStream.Write(buffer, 0, buffer.Length);
+                                        written += buffer.Length;
+                                        var args = new PostProgressEventArgs
+                                                       {
+                                                           FileName = parameter.FileName,
+                                                           BytesWritten = written,
+                                                           TotalBytes = fs.Length
+                                                       };
+                                        OnPostProgress(args);
+                                    }
+                                }
+                            }
+
+                            Write(encoding, requestStream, Environment.NewLine);
+
+                            break;
+                        }
+                    case HttpPostParameterType.Field:
+                        {
+                            var fieldLine = "Content-Disposition: form-data; name=\"{0}\"".FormatWith(parameter.Name);
+                            Write(encoding, requestStream, fieldLine);
+                            Write(encoding, requestStream, Environment.NewLine);
+                            Write(encoding, requestStream, parameter.Value);
+#if TRACE
+                            Trace.WriteLine(fieldLine);
+                            Trace.WriteLine("");
+                            Trace.WriteLine(parameter.Value);
+#endif
+                            break;
+                        }
+                }
+            }
+
+            Write(encoding, requestStream, footer);
+#if TRACE
+            Trace.WriteLine(footer);
+#endif
+            requestStream.Flush();
+            requestStream.Close();
+        }
 
 #if !SILVERLIGHT
         public virtual void Request(string url, out WebException exception)
@@ -1604,10 +1623,10 @@ namespace Hammock.Web
         }
 
         private void ExecutePostOrPut(PostOrPut method, 
-                                        ICache cache, 
-                                        string url, 
-                                        string key, 
-                                        out WebException exception)
+                                      ICache cache, 
+                                      string url, 
+                                      string key, 
+                                      out WebException exception)
         {
             ExecutePostOrPut(method, url, out exception);
             if (exception == null)
@@ -1648,5 +1667,12 @@ namespace Hammock.Web
                 ContentStream.Dispose();
             }
         }
+    }
+
+    internal class PostProgressEventArgs : EventArgs
+    {
+        public virtual string FileName { get; set; }
+        public virtual long BytesWritten { get; set; }
+        public virtual long TotalBytes { get; set; }
     }
 }

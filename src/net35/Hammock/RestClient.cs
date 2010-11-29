@@ -36,6 +36,15 @@ namespace Hammock
         private const string MockHttpMethod = "mockHttpMethod";
 
         public virtual string Authority { get; set; }
+        public virtual event EventHandler<FileProgressEventArgs> FileProgress;
+        public virtual void OnFileProgress(FileProgressEventArgs args)
+        {
+            var handler = FileProgress;
+            if (handler != null)
+            {
+                handler(this, args);
+            }
+        }
 
 #if SILVERLIGHT
         public virtual bool HasElevatedPermissions { get; set; }
@@ -223,24 +232,26 @@ namespace Hammock
             return true;
         }
 #endif
-        private void UpdateRepeatingRequestState(RestRequest request)
+        private void UpdateRepeatingRequestState(RestBase request)
         {
             var taskState = request.TaskState ?? TaskState;
-            if (taskState != null)
+            if (taskState == null)
             {
-                taskState.RepeatCount++;
-                taskState.LastRepeat = DateTime.Now;
+                return;
             }
+            taskState.RepeatCount++;
+            taskState.LastRepeat = DateTime.Now;
         }
 
-        private void UpdateRetryState(RestRequest request)
+        private void UpdateRetryState(RestBase request)
         {
             var retryState = request.RetryState ?? RetryState;
-            if (retryState != null)
+            if (retryState == null)
             {
-                retryState.RepeatCount++;
-                retryState.LastRepeat = DateTime.Now;
+                return;
             }
+            retryState.RepeatCount++;
+            retryState.LastRepeat = DateTime.Now;
         }
 
         private static bool ShouldRetry(RetryPolicy retryPolicy,
@@ -2342,6 +2353,8 @@ namespace Hammock
                             ? credentials.GetQueryFor(uri.ToString(), request, info, method)
                             : new BasicAuthWebQuery(info);
 
+            query.PostProgress += QueryPostProgress;
+
 #if SILVERLIGHT
             query.HasElevatedPermissions = HasElevatedPermissions;
             query.SilverlightAcceptEncodingHeader = SilverlightAcceptEncodingHeader;
@@ -2350,6 +2363,17 @@ namespace Hammock
             query.SilverlightUserAgentHeader = SilverlightUserAgentHeader;
 #endif
             return query;
+        }
+
+        private void QueryPostProgress(object sender, PostProgressEventArgs e)
+        {
+            var args = new FileProgressEventArgs
+                           {
+                               FileName = e.FileName,
+                               BytesWritten = e.BytesWritten,
+                               TotalBytes = e.TotalBytes
+                           };
+            OnFileProgress(args);
         }
 
         public void CancelStreaming()
