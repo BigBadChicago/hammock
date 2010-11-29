@@ -94,47 +94,8 @@
     <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkStatus.cs">
       <Link>Postmark\PostmarkStatus.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Caching.cs">
-      <Link>RestClientTests.Async.Caching.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.cs">
-      <Link>RestClientTests.Async.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Mocks.cs">
-      <Link>RestClientTests.Async.Mocks.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.MultiPart.cs">
-      <Link>RestClientTests.Async.MultiPart.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.OAuth.cs">
-      <Link>RestClientTests.Async.OAuth.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Retries.cs">
-      <Link>RestClientTests.Async.Retries.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Streaming.cs">
-      <Link>RestClientTests.Async.Streaming.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Async.Tasks.cs">
-      <Link>RestClientTests.Async.Tasks.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Caching.cs">
-      <Link>RestClientTests.Caching.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.cs">
       <Link>RestClientTests.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Mocks.cs">
-      <Link>RestClientTests.Mocks.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.MultiPart.cs">
-      <Link>RestClientTests.MultiPart.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.OAuth.cs">
-      <Link>RestClientTests.OAuth.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.Retries.cs">
-      <Link>RestClientTests.Retries.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -149,15 +110,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\net35\Hammock.Tests\app.config">
+      <Link>app.config</Link>
+    </None>
     <None Include="..\..\net35\Hammock.Tests\app.config.example">
       <Link>app.config.example</Link>
+      <SubType>Designer</SubType>
     </None>
-    <None Include="app.config" />
     <None Include="key.snk" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="failwhale.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="..\..\net35\Hammock.Tests\_failwhale.jpg">
+      <Link>_failwhale.jpg</Link>
+    </Content>
+    <Content Include="..\..\net35\Hammock.Tests\_profile.jpg">
+      <Link>_profile.jpg</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

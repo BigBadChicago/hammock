@@ -2,13 +2,9 @@
 <configuration>
   <appSettings>
     <clear/>
-      <add key="TwitterUsername" value=""/>
-      <add key="TwitterPassword" value=""/>
-      <add key="OAuthBaseUrl" value="http://twitter.com/oauth/{0}"/>
-      <add key="OAuthConsumerKey" value=""/>
-      <add key="OAuthConsumerSecret" value=""/>    
-      <add key="PostmarkServerToken" value=""/>
-      <add key="PostmarkFromAddress" value=""/>
-      <add key="PostmarkToAddress" value=""/>
+    <add key="OAuthConsumerKey" value=""/>
+    <add key="OAuthConsumerSecret" value=""/>
+    <add key="OAuthAccessToken" value=""/>
+    <add key="OAuthAccessTokenSecret" value=""/>
   </appSettings>
 </configuration>
