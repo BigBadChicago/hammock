@@ -14,15 +14,12 @@ using Hammock.Web.Mocks;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
+using System.IO.IsolatedStorage;
 #endif
 
 #if SILVERLIGHT && !WindowsPhone
 using System.Windows.Browser;
 using System.Net.Browser;
-#endif
-
-#if WINDOWS_PHONE
-using System.IO.IsolatedStorage;
 #endif
 
 namespace Hammock.Web
@@ -1168,7 +1165,7 @@ namespace Hammock.Web
                             Trace.WriteLine("[FILE DATA]");
 #endif
 
-#if !WINDOWS_PHONE
+#if !SILVERLIGHT
                             using (var fs = parameter.FileStream ?? new FileStream(parameter.FilePath, FileMode.Open, FileAccess.Read))
 #else
                             if (parameter.FileStream == null)
