@@ -21,13 +21,18 @@ using System.Windows.Browser;
 using System.Net.Browser;
 #endif
 
+#if WINDOWS_PHONE
+using System.IO.IsolatedStorage;
+#endif
+
 namespace Hammock.Web
 {
     public abstract partial class WebQuery: IDisposable
     {
         private const string AcceptEncodingHeader = "Accept-Encoding";
         private static readonly object _sync = new object();
-        
+        private readonly WebHeaderCollection _restrictedHeaders = new WebHeaderCollection(0);
+
         public virtual Encoding Encoding { get; protected internal set; }
         public virtual IWebQueryInfo Info { get; protected set; }
         public virtual string UserAgent { get; protected internal set; }
@@ -427,6 +432,7 @@ namespace Hammock.Web
 
 #if !SILVERLIGHT && !WindowsPhone
                 request.AutomaticDecompression = decompressionMethods;
+                request.Headers.Add(AcceptEncodingHeader, "gzip,deflate");
 #else
 
 #if !WindowsPhone
@@ -533,7 +539,7 @@ namespace Hammock.Web
                     if(header.Key.EqualsIgnoreCase("User-Agent"))
                     {
                         // [DC]: User-Agent is still restricted in elevated mode
-                        request.Headers[SilverlightUserAgentHeader ?? "X-UserAgent"] = UserAgent;
+                        request.Headers[SilverlightUserAgentHeader ?? "X-User-Agent"] = UserAgent;
                         continue;
                     }
 
@@ -545,7 +551,7 @@ namespace Hammock.Web
                         }
                         else
                         {
-                            request.Headers[SilverlightAcceptEncodingHeader] = UserAgent;
+                            request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = header.Value;
                         }
                         continue;
                     }
@@ -558,13 +564,13 @@ namespace Hammock.Web
                         }
                         else
                         {
-                            request.Headers[SilverlightAuthorizationHeader] = AuthorizationHeader;
+                            request.Headers[SilverlightAuthorizationHeader ?? "X-Authorization"] = AuthorizationHeader;
                         }
                         continue;
                     }
 #endif
-
-                    _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
+                        _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
+                        _restrictedHeaders.Add(header.Key, header.Value);
                     }
                     if(request is MockHttpWebRequest)
                     {
@@ -579,9 +585,14 @@ namespace Hammock.Web
         }
 
         [Conditional("TRACE")]
-        private static void TraceHeaders(WebRequest request)
+        private void TraceHeaders(WebRequest request)
         {
             foreach (var trace in request.Headers.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key])))
+            {
+                Trace.WriteLine(trace);
+            }
+
+            foreach (var trace in _restrictedHeaders.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key])))
             {
                 Trace.WriteLine(trace);
             }
@@ -969,8 +980,11 @@ namespace Hammock.Web
                 if (response != null)
                 {
                     ContentStream = response.GetResponseStream();
-                    var args = new WebQueryResponseEventArgs(ContentStream);
-                    OnQueryResponse(args);
+                    if (ContentStream != null)
+                    {
+                        var args = new WebQueryResponseEventArgs(ContentStream);
+                        OnQueryResponse(args);
+                    }
                 }
 
                 exception = null;
@@ -1001,7 +1015,7 @@ namespace Hammock.Web
         }
 
         [Conditional("TRACE")]
-        private static void TraceRequest(WebRequest request)
+        protected void TraceRequest(WebRequest request)
         {
             var version = request is HttpWebRequest ?
 #if SILVERLIGHT
@@ -1056,8 +1070,11 @@ namespace Hammock.Web
                     if (response != null)
                     {
                         ContentStream = response.GetResponseStream();
-                        var args = new WebQueryResponseEventArgs(ContentStream);
-                        OnQueryResponse(args);
+                        if (ContentStream != null)
+                        {
+                            var args = new WebQueryResponseEventArgs(ContentStream);
+                            OnQueryResponse(args);
+                        }
                     }
                 }
             }
@@ -1150,7 +1167,19 @@ namespace Hammock.Web
                             Trace.WriteLine("");
                             Trace.WriteLine("[FILE DATA]");
 #endif
+
+#if !WINDOWS_PHONE
                             using (var fs = parameter.FileStream ?? new FileStream(parameter.FilePath, FileMode.Open, FileAccess.Read))
+#else
+                            if (parameter.FileStream == null)
+                            {
+                                var store = IsolatedStorageFile.GetUserStoreForApplication();
+                                var stream = store.OpenFile(parameter.FilePath, FileMode.Open, FileAccess.Read);
+                                parameter.FileStream = stream;
+                            }
+
+                            using (var fs = parameter.FileStream) // <-- WP7 requires a stream
+#endif
                             {
                                 var written = default(long);
                                 using (var br = new BinaryReader(fs))

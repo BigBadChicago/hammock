@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using Hammock.Caching;
+using Hammock.Extensions;
 using Hammock.Web.Mocks;
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -918,7 +919,6 @@ namespace Hammock.Web
 #else
             var encoding = Encoding ?? Encoding.GetEncoding(1252);
 #endif
-
             // No cached response
             using (var requestStream = request.EndGetRequestStream(asyncResult))
             {
@@ -996,7 +996,6 @@ namespace Hammock.Web
 
                 var args = new WebQueryResponseEventArgs(ContentStream);
                 OnQueryResponse(args);
-
             }
             catch (WebException ex)
             {

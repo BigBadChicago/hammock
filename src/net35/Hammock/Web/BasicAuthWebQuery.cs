@@ -35,18 +35,14 @@ namespace Hammock.Web
             }
         }
 
-#if SILVERLIGHT
         protected override void SetAuthorizationHeader(WebRequest request, string header)
-#else
-        protected override void SetAuthorizationHeader(WebRequest request, string header)
-#endif
         {
             if (!HasAuth)
             {
                 return;
             }
 
-            string credentials = GetAuthorizationHeader();
+            var credentials = GetAuthorizationHeader();
             AuthorizationHeader = header;
 
 #if !SILVERLIGHT || WindowsPhone

@@ -30,6 +30,19 @@ namespace Hammock
         private TaskOptions _taskOptions;
         private RetryPolicy _retryPolicy;
 
+        public WebParameterCollection GetAllHeaders()
+        {
+            var headers = new WebParameterCollection();
+
+            var parameters = Headers.AllKeys.Select(key => new WebPair(key, Headers[key]));
+            foreach (var parameter in parameters)
+            {
+                headers.Add(parameter.Name, parameter.Value);
+            }
+
+            return headers;
+        }
+
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal Encoding Encoding { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }

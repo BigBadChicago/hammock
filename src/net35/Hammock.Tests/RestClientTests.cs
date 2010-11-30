@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Configuration;
+using System.Net;
+using Hammock.Authentication.OAuth;
+using Hammock.Web;
 using NUnit.Framework;
 
 namespace Hammock.Tests
@@ -10,7 +13,7 @@ namespace Hammock.Tests
         private string _consumerKey;
         private string _consumerSecret;
         private string _accessToken;
-        private string _tokenSecret;
+        private string _accessTokenSecret;
         
         [SetUp]
         public void SetUp()
@@ -18,17 +21,75 @@ namespace Hammock.Tests
             _consumerKey = ConfigurationManager.AppSettings["OAuthConsumerKey"];
             _consumerSecret = ConfigurationManager.AppSettings["OAuthConsumerSecret"];
             _accessToken = ConfigurationManager.AppSettings["OAuthAccessToken"];
-            _tokenSecret = ConfigurationManager.AppSettings["OAuthTokenSecret"];
+            _accessTokenSecret = ConfigurationManager.AppSettings["OAuthAccessTokenSecret"];
+
+            ServicePointManager.Expect100Continue = false;
         }
 
         [Test]
-        public void foo()
+        public void Can_request_get()
         {
-            var client = new RestClient();
-            client.Authority = "http://stackauth.com/1.0/sites";
-            var response = client.Request();
-            Console.WriteLine(response.Content);
+            var client = new RestClient
+                             {
+                                 Authority = "https://api.twitter.com", 
+                                 UserAgent = "Hammock"
+                             };
 
+            var request = new RestRequest
+                              {
+                                  Path = "statuses/public_timeline.json",
+                                  DecompressionMethods = DecompressionMethods.GZip |
+                                                         DecompressionMethods.Deflate
+                              };
+
+            var response = client.Request(request);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Test]
+        public void Can_get_oauth_request_token()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "oauth/request_token",
+                Credentials = OAuthCredentials.ForRequestToken(_consumerKey, _consumerSecret)
+            };
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Test]
+        public void Can_post_to_protected_resource()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                VersionPath = "1",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Method = WebMethod.Post,
+                Path = "statuses/update.json?status=" + DateTime.Now.Ticks,
+                Credentials = OAuthCredentials.ForProtectedResource(
+                _consumerKey, _consumerSecret, _accessToken, _accessTokenSecret
+                )
+            };
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
     }
 }

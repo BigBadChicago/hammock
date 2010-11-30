@@ -27,15 +27,51 @@ namespace Hammock.Authentication.OAuth
         public virtual string CallbackUrl { get; set; }
         public virtual string Version { get; set; }
 
-        public OAuthCredentials()
+        public static OAuthCredentials ForRequestToken(string consumerKey, string consumerSecret)
         {
-            
+            var credentials = new OAuthCredentials
+                                  {
+                                      Type = OAuthType.RequestToken,
+                                      ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                                      SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                                      SignatureTreatment = OAuthSignatureTreatment.Escaped,
+                                      ConsumerKey = consumerKey,
+                                      ConsumerSecret = consumerSecret
+                                  };
+            return credentials;
         }
 
-        /// <summary>
-        /// A copy constructor for creating a credentials instance 
-        /// </summary>
-        /// <param name="workflow"></param>
+        public static OAuthCredentials ForAccessToken(string consumerKey, string consumerSecret, string requestToken)
+        {
+            var credentials = new OAuthCredentials
+                                  {
+                                      Type = OAuthType.AccessToken,
+                                      ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                                      SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                                      SignatureTreatment = OAuthSignatureTreatment.Escaped,
+                                      ConsumerKey = consumerKey,
+                                      ConsumerSecret = consumerSecret,
+                                      Token = requestToken
+                                  };
+            return credentials;
+        }
+
+        public static OAuthCredentials ForProtectedResource(string consumerKey, string consumerSecret, string accessToken, string accessTokenSecret)
+        {
+            var credentials = new OAuthCredentials
+            {
+                Type = OAuthType.ProtectedResource,
+                ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                SignatureTreatment = OAuthSignatureTreatment.Escaped,
+                ConsumerKey = consumerKey,
+                ConsumerSecret = consumerSecret,
+                Token = accessToken,
+                TokenSecret = accessTokenSecret
+            };
+            return credentials;
+        }
+       
         public virtual WebQuery GetQueryFor(string url, 
                                             WebParameterCollection parameters, 
                                             IWebQueryInfo info, 

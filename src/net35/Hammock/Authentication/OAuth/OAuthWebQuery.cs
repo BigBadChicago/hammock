@@ -37,6 +37,11 @@ namespace Hammock.Authentication.OAuth
             ParameterHandling = info.ParameterHandling;
         }
 
+        protected override WebRequest BuildMultiPartFormRequest(PostOrPut method, string url, IEnumerable<HttpPostParameter> parameters, out string boundary)
+        {
+            return base.BuildMultiPartFormRequest(method, url, parameters, out boundary);
+        }
+
         protected override WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
             Uri uri;
@@ -64,11 +69,6 @@ namespace Hammock.Authentication.OAuth
 #endif
             request.ContentType = "application/x-www-form-urlencoded";
 
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "REQUEST: ", method.ToUpper(), " ", request.RequestUri)
-                );
-#endif
             // [DC] LSP violation necessary for "pure" mocks
             if (request is HttpWebRequest)
             {
@@ -89,16 +89,13 @@ namespace Hammock.Authentication.OAuth
             }
 
             content = PostProcessPostParameters(request, uri);
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "\r\n", Encoding.UTF8.GetString(content, 0, content.Length))
-                );
-#endif
 
 #if !SILVERLIGHT
             // [DC]: Silverlight sets this dynamically
             request.ContentLength = content.Length;
 #endif
+
+            TraceRequest(request);
             return request;
         }
 
@@ -116,7 +113,7 @@ namespace Hammock.Authentication.OAuth
                     // [DC]: Handled in authentication
                     break;
                 case OAuthParameterHandling.UrlOrPostParameters:
-                    uri = GetAddressWithOAuthParameters(new Uri(url));
+                    url = GetAddressWithOAuthParameters(new Uri(url)).ToString();
                     break;
             }
 
@@ -140,11 +137,7 @@ namespace Hammock.Authentication.OAuth
             request.Method = method.ToUpper();
 #endif
             AuthenticateRequest(request);
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "REQUEST: ", request.Method, " ", request.RequestUri)
-                );
-#endif
+
             // [DC] LSP violation necessary for "pure" mocks
             if (request is HttpWebRequest)
             {
@@ -155,6 +148,8 @@ namespace Hammock.Authentication.OAuth
                 AppendHeaders(request);
                 SetUserAgent(request);
             }
+
+            TraceRequest(request);
 
             return request;
         }

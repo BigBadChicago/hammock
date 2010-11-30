@@ -27,7 +27,6 @@ namespace Hammock.Web
                                     FilePath = filePath,
                                     ContentType = contentType,
                                 };
-
             return parameter;
         }
 
