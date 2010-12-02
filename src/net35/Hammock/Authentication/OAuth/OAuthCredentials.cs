@@ -26,6 +26,7 @@ namespace Hammock.Authentication.OAuth
         public virtual string ClientPassword { get; set; }
         public virtual string CallbackUrl { get; set; }
         public virtual string Version { get; set; }
+        public virtual string SessionHandle { get; set; }
 
         public static RestRequest DelegateWith(RestClient client, RestRequest request)
         {
@@ -71,18 +72,26 @@ namespace Hammock.Authentication.OAuth
             return credentials;
         }
 
-        public static OAuthCredentials ForAccessToken(string consumerKey, string consumerSecret, string requestToken)
+        public static OAuthCredentials ForAccessToken(string consumerKey, string consumerSecret, string requestToken, string requestTokenSecret)
         {
             var credentials = new OAuthCredentials
-                                  {
-                                      Type = OAuthType.AccessToken,
-                                      ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
-                                      SignatureMethod = OAuthSignatureMethod.HmacSha1,
-                                      SignatureTreatment = OAuthSignatureTreatment.Escaped,
-                                      ConsumerKey = consumerKey,
-                                      ConsumerSecret = consumerSecret,
-                                      Token = requestToken
-                                  };
+            {
+                Type = OAuthType.AccessToken,
+                ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                SignatureTreatment = OAuthSignatureTreatment.Escaped,
+                ConsumerKey = consumerKey,
+                ConsumerSecret = consumerSecret,
+                Token = requestToken,
+                TokenSecret = requestTokenSecret
+            };
+            return credentials;
+        }
+
+        public static OAuthCredentials ForAccessTokenRefresh(string consumerKey, string consumerSecret, string accessToken, string accessTokenSecret, string sessionHandle)
+        {
+            var credentials = ForAccessToken(consumerKey, consumerSecret, accessToken, accessTokenSecret);
+            credentials.SessionHandle = sessionHandle;
             return credentials;
         }
 
@@ -122,7 +131,8 @@ namespace Hammock.Authentication.OAuth
                 Verifier = Verifier,
                 Token = Token,
                 TokenSecret = TokenSecret,
-                Version = Version ?? "1.0"
+                Version = Version ?? "1.0",
+                SessionHandle = SessionHandle
             };
 
             switch (Type)

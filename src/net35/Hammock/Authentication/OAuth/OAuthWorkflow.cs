@@ -18,38 +18,30 @@ namespace Hammock.Authentication.OAuth
     /// </summary>
     public class OAuthWorkflow
     {
-        public string Version { get; set; }
-        public string ConsumerKey { get; set; }
-        public string ConsumerSecret { get; set; }
-        public string Token { get; set; }
-        public string TokenSecret { get; set; }
-        public string CallbackUrl { get; set; }
-        public string Verifier { get; set; }
+        public virtual string Version { get; set; }
+        public virtual string ConsumerKey { get; set; }
+        public virtual string ConsumerSecret { get; set; }
+        public virtual string Token { get; set; }
+        public virtual string TokenSecret { get; set; }
+        public virtual string CallbackUrl { get; set; }
+        public virtual string Verifier { get; set; }
+        public virtual string SessionHandle { get; set; }
+        
+        public virtual OAuthSignatureMethod SignatureMethod { get; set; }
+        public virtual OAuthSignatureTreatment SignatureTreatment { get; set; }
+        public virtual OAuthParameterHandling ParameterHandling { get; set; }
 
-        public OAuthSignatureMethod SignatureMethod { get; set; }
-        public OAuthSignatureTreatment SignatureTreatment { get; set; }
-        public OAuthParameterHandling ParameterHandling { get; set; }
+        public virtual string ClientUsername { get; set; }
+        public virtual string ClientPassword { get; set; }
 
-        public string ClientUsername { get; set; }
-        public string ClientPassword { get; set; }
-
-        /// <summary>
-        /// The request token url.
-        /// </summary>
         /// <seealso cref="http://oauth.net/core/1.0#request_urls"/>
-        public string RequestTokenUrl { get; set; }
+        public virtual string RequestTokenUrl { get; set; }
 
-        /// <summary>
-        /// The access token url.
-        /// </summary>
         /// <seealso cref="http://oauth.net/core/1.0#request_urls"/>
-        public string AccessTokenUrl { get; set; }
+        public virtual string AccessTokenUrl { get; set; }
 
-        /// <summary>
-        /// THe user authorization url.
-        /// </summary>
         /// <seealso cref="http://oauth.net/core/1.0#request_urls"/>
-        public string AuthorizationUrl { get; set; }
+        public virtual string AuthorizationUrl { get; set; }
 
         /// <summary>
         /// Generates a <see cref="OAuthWebQueryInfo"/> instance to pass to an
@@ -76,12 +68,16 @@ namespace Hammock.Authentication.OAuth
         /// <param name="credentials">The credentials to copy</param>
         public OAuthWorkflow(OAuthCredentials credentials)
         {
+            InitializeFromCredentials(credentials);
+        }
+
+        private void InitializeFromCredentials(OAuthCredentials credentials)
+        {
             ConsumerKey = credentials.ConsumerKey;
             ConsumerSecret = credentials.ConsumerSecret;
             ParameterHandling = credentials.ParameterHandling;
             SignatureMethod = credentials.SignatureMethod;
             SignatureTreatment = credentials.SignatureTreatment;
-
             Token = credentials.Token;
             TokenSecret = credentials.TokenSecret;
             Verifier = credentials.Verifier;
@@ -89,6 +85,7 @@ namespace Hammock.Authentication.OAuth
             ClientPassword = credentials.ClientPassword;
             CallbackUrl = credentials.CallbackUrl;
             Version = credentials.Version;
+            SessionHandle = credentials.SessionHandle;
         }
 
         /// <summary>
@@ -100,7 +97,7 @@ namespace Hammock.Authentication.OAuth
         /// <param name="parameters">Any existing, non-OAuth query parameters desired in the request</param>
         /// <seealso cref="http://oauth.net/core/1.0#anchor9"/>
         /// <returns></returns>
-        public OAuthWebQueryInfo BuildRequestTokenInfo(WebMethod method, WebParameterCollection parameters)
+        public virtual OAuthWebQueryInfo BuildRequestTokenInfo(WebMethod method, WebParameterCollection parameters)
         {
             ValidateTokenRequestState();
 
@@ -144,7 +141,7 @@ namespace Hammock.Authentication.OAuth
         /// </summary>
         /// <param name="method">The HTTP method for the intended request</param>
         /// <seealso cref="http://oauth.net/core/1.0#anchor9"/>
-        public OAuthWebQueryInfo BuildAccessTokenInfo(WebMethod method)
+        public virtual OAuthWebQueryInfo BuildAccessTokenInfo(WebMethod method)
         {
             return BuildAccessTokenInfo(method, null);
         }
@@ -157,7 +154,7 @@ namespace Hammock.Authentication.OAuth
         /// <param name="method">The HTTP method for the intended request</param>
         /// <seealso cref="http://oauth.net/core/1.0#anchor9"/>
         /// <param name="parameters">Any existing, non-OAuth query parameters desired in the request</param>
-        public OAuthWebQueryInfo BuildAccessTokenInfo(WebMethod method, WebParameterCollection parameters)
+        public virtual OAuthWebQueryInfo BuildAccessTokenInfo(WebMethod method, WebParameterCollection parameters)
         {
             ValidateAccessRequestState();
 
@@ -205,7 +202,7 @@ namespace Hammock.Authentication.OAuth
         /// <param name="method">The HTTP method for the intended request</param>
         /// <seealso cref="http://tools.ietf.org/html/draft-dehora-farrell-oauth-accesstoken-creds-00#section-4"/>
         /// <param name="parameters">Any existing, non-OAuth query parameters desired in the request</param>
-        public OAuthWebQueryInfo BuildClientAuthAccessTokenInfo(WebMethod method, WebParameterCollection parameters)
+        public virtual OAuthWebQueryInfo BuildClientAuthAccessTokenInfo(WebMethod method, WebParameterCollection parameters)
         {
             ValidateClientAuthAccessRequestState();
 
@@ -245,7 +242,7 @@ namespace Hammock.Authentication.OAuth
             return info;
         }
 
-        public OAuthWebQueryInfo BuildProtectedResourceInfo(WebMethod method, 
+        public virtual OAuthWebQueryInfo BuildProtectedResourceInfo(WebMethod method, 
                                                             WebParameterCollection parameters,
                                                             string url)
         {
@@ -430,6 +427,11 @@ namespace Hammock.Authentication.OAuth
             if (!Verifier.IsNullOrBlank())
             {
                 authParameters.Add(new WebPair("oauth_verifier", Verifier));
+            }
+
+            if(!SessionHandle.IsNullOrBlank())
+            {
+                authParameters.Add(new WebPair("oauth_session_handle", SessionHandle));
             }
 
             foreach (var authParameter in authParameters)
