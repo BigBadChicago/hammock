@@ -1147,6 +1147,7 @@ namespace Hammock.Web
             }
             return dataBytes.Length;
         }
+
         private static int WriteLine(bool write, Encoding encoding, Stream requestStream, string input)
         {
             var sb = new StringBuilder();
@@ -1162,6 +1163,7 @@ namespace Hammock.Web
 
         private long WriteMultiPartImpl(bool write, IEnumerable<HttpPostParameter> parameters, string boundary, Encoding encoding, Stream requestStream)
         {
+            Stream fs = null;
             var header = string.Format("--{0}", boundary);
             var footer = string.Format("--{0}--", boundary);
             long written = 0;
@@ -1197,7 +1199,7 @@ namespace Hammock.Web
 #endif
 
 #if !SILVERLIGHT
-                            using (var fs = parameter.FileStream ?? new FileStream(parameter.FilePath, FileMode.Open, FileAccess.Read))
+                            fs = parameter.FileStream ?? new FileStream(parameter.FilePath, FileMode.Open, FileAccess.Read);
 #else
                             if (parameter.FileStream == null)
                             {
@@ -1206,7 +1208,7 @@ namespace Hammock.Web
                                 parameter.FileStream = stream;
                             }
 
-                            using (var fs = parameter.FileStream) // <-- WP7 requires a stream
+                            fs = parameter.FileStream; // <-- WP7 requires a stream
 #endif
                             {
                                 if(!write)
@@ -1270,6 +1272,10 @@ namespace Hammock.Web
             {
                 requestStream.Flush();
                 requestStream.Close();
+                if (fs != null)
+                {
+                    fs.Dispose();
+                }
             }
 
             return written;
