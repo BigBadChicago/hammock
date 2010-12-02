@@ -314,8 +314,10 @@ namespace Hammock.Web
                         response = new GzipHttpWebResponse((HttpWebResponse)response);
                     }
 #endif
+                    WebResponse = response;
+                    
                     ContentStream = response.GetResponseStream();
-
+                    
                     if (store != null)
                     {
                         // No expiration specified

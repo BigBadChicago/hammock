@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using Hammock.Extensions;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
+#else
+using System.Collections.Specialized;
 #endif
 
 namespace Hammock
@@ -13,7 +14,7 @@ namespace Hammock
 #if !Silverlight
     [Serializable]
 #endif
-    public class RestResponseBase
+    public class RestResponseBase : IDisposable
     {
         private string _content;
         public virtual string Content
@@ -27,7 +28,10 @@ namespace Hammock
                     {
                         _content = reader.ReadToEnd();
                     }
-                    ContentStream.Position = 0;
+                    if (ContentStream.CanSeek)
+                    {
+                        ContentStream.Position = 0;
+                    }
                 }
                 return _content;
             }
@@ -148,18 +152,21 @@ namespace Hammock
                 ContentStream.Dispose();
             }
 
-            stream.Position = 0;
+            if(stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
             return new DurableMemoryStream(stream);
         }
 
         private class DurableMemoryStream : MemoryStream
         {
+            private readonly Stream _stream;
+
             public DurableMemoryStream(Stream stream)
             {
                 _stream = stream;
             }
-
-            readonly Stream _stream;
 
             public override IAsyncResult BeginRead(byte[] buffer, int offset, int count,
                                                    AsyncCallback callback, object state)
@@ -256,6 +263,23 @@ namespace Hammock
             public override void WriteByte(byte value)
             {
                 _stream.WriteByte(value);
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if(disposing)
+                {
+                    _stream.Dispose();
+                }
+                base.Dispose(disposing);
+            }
+        }
+
+        public void Dispose()
+        {
+            if(ContentStream != null)
+            {
+                ContentStream.Dispose();
             }
         }
     }
