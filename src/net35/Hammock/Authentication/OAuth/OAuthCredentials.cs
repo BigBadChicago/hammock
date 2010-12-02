@@ -44,7 +44,7 @@ namespace Hammock.Authentication.OAuth
             var url = request.BuildEndpoint(client).ToString();
             var workflow = new OAuthWorkflow(credentials);
             var uri = new Uri(client.Authority);
-            var realm = uri.Authority;
+            var realm = uri.Host;
 
             var info = workflow.BuildProtectedResourceInfo(method, request.GetAllHeaders(), url);
             var query = credentials.GetQueryFor(url, request, info, method);
