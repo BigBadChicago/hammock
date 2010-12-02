@@ -1097,13 +1097,21 @@ namespace Hammock.Web
 #else
             var encoding = Encoding ?? Encoding.GetEncoding(1252);
 #endif
+            var expected = WriteMultiPartImpl(
+                false /* write */, parameters, boundary, encoding, null
+                );
+
+            request.ContentLength = expected;
+
             try
             {
                 using (var requestStream = request.GetRequestStream())
                 {
-                    WriteMultiPartImpl(
-                        parameters, boundary, encoding, requestStream
+                    var actual = WriteMultiPartImpl(
+                        true /* write */, parameters, boundary, encoding, requestStream
                         );
+                    
+                    Debug.Assert(expected == actual, string.Format("Expected {0} bytes but wrote {1}!", expected, actual));
 
                     // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
@@ -1130,22 +1138,42 @@ namespace Hammock.Web
         }
 #endif
 
-        private static void Write(Encoding encoding, Stream requestStream, string input)
+        private static int Write(bool write, Encoding encoding, Stream requestStream, string input)
         {
-            var newLineBytes = encoding.GetBytes(input);
-            requestStream.Write(newLineBytes, 0, newLineBytes.Length);
+            var dataBytes = encoding.GetBytes(input);
+            if(write)
+            {
+                requestStream.Write(dataBytes, 0, dataBytes.Length);
+            }
+            return dataBytes.Length;
+        }
+        private static int WriteLine(bool write, Encoding encoding, Stream requestStream, string input)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(input);
+
+            var dataBytes = encoding.GetBytes(sb.ToString());
+            if (write)
+            {
+                requestStream.Write(dataBytes, 0, dataBytes.Length);
+            }
+            return dataBytes.Length;
         }
 
-        private void WriteMultiPartImpl(IEnumerable<HttpPostParameter> parameters, string boundary, Encoding encoding, Stream requestStream)
+        private long WriteMultiPartImpl(bool write, IEnumerable<HttpPostParameter> parameters, string boundary, Encoding encoding, Stream requestStream)
         {
             var header = string.Format("--{0}", boundary);
             var footer = string.Format("--{0}--", boundary);
+            long written = 0;
 
             foreach (var parameter in parameters)
             {
-                Write(encoding, requestStream, header);
+                written += WriteLine(write, encoding, requestStream, header);
 #if TRACE
-                Trace.WriteLine(header);
+                if(write)
+                {
+                    Trace.WriteLine(header);
+                }
 #endif
                 switch (parameter.Type)
                 {
@@ -1155,14 +1183,17 @@ namespace Hammock.Web
                             var fileHeader = fileMask.FormatWith(parameter.Name, parameter.FileName);
                             var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
 
-                            Write(encoding, requestStream, fileHeader);
-                            Write(encoding, requestStream, fileLine);
-                            Write(encoding, requestStream, Environment.NewLine);
+                            written += WriteLine(write, encoding, requestStream, fileHeader);
+                            written += WriteLine(write, encoding, requestStream, fileLine);
+                            written += WriteLine(write, encoding, requestStream, "");
 #if TRACE
-                            Trace.WriteLine(fileHeader);
-                            Trace.WriteLine(fileLine);
-                            Trace.WriteLine("");
-                            Trace.WriteLine("[FILE DATA]");
+                            if (write)
+                            {
+                                Trace.WriteLine(fileHeader);
+                                Trace.WriteLine(fileLine);
+                                Trace.WriteLine("");
+                                Trace.WriteLine("[FILE DATA]");
+                            }
 #endif
 
 #if !SILVERLIGHT
@@ -1178,51 +1209,70 @@ namespace Hammock.Web
                             using (var fs = parameter.FileStream) // <-- WP7 requires a stream
 #endif
                             {
-                                var written = default(long);
-                                using (var br = new BinaryReader(fs))
+                                if(!write)
                                 {
-                                    while (written < fs.Length)
+                                    written += fs.Length;
+                                }
+                                else
+                                {
+                                    var fileWritten = default(long);
+                                    using (var br = new BinaryReader(fs))
                                     {
-                                        var buffer = br.ReadBytes(8192);
-                                        requestStream.Write(buffer, 0, buffer.Length);
-                                        written += buffer.Length;
-                                        var args = new PostProgressEventArgs
-                                                       {
-                                                           FileName = parameter.FileName,
-                                                           BytesWritten = written,
-                                                           TotalBytes = fs.Length
-                                                       };
-                                        OnPostProgress(args);
+                                        while (fileWritten < fs.Length)
+                                        {
+                                            var buffer = br.ReadBytes(8192);
+                                            requestStream.Write(buffer, 0, buffer.Length);
+                                            written += buffer.Length;
+                                            fileWritten += buffer.Length;
+
+                                            var args = new PostProgressEventArgs
+                                            {
+                                                FileName = parameter.FileName,
+                                                BytesWritten = fileWritten,
+                                                TotalBytes = fs.Length
+                                            };
+                                            OnPostProgress(args);
+                                        }
                                     }
                                 }
                             }
-
-                            Write(encoding, requestStream, Environment.NewLine);
-
+                            written += WriteLine(write, encoding, requestStream, "");
                             break;
                         }
                     case HttpPostParameterType.Field:
                         {
                             var fieldLine = "Content-Disposition: form-data; name=\"{0}\"".FormatWith(parameter.Name);
-                            Write(encoding, requestStream, fieldLine);
-                            Write(encoding, requestStream, Environment.NewLine);
-                            Write(encoding, requestStream, parameter.Value);
+                            
+                            written += WriteLine(write, encoding, requestStream, fieldLine);
+                            written += WriteLine(write, encoding, requestStream, "");
+                            written += WriteLine(write, encoding, requestStream, parameter.Value);
 #if TRACE
-                            Trace.WriteLine(fieldLine);
-                            Trace.WriteLine("");
-                            Trace.WriteLine(parameter.Value);
+                            if(write)
+                            {
+                                Trace.WriteLine(fieldLine);
+                                Trace.WriteLine("");
+                                Trace.WriteLine(parameter.Value);
+                            }
 #endif
                             break;
                         }
                 }
             }
 
-            Write(encoding, requestStream, footer);
+            written += Write(write, encoding, requestStream, footer);
 #if TRACE
-            Trace.WriteLine(footer);
+            if(write)
+            {
+                Trace.WriteLine(footer);
+            }
 #endif
-            requestStream.Flush();
-            requestStream.Close();
+            if(write)
+            {
+                requestStream.Flush();
+                requestStream.Close();
+            }
+
+            return written;
         }
 
 #if !SILVERLIGHT

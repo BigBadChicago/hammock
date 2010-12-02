@@ -27,6 +27,36 @@ namespace Hammock.Authentication.OAuth
         public virtual string CallbackUrl { get; set; }
         public virtual string Version { get; set; }
 
+        public static RestRequest DelegateWith(RestClient client, RestRequest request)
+        {
+            if(request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            if(!request.Method.HasValue)
+            {
+                throw new ArgumentException("Request must specify a web method.");
+            }
+
+            var method = request.Method.Value;
+            var credentials = (OAuthCredentials)request.Credentials;
+            var url = request.BuildEndpoint(client).ToString();
+            var workflow = new OAuthWorkflow(credentials);
+            var uri = new Uri(client.Authority);
+            var realm = uri.Authority;
+
+            var info = workflow.BuildProtectedResourceInfo(method, request.GetAllHeaders(), url);
+            var query = credentials.GetQueryFor(url, request, info, method);
+            ((OAuthWebQuery) query).Realm = realm;
+            var auth = query.GetAuthorizationContent();
+
+            var echo = new RestRequest();
+            echo.AddHeader("X-Auth-Service-Provider", url);
+            echo.AddHeader("X-Verify-Credentials-Authorization", auth);
+            return echo;
+        }
+        
         public static OAuthCredentials ForRequestToken(string consumerKey, string consumerSecret)
         {
             var credentials = new OAuthCredentials

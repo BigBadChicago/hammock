@@ -14,7 +14,8 @@ namespace Hammock.Tests
         private string _consumerSecret;
         private string _accessToken;
         private string _accessTokenSecret;
-        
+        private string _twitPicKey;
+
         [SetUp]
         public void SetUp()
         {
@@ -22,6 +23,7 @@ namespace Hammock.Tests
             _consumerSecret = ConfigurationManager.AppSettings["OAuthConsumerSecret"];
             _accessToken = ConfigurationManager.AppSettings["OAuthAccessToken"];
             _accessTokenSecret = ConfigurationManager.AppSettings["OAuthAccessTokenSecret"];
+            _twitPicKey = ConfigurationManager.AppSettings["TwitPicKey"];
 
             ServicePointManager.Expect100Continue = false;
         }
@@ -90,6 +92,47 @@ namespace Hammock.Tests
             var response = client.Request(request);
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Test]
+        public void Can_stream_photo_over_delegated_credentials()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitpic.com",
+                VersionPath = "2",
+                UserAgent = "Hammock"
+            };
+
+            var request = PrepareEchoRequest();
+            request.Method = WebMethod.Get;
+            request.Path = "upload.xml";
+            request.AddField("key", _twitPicKey);
+            request.AddFile("media", "failwhale", "_failwhale.jpg", "image/jpeg");
+            
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Console.WriteLine(response.Content);
+        }
+
+        public RestRequest PrepareEchoRequest()
+        {
+            var client = new RestClient
+                             {
+                                 Authority = "https://api.twitter.com",
+                                 VersionPath = "1",
+                                 UserAgent = "TweetSharp"
+                             };
+            var request = new RestRequest
+                              {
+                                  Method = WebMethod.Get,
+                                  Path = "account/verify_credentials.json",
+                                  Credentials = OAuthCredentials.ForProtectedResource(
+                                      _consumerKey, _consumerSecret, _accessToken, _accessTokenSecret
+                                      )
+                              };
+
+            return OAuthCredentials.DelegateWith(client, request);
         }
     }
 }

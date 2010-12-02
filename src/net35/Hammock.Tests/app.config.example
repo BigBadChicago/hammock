@@ -6,5 +6,6 @@
     <add key="OAuthConsumerSecret" value=""/>
     <add key="OAuthAccessToken" value=""/>
     <add key="OAuthAccessTokenSecret" value=""/>
+    <add key="TwitPicKey" value=""/>
   </appSettings>
 </configuration>

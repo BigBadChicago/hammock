@@ -919,12 +919,18 @@ namespace Hammock.Web
 #else
             var encoding = Encoding ?? Encoding.GetEncoding(1252);
 #endif
+            var expected = WriteMultiPartImpl(
+                false /* write */, parameters, boundary, encoding, null
+                );
+            
             // No cached response
             using (var requestStream = request.EndGetRequestStream(asyncResult))
             {
-                WriteMultiPartImpl(
-                        parameters, boundary, encoding, requestStream
+                var actual = WriteMultiPartImpl(
+                        true /* write */, parameters, boundary, encoding, requestStream
                         );
+
+                Debug.Assert(expected == actual, string.Format("Expected {0} bytes but wrote {1}!", expected, actual));
 
                 var inner = request.BeginGetResponse(PostAsyncResponseCallback,
                                          new Triplet<WebRequest, Triplet<ICache, object, string>, object>
