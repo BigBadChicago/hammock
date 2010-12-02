@@ -36,10 +36,21 @@ namespace Hammock
         private const string MockHttpMethod = "mockHttpMethod";
 
         public virtual string Authority { get; set; }
+        
         public virtual event EventHandler<FileProgressEventArgs> FileProgress;
         public virtual void OnFileProgress(FileProgressEventArgs args)
         {
             var handler = FileProgress;
+            if (handler != null)
+            {
+                handler(this, args);
+            }
+        }
+
+        public virtual event EventHandler<RetryEventArgs> BeforeRetry;
+        public virtual void OnBeforeRetry(RetryEventArgs args)
+        {
+            var handler = BeforeRetry;
             if (handler != null)
             {
                 handler(this, args);
@@ -118,6 +129,7 @@ namespace Hammock
             var uri = request.BuildEndpoint(this);
             var query = GetQueryFor(request, uri);
             SetQueryMeta(request, query);
+
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
             {
@@ -128,6 +140,7 @@ namespace Hammock
             while (_remainingRetries > 0)
             {
                 var url = uri.ToString();
+
                 if (RequestExpectsMock(request))
                 {
                     if (!_mockFactoryInitialized)
@@ -161,6 +174,8 @@ namespace Hammock
                         if (_remainingRetries > 0)
                         {
                             query.Result = new WebQueryResult { TimesTried = GetIterationCount(request) };
+
+                            OnBeforeRetry(new RetryEventArgs { Client = this, Request = request });
                         }
                     }
                     else
@@ -250,6 +265,7 @@ namespace Hammock
             {
                 return;
             }
+
             retryState.RepeatCount++;
             retryState.LastRepeat = DateTime.Now;
         }
@@ -1013,7 +1029,6 @@ namespace Hammock
                 asyncResult = beginRequest.Invoke();
             }
 
-
             if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
             {
                 if (IsFirstIteration && request.IsFirstIteration)
@@ -1033,9 +1048,12 @@ namespace Hammock
                                                        if (retry)
                                                        {
                                                            UpdateRetryState(request);
-                                                           BeginRequestImpl(request, callback, query, url, true
-                                                               /* isInternal */, userState);
+                                                           BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                                                            Interlocked.Decrement(ref _remainingRetries);
+                                                           if(_remainingRetries > 0)
+                                                           {
+                                                               OnBeforeRetry(new RetryEventArgs { Client = this, Request = request });
+                                                           }
                                                        }
                                                        else if (inRetryScope)
                                                        {
@@ -1049,7 +1067,6 @@ namespace Hammock
                                                    }
 
                                                    query.Result = current;
-
 
                                                    if (_remainingRetries == 0)
                                                    {
@@ -1141,9 +1158,12 @@ namespace Hammock
                                if (retry)
                                {
                                    UpdateRetryState(request);
-                                   BeginRequestImpl(request, callback, query, url, true
-                                       /* isInternal */, userState);
+                                   BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
                                    Interlocked.Decrement(ref _remainingRetries);
+                                   if(_remainingRetries > 0)
+                                   {
+                                       OnBeforeRetry(new RetryEventArgs { Client = this, Request = request });
+                                   }
                                }
                                else if (inRetryScope)
                                {

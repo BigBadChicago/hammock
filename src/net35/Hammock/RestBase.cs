@@ -203,6 +203,12 @@ namespace Hammock
         }
     }
 
+    public class RetryEventArgs : EventArgs
+    {
+        public virtual RestClient Client { get; set; }
+        public virtual RestRequest Request { get; set; }
+    }
+
     public class FileProgressEventArgs : EventArgs
     {
         public virtual string FileName { get; set; }
