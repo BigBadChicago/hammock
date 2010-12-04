@@ -392,6 +392,7 @@ namespace Hammock.Authentication.OAuth
                 throw new ArgumentException("You must specify a consumer secret");
             }
 
+            /*
             if (Token.IsNullOrBlank())
             {
                 throw new ArgumentException("You must specify a token");
@@ -401,6 +402,7 @@ namespace Hammock.Authentication.OAuth
             {
                 throw new ArgumentException("You must specify a token secret");
             }
+            */
         }
 
         private void AddAuthParameters(ICollection<WebPair> parameters, string timestamp, string nonce)

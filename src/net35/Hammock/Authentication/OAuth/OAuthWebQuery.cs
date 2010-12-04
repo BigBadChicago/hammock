@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Web;
-#if !Silverlight
-using System.Web;
-#endif
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -476,11 +472,14 @@ namespace Hammock.Authentication.OAuth
         private void RecalculateProtectedResourceSignature(string url)
         {
             var info = (OAuthWebQueryInfo) Info;
+
+            /*
             if (info.Token.IsNullOrBlank() || info.TokenSecret.IsNullOrBlank())
             {
                 // No signature values to work with
                 return;
             }
+            */
 
             if(!info.ClientUsername.IsNullOrBlank() || !info.ClientPassword.IsNullOrBlank())
             {

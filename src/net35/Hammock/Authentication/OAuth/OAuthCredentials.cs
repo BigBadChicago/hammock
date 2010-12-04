@@ -95,6 +95,23 @@ namespace Hammock.Authentication.OAuth
             return credentials;
         }
 
+        public static OAuthCredentials ForClientAuthentication(string consumerKey, string consumerSecret, string username, string password)
+        {
+            var credentials = new OAuthCredentials
+            {
+                Type = OAuthType.ClientAuthentication,
+                ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                SignatureTreatment = OAuthSignatureTreatment.Escaped,
+                ConsumerKey = consumerKey,
+                ConsumerSecret = consumerSecret,
+                ClientUsername = username,
+                ClientPassword = password
+            };
+
+            return credentials;
+        }
+
         public static OAuthCredentials ForProtectedResource(string consumerKey, string consumerSecret, string accessToken, string accessTokenSecret)
         {
             var credentials = new OAuthCredentials

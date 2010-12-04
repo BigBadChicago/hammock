@@ -125,10 +125,8 @@ namespace Hammock
 
         private WebQuery RequestImpl(RestRequest request)
         {
-            request = request ?? new RestRequest();
-            var uri = request.BuildEndpoint(this);
-            var query = GetQueryFor(request, uri);
-            SetQueryMeta(request, query);
+            Uri uri;
+            WebQuery query = null;
 
             var retryPolicy = GetRetryPolicy(request);
             if (_firstTry)
@@ -139,6 +137,8 @@ namespace Hammock
 
             while (_remainingRetries > 0)
             {
+                request = PrepareRequest(request, out uri, out query);
+
                 var url = uri.ToString();
 
                 if (RequestExpectsMock(request))
@@ -191,6 +191,15 @@ namespace Hammock
 
             _firstTry = _remainingRetries == 0;
             return query;
+        }
+
+        private RestRequest PrepareRequest(RestRequest request, out Uri uri, out WebQuery query)
+        {
+            request = request ?? new RestRequest();
+            uri = request.BuildEndpoint(this);
+            query = GetQueryFor(request, uri);
+            SetQueryMeta(request, query);
+            return request;
         }
 
         private bool RequestMultiPart(RestBase request, WebQuery query, string url, out WebException exception)
