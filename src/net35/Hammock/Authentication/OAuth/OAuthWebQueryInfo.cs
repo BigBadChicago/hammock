@@ -1,56 +1,63 @@
+using System;
 using Hammock.Attributes.Specialized;
 using Hammock.Web;
 
 namespace Hammock.Authentication.OAuth
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class OAuthWebQueryInfo : IWebQueryInfo
     {
         [Parameter("oauth_consumer_key")]
-        public string ConsumerKey { get; set; }
+        public virtual string ConsumerKey { get; set; }
 
         [Parameter("oauth_token")]
-        public string Token { get; set; }
+        public virtual string Token { get; set; }
 
         [Parameter("oauth_nonce")]
-        public string Nonce { get; set; }
+        public virtual string Nonce { get; set; }
 
         [Parameter("oauth_timestamp")]
-        public string Timestamp { get; set; }
+        public virtual string Timestamp { get; set; }
 
         [Parameter("oauth_signature_method")]
-        public string SignatureMethod { get; set; }
+        public virtual string SignatureMethod { get; set; }
 
         [Parameter("oauth_signature")]
-        public string Signature { get; set; }
+        public virtual string Signature { get; set; }
 
         [Parameter("oauth_version")]
-        public string Version { get; set; }
+        public virtual string Version { get; set; }
 
         [Parameter("oauth_callback")]
-        public string Callback { get; set; }
+        public virtual string Callback { get; set; }
 
         [Parameter("oauth_verifier")]
-        public string Verifier { get; set; }
+        public virtual string Verifier { get; set; }
 
         [Parameter("x_auth_mode")]
-        public string ClientMode { get; set; }
+        public virtual string ClientMode { get; set; }
 
         [Parameter("x_auth_username")]
-        public string ClientUsername { get; set; }
+        public virtual string ClientUsername { get; set; }
 
         [Parameter("x_auth_password")]
-        public string ClientPassword { get; set; }
+        public virtual string ClientPassword { get; set; }
 
         [UserAgent]
-        public string UserAgent { get; set; }
+        public virtual string UserAgent { get; set; }
 
-        public WebMethod WebMethod { get; set; }
+        public virtual WebMethod WebMethod { get; set; }
+
+        public virtual OAuthParameterHandling ParameterHandling { get; set; }
+
+        public virtual OAuthSignatureTreatment SignatureTreatment { get; set; }
+
+        internal virtual string ConsumerSecret { get; set; }
         
-        public OAuthParameterHandling ParameterHandling { get; set; }
-        public OAuthSignatureTreatment SignatureTreatment { get; set; }
-        
-        internal string ConsumerSecret { get; set; }
-        
-        internal string TokenSecret { get; set; }
+        internal virtual string TokenSecret { get; set; }
+
+        internal virtual bool FirstUse { get; set; }
     }
 }

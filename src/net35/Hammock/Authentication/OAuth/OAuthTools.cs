@@ -186,7 +186,6 @@ namespace Hammock.Authentication.OAuth
         /// <param name="method">The request's HTTP method type</param>
         /// <param name="url">The request URL</param>
         /// <param name="parameters">The request's parameters</param>
-        /// <param name="escape"></param>
         /// <returns>A signature base string</returns>
         public static string ConcatenateRequestElements(WebMethod method, string url, WebParameterCollection parameters)
         {
@@ -296,9 +295,11 @@ namespace Hammock.Authentication.OAuth
                     throw new NotImplementedException("Only HMAC-SHA1 is currently supported.");
             }
 
-            return signatureTreatment == OAuthSignatureTreatment.Escaped
+            var result = signatureTreatment == OAuthSignatureTreatment.Escaped
                        ? UrlEncodeRelaxed(signature)
                        : signature;
+
+            return result;
         }
     }
 }

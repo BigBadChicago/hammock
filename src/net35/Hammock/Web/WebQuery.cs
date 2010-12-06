@@ -1028,7 +1028,7 @@ namespace Hammock.Web
             var pathAndQuery = String.Concat(
                 request.RequestUri.AbsolutePath, string.IsNullOrEmpty(request.RequestUri.Query)
                                                      ? ""
-                                                     : string.Concat("?", request.RequestUri.Query)
+                                                     : string.Concat(request.RequestUri.Query)
                 );
             Trace.WriteLine(
                 String.Concat(request.Method, " ", pathAndQuery, " ", version

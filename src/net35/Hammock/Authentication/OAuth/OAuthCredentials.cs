@@ -169,6 +169,7 @@ namespace Hammock.Authentication.OAuth
                     break;
                 case OAuthType.ProtectedResource:
                     oauth = workflow.BuildProtectedResourceInfo(method, parameters, url);
+                    oauth.FirstUse = true;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

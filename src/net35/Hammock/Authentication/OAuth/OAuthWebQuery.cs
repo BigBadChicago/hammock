@@ -20,6 +20,7 @@ namespace Hammock.Authentication.OAuth
     {
         public virtual string Realm { get; set; }
         public virtual OAuthParameterHandling ParameterHandling { get; private set; }
+        private bool _recalculate = true;
 
         public OAuthWebQuery(OAuthWebQueryInfo info)
             : base(info)
@@ -31,6 +32,10 @@ namespace Hammock.Authentication.OAuth
         {
             Method = info.WebMethod;
             ParameterHandling = info.ParameterHandling;
+            if(info.FirstUse)
+            {
+                _recalculate = false;
+            }
         }
 
         protected override WebRequest BuildMultiPartFormRequest(PostOrPut method, string url, IEnumerable<HttpPostParameter> parameters, out string boundary)
@@ -339,6 +344,8 @@ namespace Hammock.Authentication.OAuth
                 sb.Append("realm=\"{0}\",".FormatWith(OAuthTools.UrlEncodeRelaxed(Realm)));
             }
 
+            Parameters.Sort((l, r) => l.Name.CompareTo(r.Name));
+
             var parameters = 0;
             foreach (var parameter in Parameters.Where(parameter => 
                                                        !parameter.Name.IsNullOrBlank() && 
@@ -471,15 +478,13 @@ namespace Hammock.Authentication.OAuth
 
         private void RecalculateProtectedResourceSignature(string url)
         {
-            var info = (OAuthWebQueryInfo) Info;
-
-            /*
-            if (info.Token.IsNullOrBlank() || info.TokenSecret.IsNullOrBlank())
+            if(!_recalculate)
             {
-                // No signature values to work with
-                return;
+                _recalculate = true;
+                return; // <-- More efficient for unrecycled queries
             }
-            */
+
+            var info = (OAuthWebQueryInfo) Info;
 
             if(!info.ClientUsername.IsNullOrBlank() || !info.ClientPassword.IsNullOrBlank())
             {
@@ -501,7 +506,7 @@ namespace Hammock.Authentication.OAuth
                                 TokenSecret = info.TokenSecret,
                                 ClientUsername = info.ClientUsername,
                                 ClientPassword = info.ClientPassword,
-                                SignatureMethod = OAuthSignatureMethod.HmacSha1,
+                                SignatureMethod = info.SignatureMethod.FromRequestValue(),
                                 ParameterHandling = ParameterHandling,
                                 CallbackUrl = info.Callback,
                                 Verifier = info.Verifier

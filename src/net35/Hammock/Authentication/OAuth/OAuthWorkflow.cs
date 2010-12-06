@@ -295,7 +295,7 @@ namespace Hammock.Authentication.OAuth
             var signature = OAuthTools.GetSignature(
                 SignatureMethod, SignatureTreatment, signatureBase, ConsumerSecret, TokenSecret
                 );
-
+            
             var info = new OAuthWebQueryInfo
                            {
                                WebMethod = method,
@@ -308,6 +308,7 @@ namespace Hammock.Authentication.OAuth
                                Timestamp = timestamp,
                                Nonce = nonce,
                                Version = Version ?? "1.0",
+                               Callback = CallbackUrl,
                                UserAgent = "Hammock",
                                ConsumerSecret = ConsumerSecret,
                                TokenSecret = TokenSecret
