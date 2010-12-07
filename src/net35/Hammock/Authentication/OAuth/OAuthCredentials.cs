@@ -72,6 +72,13 @@ namespace Hammock.Authentication.OAuth
             return credentials;
         }
 
+        public static OAuthCredentials ForRequestToken(string consumerKey, string consumerSecret, string callbackUrl)
+        {
+            var credentials = ForRequestToken(consumerKey, consumerSecret);
+            credentials.CallbackUrl = callbackUrl;
+            return credentials;
+        }
+
         public static OAuthCredentials ForAccessToken(string consumerKey, string consumerSecret, string requestToken, string requestTokenSecret)
         {
             var credentials = new OAuthCredentials
@@ -85,6 +92,13 @@ namespace Hammock.Authentication.OAuth
                 Token = requestToken,
                 TokenSecret = requestTokenSecret
             };
+            return credentials;
+        }
+
+        public static OAuthCredentials ForAccessToken(string consumerKey, string consumerSecret, string requestToken, string requestTokenSecret, string verifier)
+        {
+            var credentials = ForAccessToken(consumerKey, consumerSecret, requestToken, requestTokenSecret);
+            credentials.Verifier = verifier;
             return credentials;
         }
 
