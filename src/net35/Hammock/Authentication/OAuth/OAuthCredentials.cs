@@ -109,6 +109,14 @@ namespace Hammock.Authentication.OAuth
             return credentials;
         }
 
+        public static OAuthCredentials ForAccessTokenRefresh(string consumerKey, string consumerSecret, string accessToken, string accessTokenSecret, string sessionHandle, string verifier)
+        {
+            var credentials = ForAccessToken(consumerKey, consumerSecret, accessToken, accessTokenSecret);
+            credentials.SessionHandle = sessionHandle;
+            credentials.Verifier = verifier;
+            return credentials;
+        }
+
         public static OAuthCredentials ForClientAuthentication(string consumerKey, string consumerSecret, string username, string password)
         {
             var credentials = new OAuthCredentials
