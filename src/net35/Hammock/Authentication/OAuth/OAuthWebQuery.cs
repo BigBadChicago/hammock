@@ -90,7 +90,6 @@ namespace Hammock.Authentication.OAuth
 
         protected override string AppendParameters(string url)
         {
-            //  Base behavior
             return AppendParameters(url, true /* escape */, false /* skipOAuth */);
         }
 

@@ -1,51 +1,121 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.IsolatedStorage;
 using System.Linq;
-using System.Text;
+using System.Net;
+using System.Reflection;
 using System.Windows;
+using Demo.WindowsPhone.Configuration;
 using Demo.WindowsPhone.Models;
 using Demo.WindowsPhone.Serialization;
 using Demo.WindowsPhone.ViewModels;
 using Hammock;
+using Hammock.Authentication.OAuth;
 using Hammock.Silverlight.Compat;
 using Hammock.Web;
+using Microsoft.Practices.Mobile.Configuration;
 
 namespace Demo.WindowsPhone
 {
     public partial class MainPage
     {
+        private readonly string _consumerKey;
+        private readonly string _consumerSecret;
+        private readonly string _accessToken;
+        private readonly string _accessTokenSecret;
+        private readonly string _twitPicKey;
+        
         public MainPage()
         {
             InitializeComponent();
 
+            var section = (ApplicationSettingsSection)ConfigurationManager.GetSection("ApplicationSettings");
+            _consumerKey = section.AppSettings["ConsumerKey"].Value;
+            _consumerSecret = section.AppSettings["ConsumerSecret"].Value;
+            _accessToken = section.AppSettings["AccessToken"].Value;
+            _accessTokenSecret = section.AppSettings["AccessTokenSecret"].Value;
+            _twitPicKey = section.AppSettings["TwitPicKey"].Value;
+
+            PreloadResources();
+
             Loaded += MainPageLoaded;
+        }
+        
+        private static void PreloadResources()
+        {
+            var store = IsolatedStorageFile.GetUserStoreForApplication();
+            if(store.FileExists("_failwhale.jpg"))
+            {
+                store.DeleteFile("_failwhale.jpg");
+            }
+            MoveToIsolatedStorage("_failwhale.jpg");
+        }
+
+        private static void MoveToIsolatedStorage(string path)
+        {
+            var store = IsolatedStorageFile.GetUserStoreForApplication();
+
+            if (store.GetFileNames(path).Length != 0)
+            {
+                return;
+            }
+
+            using (var target = new IsolatedStorageFileStream(path, FileMode.Create, store))
+            {
+                path = string.Format("Demo.WindowsPhone.{0}", path);
+
+                using(var source = Assembly.GetExecutingAssembly().GetManifestResourceStream(path))
+                {
+                    if (source != null)
+                    {
+                        var content = new byte[source.Length];
+                        source.Read(content, 0, content.Length);
+                        target.Write(content, 0, content.Length);
+                    }
+                }
+            }
         }
 
         private void MainPageLoaded(object sender, RoutedEventArgs e)
         {
             LoadPublicTweets();
 
-            RestClient client = new RestClient
+            var client = new RestClient
+                             {
+                                 Authority = "http://api.twitpic.com/",
+                                 VersionPath = "2"
+                             };
+            
+            // Prepare an OAuth Echo request to TwitPic
+            var request = PrepareEchoRequest();
+            request.Path = "uploadAndPost.xml";
+            request.AddField("key", _twitPicKey); // <-- Sign up with TwitPic to get an API key
+            request.AddField("message", "Failwhale!");
+            request.AddFile("media", "failwhale", "_failwhale.jpg", "image/jpeg"); // <-- This overload uses IsolatedStorage
+            
+            client.BeginRequest(request, (req, resp, state) => Debug.Assert(resp.StatusCode == HttpStatusCode.OK));
+        }
+
+        public RestRequest PrepareEchoRequest()
+        {
+            var client = new RestClient
             {
-                Authority = "http://www.tumblr.com/api"
+                Authority = "https://api.twitter.com",
+                VersionPath = "1",
+                UserAgent = "TweetSharp"
             };
 
-            RestRequest request = new RestRequest
+            var request = new RestRequest
             {
-                Path = "/write",
-                Method = WebMethod.Post
+                Method = WebMethod.Get,
+                Path = "account/verify_credentials.json",
+                Credentials = OAuthCredentials.ForProtectedResource(
+                    _consumerKey, _consumerSecret, _accessToken, _accessTokenSecret
+                    )
             };
 
-            const string data = "This is a test stream";
-            var capturedImage = new MemoryStream(Encoding.UTF8.GetBytes(data));
-
-            request.AddParameter("email", "email");
-            request.AddParameter("password", "password");
-            request.AddParameter("generator", "YABA - Windows Phone 7");
-            request.AddParameter("type", "photo");
-            request.AddParameter("caption", "caption");
-            request.AddFile("data", "image1.jpg", capturedImage, "image/jpeg");
-            client.BeginRequest(request);
+            return OAuthCredentials.DelegateWith(client, request);
         }
 
         private void LoadPublicTweets()
