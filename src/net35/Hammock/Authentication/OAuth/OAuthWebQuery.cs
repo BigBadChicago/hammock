@@ -41,21 +41,17 @@ namespace Hammock.Authentication.OAuth
 
         protected override Func<string, string> BeforeBuildPostOrPutFormWebRequest()
         {
-            return url =>
+            return post =>
                        {
-                           Uri uri;
-
-                           // [DC]: Prior to this call, there should be no parameter encoding
-                           url = AppendParameters(url, true, true); // Uses OAuthTools
-                           url = PreProcessPostParameters(url, out uri);
-
-                           return url;
+                           post = PreProcessPostParameters(post);
+                           
+                           return post;
                        };
         }
 
-        protected override byte[] BuildPostOrPutContent(WebRequest request, Uri uri, string parameters)
+        protected override byte[] BuildPostOrPutContent(WebRequest request, string post)
         {
-            var content = PostProcessPostParameters(request, uri);
+            var content = PostProcessPostParameters(request, post.AsUri());
 #if TRACE
             Trace.WriteLine(String.Concat(
                 "\r\n", content)
@@ -76,16 +72,13 @@ namespace Hammock.Authentication.OAuth
 
         private string GetOAuthUrl(string url)
         {
-            Uri uri;
-
             // [DC]: Prior to this call, there should be no parameter encoding
-            url = PreProcessPostParameters(url, out uri);
-            url = AppendParameters(url, true, true); // Uses OAuthTools
-
+            url = PreProcessPostParameters(url);
+            
             switch (ParameterHandling)
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
-                    // [DC]: Handled in authentication
+                    url = AppendParameters(url, true /* escape */, true /* skipOAuth */);
                     break;
                 case OAuthParameterHandling.UrlOrPostParameters:
                     url = GetAddressWithOAuthParameters(new Uri(url));
@@ -182,10 +175,10 @@ namespace Hammock.Authentication.OAuth
             return content;
         }
 
-        private static string PreProcessPostParameters(string url, out Uri uri)
+        // Removes POST parameters from query
+        private static string PreProcessPostParameters(string url)
         {
-            // Remove POST parameters from query
-            uri = url.AsUri();
+            var uri = url.AsUri();
             url = uri.Scheme.Then("://")
 #if !SILVERLIGHT
                 .Then(uri.Authority);
@@ -199,8 +192,8 @@ namespace Hammock.Authentication.OAuth
 #endif
             url = url.Then(uri.AbsolutePath);
             return url;
-
         }
+
         private static string GetPostParametersValue(ICollection<WebPair> postParameters, bool escapeParameters)
         {
             var body = "";

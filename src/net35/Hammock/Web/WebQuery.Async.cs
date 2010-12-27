@@ -766,20 +766,8 @@ namespace Hammock.Web
             // No cached response
             using (var stream = request.EndGetRequestStream(asyncResult))
             {
-                if (post != null)
-                {
-                    stream.Write(post, 0, post.Length);
-                    stream.Flush();
-                }
-                stream.Close();
+                WritePostContentToRequestStream(post, stream);
 
-#if TRACE
-                var encoding = Encoding ?? new UTF8Encoding();
-                if (post != null)
-                {
-                    Trace.WriteLine(encoding.GetString(post, 0, post.Length));
-                }
-#endif
                 var inner = request.BeginGetResponse(PostAsyncResponseCallback,
                                          new Triplet<WebRequest, Triplet<ICache, object, string>, object>
                                          {
@@ -790,6 +778,23 @@ namespace Hammock.Web
 
                 RegisterAbortTimer(request, new WebQueryAsyncResult { InnerResult = inner });
             }
+        }
+
+        private void WritePostContentToRequestStream(byte[] post, Stream stream)
+        {
+            if (post != null)
+            {
+                stream.Write(post, 0, post.Length);
+                stream.Flush();
+            }
+            stream.Close();
+#if TRACE
+            var encoding = Encoding ?? new UTF8Encoding();
+            if (post != null)
+            {
+                Trace.WriteLine(encoding.GetString(post, 0, post.Length));
+            }
+#endif
         }
 
         protected virtual void PostAsyncRequestCallbackMultiPart(IAsyncResult asyncResult)

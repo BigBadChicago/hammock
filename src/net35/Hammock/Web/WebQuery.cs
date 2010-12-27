@@ -249,7 +249,7 @@ namespace Hammock.Web
         
         protected virtual WebRequest BuildPostOrPutFormWebRequest(PostOrPut method, string url, out byte[] content)
         {
-            var parameters = BeforeBuildPostOrPutFormWebRequest().Invoke(url);
+            var post = BeforeBuildPostOrPutFormWebRequest().Invoke(url);
 
             var request = WebRequest.Create(url);
 
@@ -263,7 +263,7 @@ namespace Hammock.Web
 
             TraceRequest(request);
             
-            content = BuildPostOrPutContent(null, null, parameters);
+            content = BuildPostOrPutContent(request, post);
 
 #if !SILVERLIGHT
             request.ContentLength = content.Length;
@@ -271,10 +271,10 @@ namespace Hammock.Web
             return request;
         }
 
-        protected virtual byte[] BuildPostOrPutContent(WebRequest request, Uri uri, string parameters)
+        protected virtual byte[] BuildPostOrPutContent(WebRequest request, string post)
         {
             var encoding = Encoding ?? Encoding.UTF8;
-            var content = PostContent ?? encoding.GetBytes(parameters);
+            var content = PostContent ?? encoding.GetBytes(post);
 #if TRACE
             Trace.WriteLine(String.Concat(
                 "\r\n", content)

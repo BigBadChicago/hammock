@@ -127,6 +127,7 @@ namespace Hammock.Tests
         }
 
         [Test]
+        [Ignore("Makes a live status update")]
         public void Can_prepare_oauth_with_url_parameters()
         {
             var client = new RestClient
@@ -135,17 +136,24 @@ namespace Hammock.Tests
                 UserAgent = "Hammock"
             };
 
-            var credentials = OAuthCredentials.ForRequestToken(_consumerKey, _consumerSecret);
+            var credentials = OAuthCredentials.ForProtectedResource(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
             credentials.ParameterHandling = OAuthParameterHandling.UrlOrPostParameters;
 
             var request = new RestRequest
             {
-                Path = "oauth/request_token",
+                Path = "statuses/update.json",
+                Method = WebMethod.Post,
                 Credentials = credentials
             };
 
+            request.AddParameter("status", DateTime.Now.Ticks.ToString());
+            request.AddParameter("test", "value");
+
             var response = client.Request(request);
             Assert.IsNotNull(response);
+
+            Console.WriteLine(response.Content);
+
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
