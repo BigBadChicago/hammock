@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -20,7 +21,7 @@ namespace Hammock.Authentication.OAuth
     {
         public virtual string Realm { get; set; }
         public virtual OAuthParameterHandling ParameterHandling { get; private set; }
-        private bool _recalculate = true;
+        private bool _recalculate = false;
 
         public OAuthWebQuery(OAuthWebQueryInfo info)
             : base(info)
@@ -38,121 +39,60 @@ namespace Hammock.Authentication.OAuth
             }
         }
 
-        protected override WebRequest BuildMultiPartFormRequest(PostOrPut method, string url, IEnumerable<HttpPostParameter> parameters, out string boundary)
+        protected override Func<string, string> BeforeBuildPostOrPutFormWebRequest()
         {
-            return base.BuildMultiPartFormRequest(method, url, parameters, out boundary);
+            return url =>
+                       {
+                           Uri uri;
+
+                           // [DC]: Prior to this call, there should be no parameter encoding
+                           url = AppendParameters(url, true, true); // Uses OAuthTools
+                           url = PreProcessPostParameters(url, out uri);
+
+                           return url;
+                       };
         }
 
-        protected override WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
+        protected override byte[] BuildPostOrPutContent(WebRequest request, Uri uri, string parameters)
         {
-            Uri uri;
-
-            // [DC]: Prior to this call, there should be no parameter encoding
-            url = AppendParameters(url, true, true); // Uses OAuthTools
-            url = PreProcessPostParameters(url, out uri);
-
-            var request = WebRequest.Create(url);
-            AuthenticateRequest(request);
-
-#if SILVERLIGHT && !WindowsPhone
-            var httpMethod = method == PostOrPut.Post ? "POST" : "PUT";;
-            if (HasElevatedPermissions)
-            {
-                request.Method = httpMethod;
-            }
-            else
-            {
-                request.Method = "POST";
-                request.Headers[SilverlightMethodHeader] = httpMethod;
-            }
-#else
-            request.Method = method == PostOrPut.Post ? "POST" : "PUT";
+            var content = PostProcessPostParameters(request, uri);
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "\r\n", content)
+                );
+            return content;
 #endif
-            request.ContentType = "application/x-www-form-urlencoded";
-
-            // [DC] LSP violation necessary for "pure" mocks
-            if (request is HttpWebRequest)
-            {
-                SetRequestMeta((HttpWebRequest)request);
-            }
-            else
-            {
-                AppendHeaders(request);
-                if (!UserAgent.IsNullOrBlank())
-                {
-#if SILVERLIGHT
-                    // [DC] User-Agent is still restricted in elevated mode
-                    request.Headers[SilverlightUserAgentHeader] = UserAgent;
-#else
-                    request.Headers["User-Agent"] = UserAgent;
-#endif
-                }
-            }
-
-            content = PostProcessPostParameters(request, uri);
-
-#if !SILVERLIGHT
-            // [DC]: Silverlight sets this dynamically
-            request.ContentLength = content.Length;
-#endif
-
-            TraceRequest(request);
-            return request;
+        }
+        
+        protected override Func<string, string> BeforeBuildGetDeleteHeadOptionsWebRequest()
+        {
+            return GetOAuthUrl;
         }
 
-        protected override WebRequest BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions method, string url)
+        protected override Func<string, string> BeforeBuildPostOrPutEntityWebRequest()
+        {
+            return GetOAuthUrl;
+        }
+
+        private string GetOAuthUrl(string url)
         {
             Uri uri;
 
             // [DC]: Prior to this call, there should be no parameter encoding
             url = PreProcessPostParameters(url, out uri);
             url = AppendParameters(url, true, true); // Uses OAuthTools
-            
+
             switch (ParameterHandling)
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
                     // [DC]: Handled in authentication
                     break;
                 case OAuthParameterHandling.UrlOrPostParameters:
-                    url = GetAddressWithOAuthParameters(new Uri(url)).ToString();
+                    url = GetAddressWithOAuthParameters(new Uri(url));
                     break;
             }
 
-            var request = WebRequest.Create(url);
-#if SILVERLIGHT
-            var httpMethod = method.ToUpper();
-
-#if WindowsPhone
-            HasElevatedPermissions = true;
-#endif
-            if (HasElevatedPermissions)
-            {
-                request.Method = httpMethod;
-            }
-            else
-            {
-                request.Method = "POST";
-                request.Headers[SilverlightMethodHeader] = httpMethod;
-            }
-#else
-            request.Method = method.ToUpper();
-#endif
-            AuthenticateRequest(request);
-
-            // [DC] LSP violation necessary for "pure" mocks
-            if (request is HttpWebRequest)
-            {
-                SetRequestMeta((HttpWebRequest)request);
-            }
-            else
-            {
-                AppendHeaders(request);
-                SetUserAgent(request);
-            }
-
-            TraceRequest(request);
-
-            return request;
+            return url;
         }
 
         protected override string AppendParameters(string url)
@@ -186,7 +126,7 @@ namespace Hammock.Authentication.OAuth
             return url;
         }
 
-        private Uri GetAddressWithOAuthParameters(Uri address)
+        private string GetAddressWithOAuthParameters(Uri address)
         {
             var sb = new StringBuilder("?");
             var parameters = 0;
@@ -202,7 +142,7 @@ namespace Hammock.Authentication.OAuth
                 sb.Append(format.FormatWith(parameter.Name, parameter.Value));
             }
 
-            return new Uri(address + sb.ToString());
+            return address + sb.ToString();
         }
 
         private byte[] PostProcessPostParameters(WebRequest request, Uri uri)
@@ -309,7 +249,7 @@ namespace Hammock.Authentication.OAuth
             switch (ParameterHandling)
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
-                    return GetAuthorizationHeader();
+                    return BuildAuthorizationHeader();
                 case OAuthParameterHandling.UrlOrPostParameters:
                     return GetPostParametersValue(Parameters, false /* escapeParameters */);
                 default:
@@ -319,7 +259,7 @@ namespace Hammock.Authentication.OAuth
         
         protected override void SetAuthorizationHeader(WebRequest request, string header)
         {
-            var authorization = GetAuthorizationHeader();
+            var authorization = BuildAuthorizationHeader();
             AuthorizationHeader = authorization;
 
 #if !SILVERLIGHT || WindowsPhone
@@ -336,7 +276,7 @@ namespace Hammock.Authentication.OAuth
 #endif
         }
 
-        private string GetAuthorizationHeader()
+        private string BuildAuthorizationHeader()
         {
             var sb = new StringBuilder("OAuth ");
             if (!Realm.IsNullOrBlank())
@@ -417,13 +357,13 @@ namespace Hammock.Authentication.OAuth
 
         public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, DateTime absoluteExpiration, object userState)
         {
-            //RecalculateProtectedResourceSignature(url);
+            RecalculateProtectedResourceSignature(url);
             return base.RequestAsync(url, key, cache, absoluteExpiration, userState);
         }
 
         public override WebQueryAsyncResult RequestAsync(string url, string key, ICache cache, TimeSpan slidingExpiration, object userState)
         {
-            //RecalculateProtectedResourceSignature(url);
+            RecalculateProtectedResourceSignature(url);
             return base.RequestAsync(url, key, cache, slidingExpiration, userState);
         }
 #else

@@ -443,7 +443,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ICSharpCode.SharpZipLib.Silverlight\ICSharpCode.SharpZipLib.Silverlight.csproj">
       <Project>{5953279F-F478-4D5F-9906-03D56CE2DA2D}</Project>
-      <Name>ICSharpCode.SharpZipLib.Silverlight %28.NET 4.0\SharpZipLib\ICSharpCode.SharpZipLib.Silverlight%29</Name>
+      <Name>ICSharpCode.SharpZipLib.Silverlight %28Client\.NET 4.0\SharpZipLib\ICSharpCode.SharpZipLib.Silverlight%29</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />

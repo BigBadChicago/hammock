@@ -234,6 +234,7 @@ namespace Hammock.Web
 #endif
         }
 #endif
+
         protected virtual WebRequest BuildPostOrPutWebRequest(PostOrPut method, string url, out byte[] content)
         {
             return !HasEntity
@@ -241,40 +242,28 @@ namespace Hammock.Web
                        : BuildPostOrPutEntityWebRequest(method, url, out content);
         }
 
+        protected virtual Func<string, string> BeforeBuildPostOrPutFormWebRequest()
+        {
+            return url => AppendParameters(url).Replace(url + "?", "");
+        }
+        
         protected virtual WebRequest BuildPostOrPutFormWebRequest(PostOrPut method, string url, out byte[] content)
         {
-            var parameters = AppendParameters(url).Replace(url + "?", "");
+            var parameters = BeforeBuildPostOrPutFormWebRequest().Invoke(url);
 
             var request = WebRequest.Create(url);
+
             AuthenticateRequest(request);
-#if SILVERLIGHT
-            var httpMethod = method == PostOrPut.Post ? "POST" : "PUT"; ;
-            if (HasElevatedPermissions)
-            {
-                request.Method = httpMethod;
-            }
-            else
-            {
-                request.Method = "POST";
-                request.Headers[SilverlightMethodHeader] = httpMethod;
-            }
-#else
-            request.Method = method == PostOrPut.Post ? "POST" : "PUT";
-#endif
+
+            SetMethod(method.ToString(), request);
+
             request.ContentType = "application/x-www-form-urlencoded";
 
             HandleRequestMeta(request);
 
             TraceRequest(request);
             
-            var encoding = Encoding.UTF8;
-            content = PostContent ?? encoding.GetBytes(parameters);
-
-#if TRACE
-            Trace.WriteLine(String.Concat(
-                "\r\n", content)
-                );
-#endif
+            content = BuildPostOrPutContent(null, null, parameters);
 
 #if !SILVERLIGHT
             request.ContentLength = content.Length;
@@ -282,26 +271,33 @@ namespace Hammock.Web
             return request;
         }
 
-        private WebRequest BuildPostOrPutEntityWebRequest(PostOrPut method, string url, out byte[] content)
+        protected virtual byte[] BuildPostOrPutContent(WebRequest request, Uri uri, string parameters)
         {
-            url = AppendParameters(url);
+            var encoding = Encoding ?? Encoding.UTF8;
+            var content = PostContent ?? encoding.GetBytes(parameters);
+#if TRACE
+            Trace.WriteLine(String.Concat(
+                "\r\n", content)
+                );
+            return content;
+#endif
+        }
+
+        protected virtual Func<string, string> BeforeBuildPostOrPutEntityWebRequest()
+        {
+            return AppendParameters;
+        }
+
+        protected virtual WebRequest BuildPostOrPutEntityWebRequest(PostOrPut method, string url, out byte[] content)
+        {
+            url = BeforeBuildPostOrPutEntityWebRequest().Invoke(url);
 
             var request = WebRequest.Create(url);
+
+            SetMethod(method.ToString(), request);
+            
             AuthenticateRequest(request);
-#if SILVERLIGHT && !WindowsPhone
-            var httpMethod = method == PostOrPut.Post ? "POST" : "PUT"; ;
-            if (HasElevatedPermissions)
-            {
-                request.Method = httpMethod;
-            }
-            else
-            {
-                request.Method = "POST";
-                request.Headers[SilverlightMethodHeader] = httpMethod;
-            }
-#else
-            request.Method = method == PostOrPut.Post ? "POST" : "PUT";
-#endif
+
             HandleRequestMeta(request);
 
             TraceRequest(request);
@@ -310,7 +306,10 @@ namespace Hammock.Web
             {
                 var entity = Entity.Content;
 
-                content = Entity.ContentEncoding.GetBytes(entity);
+                var encoding = Entity.ContentEncoding ?? Encoding ?? Encoding.UTF8;
+
+                content = encoding.GetBytes(entity);
+
                 request.ContentType = Entity.ContentType;
 #if TRACE
                 Trace.WriteLine(String.Concat(
@@ -331,12 +330,30 @@ namespace Hammock.Web
             return request;
         }
 
+        protected virtual Func<string, string> BeforeBuildGetDeleteHeadOptionsWebRequest()
+        {
+            return AppendParameters;
+        }
+
         protected virtual WebRequest BuildGetDeleteHeadOptionsWebRequest(GetDeleteHeadOptions method, string url)
         {
-            url = AppendParameters(url);
+            url = BeforeBuildGetDeleteHeadOptionsWebRequest().Invoke(url);
 
             var request = WebRequest.Create(url);
 
+            SetMethod(method.ToString(), request);
+            
+            AuthenticateRequest(request);
+
+            HandleRequestMeta(request);
+
+            TraceRequest(request);
+            
+            return request;
+        }
+
+        private void SetMethod(string method, WebRequest request)
+        {
 #if SILVERLIGHT && !WindowsPhone
             var httpMethod = method.ToUpper();
             if (HasElevatedPermissions)
@@ -350,14 +367,7 @@ namespace Hammock.Web
             }
 #else
             request.Method = method.ToUpper();
-#endif
-            AuthenticateRequest(request);
-
-            HandleRequestMeta(request);
-
-            TraceRequest(request);
-            
-            return request;
+#endif    
         }
 
         private void HandleRequestMeta(WebRequest request)

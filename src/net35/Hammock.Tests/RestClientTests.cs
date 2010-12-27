@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Net;
+using System.Text;
 using Hammock.Authentication.OAuth;
 using Hammock.Web;
 using NUnit.Framework;
@@ -95,6 +96,16 @@ namespace Hammock.Tests
         }
 
         [Test]
+        public void Can_post_raw_content()
+        {
+            var client = new RestClient {Authority = "http://www.apitize.com"};
+            var request = new RestRequest();
+            request.AddPostContent(Encoding.UTF8.GetBytes("Babbabooey!"));
+
+            client.Request(request);
+        }
+
+        [Test]
         public void Can_stream_photo_over_delegated_credentials()
         {
             var client = new RestClient
@@ -115,6 +126,29 @@ namespace Hammock.Tests
             Console.WriteLine(response.Content);
         }
 
+        [Test]
+        public void Can_prepare_oauth_with_url_parameters()
+        {
+            var client = new RestClient
+            {
+                Authority = "http://api.twitter.com",
+                UserAgent = "Hammock"
+            };
+
+            var credentials = OAuthCredentials.ForRequestToken(_consumerKey, _consumerSecret);
+            credentials.ParameterHandling = OAuthParameterHandling.UrlOrPostParameters;
+
+            var request = new RestRequest
+            {
+                Path = "oauth/request_token",
+                Credentials = credentials
+            };
+
+            var response = client.Request(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
         public RestRequest PrepareEchoRequest()
         {
             var client = new RestClient
@@ -123,6 +157,7 @@ namespace Hammock.Tests
                                  VersionPath = "1",
                                  UserAgent = "TweetSharp"
                              };
+
             var request = new RestRequest
                               {
                                   Method = WebMethod.Get,

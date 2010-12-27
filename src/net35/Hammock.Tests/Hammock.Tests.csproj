@@ -103,11 +103,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Hammock.Extras\Hammock.Extras.csproj">
       <Project>{3BB0DC97-ECE3-4AC8-B2D0-E4C14D600179}</Project>
-      <Name>Hammock.Extras %28.NET 3.5\Hammock.Extras%29</Name>
+      <Name>Hammock.Extras %28Client\.NET 3.5\Hammock.Extras%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\Hammock\Hammock.csproj">
       <Project>{6679078A-C585-4CB6-96E9-908DBDAA2716}</Project>
-      <Name>Hammock %28.NET 3.5\Hammock%29</Name>
+      <Name>Hammock %28Client\.NET 3.5\Hammock%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
