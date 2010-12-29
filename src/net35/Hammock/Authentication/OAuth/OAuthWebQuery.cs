@@ -55,9 +55,9 @@ namespace Hammock.Authentication.OAuth
 #if TRACE
             Trace.WriteLine(String.Concat(
                 "\r\n", content)
-                );
-            return content;
+                );            
 #endif
+			return content;
         }
         
         protected override Func<string, string> BeforeBuildGetDeleteHeadOptionsWebRequest()

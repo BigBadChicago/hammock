@@ -278,9 +278,9 @@ namespace Hammock.Web
 #if TRACE
             Trace.WriteLine(String.Concat(
                 "\r\n", content)
-                );
-            return content;
+                );            
 #endif
+			return content;
         }
 
         protected virtual Func<string, string> BeforeBuildPostOrPutEntityWebRequest()
@@ -1121,7 +1121,9 @@ namespace Hammock.Web
                         true /* write */, parameters, boundary, encoding, requestStream
                         );
                     
+#if DEBUG
                     Debug.Assert(expected == actual, string.Format("Expected {0} bytes but wrote {1}!", expected, actual));
+#endif
 
                     // [DC] Avoid disposing until no longer needed to build results
                     var response = request.GetResponse();
