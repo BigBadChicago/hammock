@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Hammock.Server
@@ -9,9 +8,13 @@ namespace Hammock.Server
     {
         ICollection<IHttpModule> Modules { get; }
 
-        void Start(IPAddress address);
-        void Start(IPAddress address, int port);
-        void Start(IPAddress address, X509Certificate certificate);
-        void Start(IPAddress address, int port, X509Certificate certificate);
+        void Start(IAddress address);
+        void Start(IAddress address, int port);
+        void Start(IAddress address, X509Certificate certificate);
+        void Start(IAddress address, int port, X509Certificate certificate);
+
+        void Stop();
+        
+        void WithConnection(IHttpConnection connection);
     }
 }

@@ -1,28 +1,26 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Security.Principal;
 
 namespace Hammock.Server.Defaults
 {
-    [Export(typeof(IHttpListenerContext))]
-    public class DefaultHttpListenerContext : IHttpListenerContext
+    public class HttpListenerContext : IHttpListenerContext
     {
-        public IHttpRequest Request
+        public virtual IHttpRequest Request
         {
             get { throw new NotImplementedException(); }
         }
 
-        public IHttpResponse Response
+        public virtual IHttpResponse Response
         {
             get { throw new NotImplementedException(); }
         }
 
-        public IPrincipal User
+        public virtual IPrincipal User
         {
             get { throw new NotImplementedException(); }
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             throw new NotImplementedException();
         }

@@ -3,7 +3,7 @@
   <Interface Name="Hammock.Server.IHttpServer">
     <Position X="1.25" Y="4" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAACAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAAQAAAAAAAAIgAAAAAAAAA=</HashCode>
       <FileName>IHttpServer.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
@@ -67,13 +67,6 @@
     <ShowAsAssociation>
       <Property Name="Identity" />
     </ShowAsAssociation>
-  </Interface>
-  <Interface Name="Hammock.Server.ITcpListener">
-    <Position X="3.5" Y="0.5" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAgAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ITcpListener.cs</FileName>
-    </TypeIdentifier>
   </Interface>
   <Interface Name="System.Security.Principal.IIdentity">
     <Position X="8.5" Y="2.25" Width="1.5" />

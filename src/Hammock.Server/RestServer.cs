@@ -1,44 +1,54 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using Hammock.Server.Defaults;
 
 namespace Hammock.Server
 {
     public class RestServer : IHttpServer
     {
-        private IHttpListener _listener;
+        private readonly IHttpServer _server;
 
         public ICollection<IHttpModule> Modules { get; private set; }
 
         public RestServer()
         {
+            _server = new Defaults.HttpServer();
             Modules = new List<IHttpModule>(0);
         }
 
-        public virtual void Start(IPAddress address)
+        public virtual void Start(IAddress address)
         {
-            _listener = new DefaultHttpListener(address, 80);
+            _server.Start(address, 80);
         }
 
-        public virtual void Start(IPAddress address, int port)
+        public virtual void Start(IAddress address, int port)
         {
-            _listener = new DefaultHttpListener(address, port);
+            _server.Start(address, port);
         }
 
-        public virtual void Start(IPAddress address, X509Certificate certificate)
+        public virtual void Start(IAddress address, X509Certificate certificate)
         {
-            _listener = new DefaultHttpListener(address, 443, certificate);
+            _server.Start(address, 443, certificate);
         }
 
-        public virtual void Start(IPAddress address, int port, X509Certificate certificate)
+        public virtual void Start(IAddress address, int port, X509Certificate certificate)
         {
-            _listener = new DefaultHttpListener(address, port, certificate);
+            _server.Start(address, port, certificate);
+        }
+
+        public void Stop()
+        {
+            _server.Stop();
+        }
+
+        public void WithConnection(IHttpConnection connection)
+        {
+            _server.WithConnection(connection);
         }
 
         public virtual void Dispose()
         {
-            _listener.Dispose();
+            _server.Dispose();
         }
     }
 }
