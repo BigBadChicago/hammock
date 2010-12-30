@@ -19,6 +19,10 @@ namespace Hammock.Server.Defaults
             {
                 return;
             }
+
+            Stop();
+            WaitForBacklog();
+
             _endpoint.Close();
             _endpoint.Dispose();
         }
@@ -47,8 +51,7 @@ namespace Hammock.Server.Defaults
             {
                 try
                 {
-                    new Action(ConnectionHandler)
-                        .BeginInvoke(null, null);
+                    new Action(ConnectionHandler).BeginInvoke(null, null);
                 }
                 catch
                 {
@@ -56,6 +59,11 @@ namespace Hammock.Server.Defaults
                 }
             }
 
+            WaitForBacklog();
+        }
+
+        private void WaitForBacklog()
+        {
             while (true)
             {
                 if (_backlog <= 0)

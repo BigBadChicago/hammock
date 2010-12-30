@@ -78,6 +78,11 @@ namespace Hammock.Server.Defaults
             {
                 _socket.Dispose();
             }
+#else
+            if(_socket != null)
+            {
+                (_socket as IDisposable).Dispose();
+            }
 #endif
         }
     }
