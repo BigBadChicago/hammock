@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Hammock.Server

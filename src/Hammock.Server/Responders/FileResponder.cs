@@ -4,14 +4,14 @@ namespace Hammock.Server.Responders
 {
     public class FileResponder : IResponder
     {
-        public void Respond(string filename, long offset, long length)
+        public void Respond(string path, long offset, long length)
         {
             if (length == 0)
             {
                 return;
             }
 
-            using(var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using(var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 Respond(stream, offset, length);
             }

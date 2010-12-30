@@ -13,8 +13,8 @@ namespace Hammock.Server
         void Start(IAddress address, X509Certificate certificate);
         void Start(IAddress address, int port, X509Certificate certificate);
 
-        void Stop();
-        
         void WithConnection(IHttpConnection connection);
+
+        void Stop();
     }
 }
