@@ -43,7 +43,7 @@ namespace Hammock.Authentication.OAuth
         {
             return post =>
                        {
-                           post = PreProcessPostParameters(post);
+                           post = AppendParameters(post);
                            
                            return post;
                        };
