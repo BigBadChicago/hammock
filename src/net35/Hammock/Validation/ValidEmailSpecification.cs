@@ -9,7 +9,7 @@ namespace Hammock.Validation
         private static readonly Regex _names =
             new Regex(
                 @"\w*<([-_a-z0-9'+*$^&%=~!?{}]+(?:\.[-_a-z0-9'+*$^&%=~!?{}]+)*@(?:(?![-.])[-a-z0-9.]+(?<![-.])\.[a-z]{2,6}|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?)>",
-#if !SL4
+#if !SL4 && !MonoTouch
                 RegexOptions.Compiled |
 #endif
                  RegexOptions.IgnoreCase
@@ -19,7 +19,7 @@ namespace Hammock.Validation
         private static readonly Regex _explicit =
             new Regex(
                 @"^[-_a-z0-9'+*$^&%=~!?{}]+(?:\.[-_a-z0-9'+*$^&%=~!?{}]+)*@(?:(?![-.])[-a-z0-9.]+(?<![-.])\.[a-z]{2,6}|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?$",
-#if !SL4
+#if !SL4 && !MonoTouch
                 RegexOptions.Compiled |
 #endif
                  RegexOptions.IgnoreCase

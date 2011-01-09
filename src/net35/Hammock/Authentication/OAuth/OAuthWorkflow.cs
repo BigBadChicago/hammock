@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Hammock.Extensions;
 using Hammock.Web;
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !MonoTouch
 using System.Web;
 #endif
 

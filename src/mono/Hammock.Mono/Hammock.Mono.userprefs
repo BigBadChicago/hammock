@@ -1,10 +1,16 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ctype="Workbench">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="../../net35/Hammock/Web/Mocks/MockWebRequestFactory.cs">
+    <Files>
+      <File FileName="../Hammock.Mono.Tests/Main.cs" Line="7" Column="3" />
+      <File FileName="../../net35/Hammock/Web/Mocks/MockWebRequestFactory.cs" Line="9" Column="7" />
+    </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
-          <Node name="Hammock.Mono" selected="True" />
+          <Node name="Hammock.MonoTouch" expanded="True" selected="True">
+            <Node name="Web" expanded="True" />
+          </Node>
         </State>
       </Pad>
       <Pad Id="ClassPad">
@@ -15,5 +21,5 @@
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches ctype="PinnedWatchStore" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

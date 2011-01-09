@@ -171,10 +171,12 @@ namespace Hammock.Web
                 out version, out statusCode, out statusDescription, out headers, 
                 out contentType, out contentLength, out responseUri
                 );
-
+			
+#if !MonoTouch
             TraceResponse(
                 responseUri, version, headers, statusCode, statusDescription
                 );
+#endif
 
             Result.WebResponse = WebResponse;
             Result.ResponseHttpStatusCode = statusCode;
@@ -185,7 +187,8 @@ namespace Hammock.Web
             Result.Exception = e.Exception;
         }
 
-        [Conditional("TRACE")]
+#if !MonoTouch
+		[Conditional("TRACE")]
         private static void TraceResponse(Uri uri, string version, System.Net.WebHeaderCollection headers, int statusCode, string statusDescription)
         {
             Trace.WriteLine(
@@ -200,6 +203,7 @@ namespace Hammock.Web
                 Trace.WriteLine(trace);
             }
         }
+#endif
 
         private void SetRequestResults(WebQueryRequestEventArgs e)
         {
@@ -260,9 +264,11 @@ namespace Hammock.Web
             request.ContentType = "application/x-www-form-urlencoded";
 
             HandleRequestMeta(request);
-
+			
+#if !MonoTouch
             TraceRequest(request);
-            
+#endif
+			
             content = BuildPostOrPutContent(request, post);
 
 #if !SILVERLIGHT
@@ -299,9 +305,11 @@ namespace Hammock.Web
             AuthenticateRequest(request);
 
             HandleRequestMeta(request);
-
+			
+#if !MonoTouch
             TraceRequest(request);
-            
+#endif
+
             if (Entity != null)
             {
                 var entity = Entity.Content;
@@ -346,9 +354,10 @@ namespace Hammock.Web
             AuthenticateRequest(request);
 
             HandleRequestMeta(request);
-
+			
+#if !MonoTouch
             TraceRequest(request);
-            
+#endif
             return request;
         }
 
@@ -590,7 +599,8 @@ namespace Hammock.Web
                 }
             }
         }
-
+		
+#if !MonoTouch
         [Conditional("TRACE")]
         private void TraceHeaders(WebRequest request)
         {
@@ -604,6 +614,7 @@ namespace Hammock.Web
                 Trace.WriteLine(trace);
             }
         }
+#endif
 
         private static void AddHeader(KeyValuePair<string, string> header, WebRequest request)
         {
@@ -1016,11 +1027,15 @@ namespace Hammock.Web
             request.Method = method == PostOrPut.Post ? "POST" : "PUT";
             
             HandleRequestMeta(request);
-            TraceRequest(request);
             
+#if !MonoTouch
+			TraceRequest(request);
+#endif
+			
             return request;
         }
-
+		
+#if !MonoTouch
         [Conditional("TRACE")]
         protected void TraceRequest(WebRequest request)
         {
@@ -1031,7 +1046,7 @@ namespace Hammock.Web
                 string.Concat("HTTP/", ((HttpWebRequest)request).ProtocolVersion) :
 #endif
  "HTTP/v1.1";
-
+			
             Trace.WriteLine(
                 String.Concat("--REQUEST: ", request.RequestUri.Scheme, "://", request.RequestUri.Host)
                 );
@@ -1046,6 +1061,7 @@ namespace Hammock.Web
 
             TraceHeaders(request);
         }
+#endif
 
 #if !SILVERLIGHT
         protected virtual void ExecutePostOrPut(PostOrPut method, string url, out WebException exception)
@@ -1117,12 +1133,16 @@ namespace Hammock.Web
             {
                 using (var requestStream = request.GetRequestStream())
                 {
-                    var actual = WriteMultiPartImpl(
+#if DEBUG
+					var actual = WriteMultiPartImpl(
                         true /* write */, parameters, boundary, encoding, requestStream
                         );
-                    
-#if DEBUG
+					
                     Debug.Assert(expected == actual, string.Format("Expected {0} bytes but wrote {1}!", expected, actual));
+#else
+				WriteMultiPartImpl(
+                        true /* write */, parameters, boundary, encoding, requestStream
+                        );
 #endif
 
                     // [DC] Avoid disposing until no longer needed to build results

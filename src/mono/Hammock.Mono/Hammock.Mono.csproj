@@ -184,4 +184,7 @@
     <None Include="..\..\net35\Hammock\Web\_Web.cd" />
     <None Include="..\..\net35\Hammock\Web\Mocks\_Mocks.cd" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Specifications\" />
+  </ItemGroup>
 </Project>

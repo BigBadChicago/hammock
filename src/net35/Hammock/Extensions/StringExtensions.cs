@@ -12,7 +12,7 @@ using System.Windows.Browser;
 using System.Web;
 #endif
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !MonoTouch
 using System.Web;
 #endif
 
@@ -115,7 +115,7 @@ namespace Hammock.Extensions
         }
 
         private const RegexOptions Options =
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !MonoTouch
             RegexOptions.Compiled | RegexOptions.IgnoreCase;
 #else
             RegexOptions.IgnoreCase;
