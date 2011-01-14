@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8E7293E5-83FB-4964-8505-6123EBEAF141}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Hammock.Framework.Mono</RootNamespace>
+    <AssemblyName>Hammock.Framework.Mono</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\mono</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\mono</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Generated\_API.cs">
+      <DependentUpon>_API.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DataAccess\IRepository.cs" />
+    <Compile Include="DataAccess\IEntity.cs" />
+    <Compile Include="DataAccess\Identity.cs" />
+    <Compile Include="Specifications\SpecificationBase.cs" />
+    <Compile Include="Specifications\OrSpecification.cs" />
+    <Compile Include="Specifications\NotSpecification.cs" />
+    <Compile Include="Specifications\ISpecification.cs" />
+    <Compile Include="Specifications\CompositeSpecificationBase.cs" />
+    <Compile Include="Specifications\AndSpecification.cs" />
+    <Compile Include="_Models\IResource.cs" />
+    <Compile Include="_Controllers\IController.cs" />
+    <Compile Include="_Views\IView.cs" />
+    <Compile Include="RestServer.cs" />
+    <Compile Include="Modules\RoutingModule.cs" />
+    <Compile Include="RestMethod.cs" />
+    <Compile Include="RestApi.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\Hammock.Mono\Hammock.Server.Mono\Hammock.Server.Mono.csproj">
+      <Project>{E7509C55-E21B-4BA3-9ED8-9C96AC620193}</Project>
+      <Name>Hammock.Server.Mono</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Generated\" />
+    <Folder Include="DataAccess\" />
+    <Folder Include="Specifications\" />
+    <Folder Include="Paging\" />
+    <Folder Include="Routing\" />
+    <Folder Include="_Models\" />
+    <Folder Include="_Views\" />
+    <Folder Include="_Controllers\" />
+    <Folder Include="Modules\" />
+    <Folder Include="Responders\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Generated\_API.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>_API.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+</Project>
