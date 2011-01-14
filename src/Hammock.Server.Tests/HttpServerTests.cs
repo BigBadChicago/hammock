@@ -15,9 +15,9 @@ namespace Hammock.Server.Tests
         {
             using(var server = new HttpServer())
             {
-                server.Start(Address.Loopback, 8080);
+                server.Start(Address.Loopback, 7878);
 
-                var client = new RestClient { Authority = "http://localhost:8080" };
+                var client = new RestClient { Authority = "http://localhost:7878" };
                 var request = new RestRequest();
                 var response = client.Request(request);
 
@@ -34,16 +34,13 @@ namespace Hammock.Server.Tests
 
             using(var server = new HttpServer())
             {
-                server.Start(Address.Loopback, 8080);
+                server.Start(Address.Loopback, 7878);
 
                 var block = new AutoResetEvent(false);
-                var client = new RestClient { Authority = "http://localhost:8080" };
+                var client = new RestClient { Authority = "http://localhost:7878" };
                 var request = new RestRequest();
 
-                var timespan =
-                    WithTimer(
-                        () =>
-                        {
+                var timespan = WithTimer(() => {
                             for (var i = 0; i < trials; i++)
                             {
                                 client.BeginRequest(request,
@@ -60,15 +57,14 @@ namespace Hammock.Server.Tests
                             }
 
                             block.WaitOne();
-                        }
-                        );
+                        });
 
                 var peak = server.GetPeak();
                 Trace.WriteLine("Peak queue was " + peak);
                 Trace.WriteLine("Total Time:" + timespan);
             }
         }
-
+		
         public TimeSpan WithTimer(Action action)
         {
             var start = DateTime.Now;
