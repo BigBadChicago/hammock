@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Server", "Hammock.Server\Hammock.Server.csproj", "{D75610E8-9074-4073-AECD-EF5FCE97E428}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Server", "net40\Hammock.Server\Hammock.Server.csproj", "{D75610E8-9074-4073-AECD-EF5FCE97E428}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Server.Tests", "Hammock.Server.Tests\Hammock.Server.Tests.csproj", "{50851227-5502-4F59-B821-8F474E81A2B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Server.Tests", "net40\Hammock.Server.Tests\Hammock.Server.Tests.csproj", "{50851227-5502-4F59-B821-8F474E81A2B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Hosting", "Hammock.Hosting\Hammock.Hosting.csproj", "{06513EBA-A493-4B2E-9F67-0BFB43592E69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Hosting", "net40\Hammock.Hosting\Hammock.Hosting.csproj", "{06513EBA-A493-4B2E-9F67-0BFB43592E69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Framework", "net40\Hammock.Framework\Hammock.Framework.csproj", "{8E7293E5-83FB-4964-8505-6123EBEAF141}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,14 @@ Global
 		{06513EBA-A493-4B2E-9F67-0BFB43592E69}.Mono|Any CPU.Build.0 = Release|Any CPU
 		{06513EBA-A493-4B2E-9F67-0BFB43592E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06513EBA-A493-4B2E-9F67-0BFB43592E69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.ClientProfiles|Any CPU.ActiveCfg = Release|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.ClientProfiles|Any CPU.Build.0 = Release|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.Mono|Any CPU.ActiveCfg = Release|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.Mono|Any CPU.Build.0 = Release|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E7293E5-83FB-4964-8505-6123EBEAF141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

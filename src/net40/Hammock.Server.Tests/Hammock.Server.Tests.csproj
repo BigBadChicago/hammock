@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,9 +51,9 @@
       <Project>{D75610E8-9074-4073-AECD-EF5FCE97E428}</Project>
       <Name>Hammock.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\net35\Hammock\Hammock.csproj">
+    <ProjectReference Include="..\..\net35\Hammock\Hammock.csproj">
       <Project>{6679078A-C585-4CB6-96E9-908DBDAA2716}</Project>
-      <Name>Hammock</Name>
+      <Name>Hammock %28Client\.NET 3.5\Hammock%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

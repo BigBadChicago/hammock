@@ -405,7 +405,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ICSharpCode.SharpZipLib.Silverlight\ICSharpCode.SharpZipLib.Silverlight.csproj">
       <Project>{2E420750-6124-473B-808D-41755C907648}</Project>
-      <Name>ICSharpCode.SharpZipLib.Silverlight %28Client\.NET 3.5\SharpZipLib\ICSharpCode.SharpZipLib.Silverlight%29</Name>
+      <Name>ICSharpCode.SharpZipLib.Silverlight %28.NET 3.5\SharpZipLib\ICSharpCode.SharpZipLib.Silverlight%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
