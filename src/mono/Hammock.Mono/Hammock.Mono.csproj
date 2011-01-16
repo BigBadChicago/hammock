@@ -65,12 +65,24 @@
     <Compile Include="..\..\net35\Hammock\Attributes\IValidatingAttribute.cs" />
     <Compile Include="..\..\net35\Hammock\Attributes\Specialized\EntityAttribute.cs" />
     <Compile Include="..\..\net35\Hammock\Attributes\Specialized\HeaderAttribute.cs" />
-    <Compile Include="..\..\net35\Hammock\Attributes\Specialized\ParameterAttribute.cs" />
-    <Compile Include="..\..\net35\Hammock\Attributes\Specialized\UserAgentAttribute.cs" />
-    <Compile Include="..\..\net35\Hammock\Attributes\Validation\BooleanToIntegerAttribute.cs" />
-    <Compile Include="..\..\net35\Hammock\Attributes\Validation\DateTimeFormatAttribute.cs" />
-    <Compile Include="..\..\net35\Hammock\Attributes\Validation\RequiredAttribute.cs" />
-    <Compile Include="..\..\net35\Hammock\Attributes\Validation\SpecificationAttribute.cs" />
+    <Compile Include="..\..\net35\Hammock\Attributes\Specialized\ParameterAttribute.cs">
+      <Link>Attributes\ParameterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Attributes\Specialized\UserAgentAttribute.cs">
+      <Link>Attributes\UserAgentAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Attributes\Validation\BooleanToIntegerAttribute.cs">
+      <Link>Attributes\BooleanToIntegerAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Attributes\Validation\DateTimeFormatAttribute.cs">
+      <Link>Attributes\DateTimeFormatAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Attributes\Validation\RequiredAttribute.cs">
+      <Link>Attributes\RequiredAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Attributes\Validation\SpecificationAttribute.cs">
+      <Link>Attributes\SpecificationAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Attributes\Validation\ValidationAttribute.cs" />
     <Compile Include="..\..\net35\Hammock\Authentication\IWebCredentials.cs" />
     <Compile Include="..\..\net35\Hammock\Authentication\Basic\BasicAuthCredentials.cs" />
@@ -113,7 +125,9 @@
     <Compile Include="..\..\net35\Hammock\Serialization\IDeserializer.cs" />
     <Compile Include="..\..\net35\Hammock\Serialization\ISerializer.cs" />
     <Compile Include="..\..\net35\Hammock\Serialization\Utf8Serializer.cs" />
-    <Compile Include="..\..\net35\Hammock\Specifications\AndSpecification.cs" />
+    <Compile Include="..\..\net35\Hammock\Specifications\AndSpecification.cs">
+      <Link>Specifications\AndSpecification.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Specifications\CompositeSpecificationBase.cs" />
     <Compile Include="..\..\net35\Hammock\Specifications\HammockSpecification.cs" />
     <Compile Include="..\..\net35\Hammock\Specifications\ISpecification.cs" />
@@ -127,7 +141,9 @@
     <Compile Include="..\..\net35\Hammock\Tasks\TaskOptions.cs" />
     <Compile Include="..\..\net35\Hammock\Tasks\TimedTask.cs" />
     <Compile Include="..\..\net35\Hammock\Validation\ValidationException.cs" />
-    <Compile Include="..\..\net35\Hammock\Validation\ValidEmailSpecification.cs" />
+    <Compile Include="..\..\net35\Hammock\Validation\ValidEmailSpecification.cs">
+      <Link>Specifications\ValidEmailSpecification.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Web\BasicAuthWebQuery.cs" />
     <Compile Include="..\..\net35\Hammock\Web\GetOrDelete.cs" />
     <Compile Include="..\..\net35\Hammock\Web\HttpPostParameter.cs" />
@@ -172,19 +188,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="..\..\net35\Hammock\_Hammock.cd" />
-    <None Include="..\..\net35\Hammock\Attributes\Specialized\_Specialized.cd" />
-    <None Include="..\..\net35\Hammock\Attributes\Validation\_Validation.cd" />
-    <None Include="..\..\net35\Hammock\Authentication\_Authentication.cd" />
-    <None Include="..\..\net35\Hammock\Authentication\OAuth\_OAuth.cd" />
-    <None Include="..\..\net35\Hammock\Caching\_Caching.cd" />
-    <None Include="..\..\net35\Hammock\Model\_Model.cd" />
-    <None Include="..\..\net35\Hammock\Retries\_Retries.cd" />
-    <None Include="..\..\net35\Hammock\Tasks\_Tasks.cd" />
-    <None Include="..\..\net35\Hammock\Web\_Web.cd" />
-    <None Include="..\..\net35\Hammock\Web\Mocks\_Mocks.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Specifications\" />
+    <Folder Include="Attributes\" />
   </ItemGroup>
 </Project>
