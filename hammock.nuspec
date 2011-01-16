@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>Hammock</id>
-		<version>1.1.5</version>
+		<version>1.1.6</version>
 		<authors>Daniel Crenna and Jason Diller</authors>
 		<owners>Apitize</owners>
 		<description>Hammock is a web API library for .NET that greatly simplifies consuming and wrapping RESTful services.</description>
@@ -11,7 +11,6 @@
 		<projectUrl>http://hammockrest.com</projectUrl>
 		<licenseUrl>http://hammock.codeplex.com/license</licenseUrl>
 		<iconUrl>http://apitize.com.s3.amazonaws.com/logo_hammock.png</iconUrl>
-		<tags>web api client http rest services wrapper json xml</tags>
-    <copyright>(c) 2011 Apitize</copyright>
+		<tags>web api client http rest services wrapper json xml</tags>   
 	</metadata>
 </package>
