@@ -79,7 +79,7 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
+                Authority = "https://api.twitter.com",
                 VersionPath = "1",
                 UserAgent = "Hammock"
             };

@@ -143,14 +143,15 @@ namespace Hammock.Authentication.OAuth
             switch (ParameterHandling)
             {
                 case OAuthParameterHandling.HttpAuthorizationHeader:
-                    SetAuthorizationHeader(request, "Authorization");
-
-                    // Only use the POST parameters that exist in the body
+                    SetAuthorizationHeader(request, "Authorization");                    
 #if SILVERLIGHT
                     var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
 #else
                     var postParameters = new WebParameterCollection(uri.Query.ParseQueryString());
 #endif
+                    // Only use the POST parameters that exist in the body
+                    postParameters = new WebParameterCollection(postParameters.Where(p => !p.Name.StartsWith("oauth_")));
+
                     // Append any leftover values to the POST body
                     var nonAuthParameters = GetPostParametersValue(postParameters, true /* escapeParameters */);
                     if (body.IsNullOrBlank())
