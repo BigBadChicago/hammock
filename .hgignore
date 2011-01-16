@@ -50,3 +50,5 @@ glob:src/net40/Hammock.Tests/app.config
 glob:bin/net20/*.*
 relre:src/_ReSharper*
 src/mono/test-results
+relre:bin/lib/*
+relre:bin/*

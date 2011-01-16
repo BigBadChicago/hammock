@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using Hammock.Authentication.OAuth;
@@ -56,7 +57,7 @@ namespace Hammock.Tests
         {
             var client = new RestClient
             {
-                Authority = "http://api.twitter.com",
+                Authority = "https://api.twitter.com",
                 UserAgent = "Hammock"
             };
 
@@ -69,6 +70,8 @@ namespace Hammock.Tests
             var response = client.Request(request);
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            Trace.WriteLine(response.Content);
         }
 
         [Test]

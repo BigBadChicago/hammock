@@ -46,7 +46,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\bin\net35\</OutputPath>
+    <OutputPath>..\..\..\bin\lib\SL3\</OutputPath>
     <DefineConstants>TRACE;DEBUG;SILVERLIGHT,Silverlight,SL,SL3</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -57,7 +57,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\net35\</OutputPath>
+    <OutputPath>..\..\..\bin\lib\SL3\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SL3</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
