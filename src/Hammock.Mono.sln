@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Mono", "Hammock.Mono\Hammock.Mono.csproj", "{C8371692-DA90-4437-BCB7-A5A2EF37B095}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Mono", "mono\Hammock.Mono\Hammock.Mono.csproj", "{C8371692-DA90-4437-BCB7-A5A2EF37B095}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Mono.Tests", "Hammock.Mono.Tests\Hammock.Mono.Tests.csproj", "{E7B431C8-930C-4E37-84B6-F8C1D67339FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hammock.Mono.Tests", "mono\Hammock.Mono.Tests\Hammock.Mono.Tests.csproj", "{E7B431C8-930C-4E37-84B6-F8C1D67339FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,7 +41,7 @@ Global
 		{E7B431C8-930C-4E37-84B6-F8C1D67339FF}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Hammock.Mono\Hammock.Mono.csproj
+		StartupItem = mono\Hammock.Mono\Hammock.Mono.csproj
 		Policies = $0
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = None
