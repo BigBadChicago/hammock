@@ -44,7 +44,6 @@ namespace Hammock
         }
 
         protected virtual internal NameValueCollection Headers { get; set; }
-        protected virtual internal Encoding Encoding { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
         protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }
         protected virtual internal byte[] PostContent
@@ -66,7 +65,8 @@ namespace Hammock
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
         public virtual IWebCredentials Credentials { get; set; }
-        
+        public virtual Encoding Encoding { get; set; }
+
         protected RestBase()
         {
             Initialize();
