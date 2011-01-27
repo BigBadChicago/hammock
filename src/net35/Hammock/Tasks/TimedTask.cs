@@ -235,6 +235,10 @@ namespace Hammock.Tasks
 
         public IRateLimitingRule<T> RateLimitingRule { get; set; }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
         #endregion
     }
 }

@@ -14,7 +14,10 @@ namespace Hammock.Serialization
         private readonly Dictionary<RuntimeTypeHandle, XmlSerializer> _serializers =
            new Dictionary<RuntimeTypeHandle, XmlSerializer>();
 
+        [NonSerialized]
         private readonly XmlWriterSettings _settings;
+
+        [NonSerialized]
         private readonly XmlSerializerNamespaces _namespaces;
 
         public HammockXmlSerializer(XmlWriterSettings settings)

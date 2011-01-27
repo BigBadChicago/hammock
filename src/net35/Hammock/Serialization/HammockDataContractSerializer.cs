@@ -17,6 +17,9 @@ namespace Hammock.Serialization
         private readonly Dictionary<RuntimeTypeHandle, DataContractSerializer> _serializers =
             new Dictionary<RuntimeTypeHandle, DataContractSerializer>();
 
+#if !SILVERLIGHT
+        [NonSerialized]
+#endif
         private readonly XmlWriterSettings _settings;
 
         public HammockDataContractSerializer(XmlWriterSettings settings)

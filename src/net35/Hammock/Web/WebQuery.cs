@@ -334,7 +334,10 @@ namespace Hammock.Web
             }
             else
             {
-                content = new MemoryStream().ToArray();
+                using(var ms = new MemoryStream())
+                {
+                    content = ms.ToArray();
+                }
             }
 
             return request;

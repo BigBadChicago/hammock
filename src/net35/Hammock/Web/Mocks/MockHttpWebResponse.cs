@@ -6,6 +6,9 @@ using Hammock.Extensions;
 
 namespace Hammock.Web.Mocks
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class MockHttpWebResponse : WebResponse
     {
         private readonly Uri _requestUri;

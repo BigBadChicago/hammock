@@ -4,6 +4,9 @@ using System.Net;
 
 namespace Hammock.Web.Mocks
 {
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public class MockHttpWebRequest : WebRequest
     {
         private readonly Uri _requestUri;
@@ -22,7 +25,7 @@ namespace Hammock.Web.Mocks
 #elif !SILVERLIGHT
         public override long ContentLength { get; set; }
 #elif !WindowsPhone
-        public new long ContentLength { get; set; }
+        public long ContentLength { get; set; }
 #endif
         public override string ContentType { get; set; }
 

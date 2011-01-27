@@ -157,6 +157,7 @@ namespace Hammock
             {
                 stream.Position = 0;
             }
+
             return new DurableMemoryStream(stream);
         }
 

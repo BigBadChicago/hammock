@@ -6,7 +6,7 @@ namespace Hammock.Web
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public class WebQueryAsyncResult : IAsyncResult
+    public class WebQueryAsyncResult : IAsyncResult, IDisposable
     {
         public virtual bool IsCompleted { get; protected internal set; }
         public virtual WaitHandle AsyncWaitHandle { get; protected internal set; }
@@ -15,6 +15,10 @@ namespace Hammock.Web
 
         public virtual IAsyncResult InnerResult { get; set; }
         public virtual object Tag { get; set; }
+
+#if !SILVERLIGHT
+        [NonSerialized]
+#endif
         private AutoResetEvent _block;
 
         public WebQueryAsyncResult()
@@ -31,6 +35,11 @@ namespace Hammock.Web
         protected internal void Signal()
         {
             _block.Set();
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

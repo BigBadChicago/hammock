@@ -31,6 +31,8 @@
     <DefineConstants>TRACE;NET40</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -397,6 +399,7 @@
     <Compile Include="..\..\net35\Hammock\RestResponse.cs">
       <Link>RestResponse.cs</Link>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Mono\HttpUtility.cs" />
     <Compile Include="Mono\WebHeaderCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
