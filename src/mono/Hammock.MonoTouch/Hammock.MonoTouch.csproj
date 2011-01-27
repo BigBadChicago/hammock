@@ -74,24 +74,11 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Folder Include="Serialization\" />
-    <Folder Include="Specifications\" />
-    <Folder Include="Web\" />
     <Folder Include="Web\Mocks\" />
-    <Folder Include="Tasks\" />
-    <Folder Include="Validation\" />
-    <Folder Include="Authentication\" />
     <Folder Include="Authentication\OAuth\" />
     <Folder Include="Authentication\Basic\" />
-    <Folder Include="Retries\" />
-    <Folder Include="Attributes\" />
     <Folder Include="Attributes\Validation\" />
     <Folder Include="Attributes\Specialized\" />
-    <Folder Include="Caching\" />
-    <Folder Include="Streaming\" />
-    <Folder Include="Extensions\" />
-    <Folder Include="Model\" />
-    <Folder Include="Mono\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\net35\Hammock\Serialization\HammockXmlSerializer.cs">
@@ -106,41 +93,8 @@
     <Compile Include="..\..\net35\Hammock\Serialization\Utf8Serializer.cs">
       <Link>Serialization\Utf8Serializer.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\IRestClient.cs">
-      <Link>IRestClient.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestBase.cs">
-      <Link>RestBase.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestCallback.cs">
-      <Link>RestCallback.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestClient.cs">
-      <Link>RestClient.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestRequest.cs">
-      <Link>RestRequest.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\RestResponse.cs">
-      <Link>RestResponse.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Specifications\AndSpecification.cs">
       <Link>Specifications\AndSpecification.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Specifications\CompositeSpecificationBase.cs">
-      <Link>Specifications\CompositeSpecificationBase.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Specifications\HammockSpecification.cs">
-      <Link>Specifications\HammockSpecification.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Specifications\ISpecification.cs">
-      <Link>Specifications\ISpecification.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Specifications\NotSpecification.cs">
-      <Link>Specifications\NotSpecification.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Specifications\OrSpecification.cs">
-      <Link>Specifications\OrSpecification.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Web\BasicAuthWebQuery.cs">
       <Link>Web\BasicAuthWebQuery.cs</Link>
@@ -148,59 +102,14 @@
     <Compile Include="..\..\net35\Hammock\Web\GetOrDelete.cs">
       <Link>Web\GetOrDelete.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\HttpPostParameter.cs">
-      <Link>Web\HttpPostParameter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\HttpPostParameterType.cs">
-      <Link>Web\HttpPostParameterType.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\IWebQueryInfo.cs">
-      <Link>Web\IWebQueryInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\Pair.cs">
-      <Link>Web\Pair.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\PostOrPut.cs">
-      <Link>Web\PostOrPut.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\Triplet.cs">
-      <Link>Web\Triplet.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebCallback.cs">
-      <Link>Web\WebCallback.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Web\WebEntity.cs">
       <Link>Web\WebEntity.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Web\WebHeader.cs">
       <Link>Web\WebHeader.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebHeaderCollection.cs">
-      <Link>Web\WebHeaderCollection.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock\Web\WebMethod.cs">
       <Link>Web\WebMethod.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebPair.cs">
-      <Link>Web\WebPair.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebPairCollection.cs">
-      <Link>Web\WebPairCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebParameter.cs">
-      <Link>Web\WebParameter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebParameterCollection.cs">
-      <Link>Web\WebParameterCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebQuery.Async.cs">
-      <Link>Web\WebQuery.Async.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebQuery.cs">
-      <Link>Web\WebQuery.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Web\WebQueryAsyncResult.cs">
-      <Link>Web\WebQueryAsyncResult.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Web\WebQueryRequestEventArgs.cs">
       <Link>Web\WebQueryRequestEventArgs.cs</Link>
@@ -405,9 +314,6 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Model\PropertyChangedBase.cs">
       <Link>Model\PropertyChangedBase.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock\Mono\WebHeaderCollection.cs">
-      <Link>Mono\WebHeaderCollection.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Mono\HttpUtility.cs">
       <Link>Mono\HttpUtility.cs</Link>

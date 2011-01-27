@@ -56,7 +56,6 @@ namespace Hammock
         }
 
         public virtual Stream ContentStream { get; set; }
-
         public virtual WebResponse InnerResponse { get; set; }
         public virtual WebException InnerException { get; set; }
         public virtual DateTime? RequestDate { get; set; }
@@ -74,6 +73,7 @@ namespace Hammock
         public virtual int TimesTried { get; set; }
         public virtual object Tag { get; set; }
         public virtual NameValueCollection Headers { get; set; }
+        public virtual NameValueCollection Cookies { get; set; }
         public virtual bool SkippedDueToRateLimitingRule { get; set; }
         public virtual bool IsFromCache
         {
@@ -93,6 +93,7 @@ namespace Hammock
         private void Initialize()
         {
             Headers = new NameValueCollection(0);
+            Cookies = new NameValueCollection(0);
         }
 
         // http://www.yoda.arachsys.com/csharp/readbinary.html

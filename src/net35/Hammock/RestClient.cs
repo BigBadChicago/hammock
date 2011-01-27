@@ -310,11 +310,13 @@ namespace Hammock
                     continue;
                 }
 
+                /*
                 var retryType = typeof(RetryCustomCondition<>).MakeGenericType(innerType);
                 if (retryType == null)
                 {
                     continue;
                 }
+                */
 
                 var func = condition.GetValue("ConditionFunction") as MulticastDelegate;
                 if (func == null)
@@ -2247,6 +2249,18 @@ namespace Hammock
                         response.Headers.Add(key, result.WebResponse.Headers[key]);
                     }
 #endif
+                    if(result.WebResponse is HttpWebResponse)
+                    {
+                        var cookies = (result.WebResponse as HttpWebResponse).Cookies;
+                        if(cookies != null)
+                        {
+                            foreach (Cookie cookie in cookies)
+                            {
+                                response.Cookies.Add(cookie.Name, cookie.Value);
+                            }
+                        }
+                    }
+
                     return response;
                 };
 
@@ -2288,29 +2302,10 @@ namespace Hammock
 
         private void SetQueryMeta(RestRequest request, WebQuery query)
         {
-            // [DC]: Trump duplicates by request over client over info values
-            foreach (var parameter in Parameters)
-            {
-                if (query.Parameters[parameter.Name] != null)
-                {
-                    query.Parameters[parameter.Name].Value = parameter.Value;
-                }
-                else
-                {
-                    query.Parameters.Add(parameter);
-                }
-            }
-            foreach (var parameter in request.Parameters)
-            {
-                if (query.Parameters[parameter.Name] != null)
-                {
-                    query.Parameters[parameter.Name].Value = parameter.Value;
-                }
-                else
-                {
-                    query.Parameters.Add(parameter);
-                }
-            }
+            // Fill query collections with found value pairs
+            CoalesceWebPairsIntoCollection(query.Parameters, Parameters, request.Parameters);
+            CoalesceWebPairsIntoCollection(query.Cookies, Cookies, request.Cookies);
+            
             query.Headers.AddRange(Headers);
             query.Headers.AddRange(request.Headers);
 
@@ -2327,6 +2322,22 @@ namespace Hammock
             query.FollowRedirects = GetFollowRedirects(request);
 #endif
             SerializeEntityBody(query, request);
+        }
+
+        // [DC]: Trump duplicates by request over client over info values
+        private static void CoalesceWebPairsIntoCollection(WebPairCollection target, params IEnumerable<WebPair>[] values)
+        {
+            foreach (var parameter in values.SelectMany(value => value))
+            {
+                if (target[parameter.Name] != null)
+                {
+                    target[parameter.Name].Value = parameter.Value;
+                }
+                else
+                {
+                    target.Add(parameter);
+                }
+            }
         }
 
         private void SerializeEntityBody(WebQuery query, RestRequest request)

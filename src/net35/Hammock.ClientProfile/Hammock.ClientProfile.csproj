@@ -291,6 +291,9 @@
     <Compile Include="..\Hammock\Web\GetOrDelete.cs">
       <Link>Web\GetOrDelete.cs</Link>
     </Compile>
+    <Compile Include="..\Hammock\Web\HttpCookieParameter.cs">
+      <Link>Web\HttpCookieParameter.cs</Link>
+    </Compile>
     <Compile Include="..\Hammock\Web\HttpPostParameter.cs">
       <Link>Web\HttpPostParameter.cs</Link>
     </Compile>

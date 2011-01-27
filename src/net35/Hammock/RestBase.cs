@@ -45,7 +45,9 @@ namespace Hammock
 
         protected virtual internal NameValueCollection Headers { get; set; }
         protected virtual internal WebParameterCollection Parameters { get; set; }
+        protected virtual internal WebParameterCollection Cookies { get; set; }
         protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }
+        
         protected virtual internal byte[] PostContent
         {
             get
@@ -76,6 +78,7 @@ namespace Hammock
         {
             Headers = new NameValueCollection(0);
             Parameters = new WebParameterCollection();
+            Cookies = new WebParameterCollection(0);
             PostParameters = new List<HttpPostParameter>(0);
         }
 
@@ -151,6 +154,16 @@ namespace Hammock
         public virtual void AddParameter(string name, string value)
         {
             Parameters.Add(name, value);
+        }
+
+        public virtual void AddCookie(string name, string value)
+        {
+            Cookies.Add(new HttpCookieParameter(name, value));
+        }
+
+        public virtual void AddCookie(Uri domain, string name, string value)
+        {
+            Cookies.Add(new HttpCookieParameter(name, value) { Domain = domain });
         }
 
         public virtual void AddField(string name, string value)

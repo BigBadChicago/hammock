@@ -35,6 +35,7 @@ namespace Hammock.Web
         public virtual string UserAgent { get; protected internal set; }
         public virtual WebHeaderCollection Headers { get; protected set; }
         public virtual WebParameterCollection Parameters { get; protected set; }
+        public virtual WebParameterCollection Cookies { get; protected set; }
 
         private WebEntity _entity;
         protected internal virtual WebEntity Entity
@@ -123,6 +124,7 @@ namespace Hammock.Web
             {
                 Headers = new WebHeaderCollection(0);
                 Parameters = new WebParameterCollection(0);
+                Cookies = new WebParameterCollection(0);
                 return;
             }
 
@@ -416,6 +418,7 @@ namespace Hammock.Web
         protected virtual void SetRequestMeta(HttpWebRequest request)
         {
             AppendHeaders(request);
+            AppendCookies(request);
 
 #if !SILVERLIGHT
             if (ServicePoint != null)
@@ -517,6 +520,24 @@ namespace Hammock.Web
                 request.KeepAlive = true;
             }
 #endif
+        }
+
+        private void AppendCookies(HttpWebRequest request)
+        {
+            foreach(var cookie in Cookies.OfType<HttpCookieParameter>())
+            {
+                var value = new Cookie(cookie.Name, cookie.Value);
+                if(cookie.Domain != null)
+                {
+                    request.CookieContainer.Add(cookie.Domain, value);        
+                }
+#if !SILVERLIGHT
+                else
+                {
+                    request.CookieContainer.Add(value);
+                }
+#endif
+            }
         }
 
         protected virtual void AppendHeaders(WebRequest request)
