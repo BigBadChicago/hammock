@@ -174,25 +174,33 @@ namespace Hammock
 
         public virtual void AddFile(string name, string fileName, string filePath)
         {
-            var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, "application/octet-stream");
-            PostParameters.Add(parameter);
+            AddFile(name, fileName, filePath, "application/octet-stream", "form-data");
         }
 
         public virtual void AddFile(string name, string fileName, string filePath, string contentType)
         {
-            var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, contentType);
-            PostParameters.Add(parameter);
+            AddFile(name, fileName, filePath, contentType, "form-data");
         }
 
         public virtual void AddFile(string name, string fileName, Stream stream)
         {
-            var parameter = HttpPostParameter.CreateFile(name, fileName, stream, "application/octet-stream");
-            PostParameters.Add(parameter);
+            AddFile(name, fileName, stream, "application/octet-stream", "form-data");
         }
 
         public virtual void AddFile(string name, string fileName, Stream stream, string contentType)
         {
-            var parameter = HttpPostParameter.CreateFile(name, fileName, stream, contentType);
+            AddFile(name, fileName, stream, contentType, "form-data");
+        }
+
+        public virtual void AddFile(string name, string fileName, string filePath, string contentType, string contentDisposition)
+        {
+            var parameter = HttpPostParameter.CreateFile(name, fileName, filePath, contentType, contentDisposition);
+            PostParameters.Add(parameter);
+        }
+
+        public virtual void AddFile(string name, string fileName, Stream stream, string contentType, string contentDisposition)
+        {
+            var parameter = HttpPostParameter.CreateFile(name, fileName, stream, contentType, contentDisposition);
             PostParameters.Add(parameter);
         }
 

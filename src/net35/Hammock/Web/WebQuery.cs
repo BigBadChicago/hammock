@@ -1239,7 +1239,8 @@ namespace Hammock.Web
                 {
                     case HttpPostParameterType.File:
                         {
-                            const string fileMask = "Content-Disposition: file; name=\"{0}\"; filename=\"{1}\"";
+                            var disposition = parameter.ContentDisposition ?? "form-data";
+                            var fileMask = "Content-Disposition: " + disposition + "; name=\"{0}\"; filename=\"{1}\"";
                             var fileHeader = fileMask.FormatWith(parameter.Name, parameter.FileName);
                             var fileLine = "Content-Type: {0}".FormatWith(parameter.ContentType.ToLower());
 

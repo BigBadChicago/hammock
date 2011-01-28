@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using Hammock.Authentication.Basic;
 using Hammock.Authentication.OAuth;
 using Hammock.Web;
 using NUnit.Framework;
@@ -29,7 +30,7 @@ namespace Hammock.Tests
 
             ServicePointManager.Expect100Continue = false;
         }
-
+        
         [Test]
         public void Can_request_get()
         {

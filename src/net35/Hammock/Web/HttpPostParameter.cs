@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace Hammock.Web
@@ -14,11 +15,13 @@ namespace Hammock.Web
         public virtual string FilePath { get; private set; }
         public virtual Stream FileStream { get; set; }
         public virtual string ContentType { get; private set; }
-       
+        public virtual string ContentDisposition { get; set; }
+
         public static HttpPostParameter CreateFile(string name, 
                                                    string fileName, 
                                                    string filePath, 
-                                                   string contentType)
+                                                   string contentType,
+                                                   string contentDisposition)
         {
             var parameter = new HttpPostParameter(name, string.Empty)
                                 {
@@ -26,6 +29,7 @@ namespace Hammock.Web
                                     FileName = fileName,
                                     FilePath = filePath,
                                     ContentType = contentType,
+                                    ContentDisposition = contentDisposition
                                 };
             return parameter;
         }
@@ -33,7 +37,8 @@ namespace Hammock.Web
         public static HttpPostParameter CreateFile(string name, 
                                                    string fileName, 
                                                    Stream fileStream, 
-                                                   string contentType)
+                                                   string contentType,
+                                                   string contentDisposition)
         {
             var parameter = new HttpPostParameter(name, string.Empty)
             {
@@ -41,6 +46,7 @@ namespace Hammock.Web
                 FileName = fileName,
                 FileStream = fileStream,
                 ContentType = contentType,
+                ContentDisposition = contentDisposition
             };
 
             return parameter;
