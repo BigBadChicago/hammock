@@ -527,6 +527,8 @@ namespace Hammock.Web
 
         private void AppendCookies(HttpWebRequest request)
         {
+            request.CookieContainer = new CookieContainer();
+
             foreach(var cookie in Cookies.OfType<HttpCookieParameter>())
             {
                 var value = new Cookie(cookie.Name, cookie.Value);
