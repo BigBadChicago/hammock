@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>Hammock</id>
-		<version>1.1.6</version>
+		<version>1.1.7</version>
 		<authors>Daniel Crenna and Jason Diller</authors>
 		<owners>Apitize</owners>
 		<description>Hammock is a web API library for .NET that greatly simplifies consuming and wrapping RESTful services.</description>

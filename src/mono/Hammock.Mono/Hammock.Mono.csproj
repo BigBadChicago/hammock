@@ -185,6 +185,9 @@
     <Compile Include="..\..\net35\Hammock\Mono\WebHeaderCollection.cs">
       <Link>WebHeaderCollection.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\Web\HttpCookieParameter.cs">
+      <Link>HttpCookieParameter.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
