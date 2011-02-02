@@ -120,11 +120,12 @@ namespace Hammock.Web
 
         private void SetQueryMeta(IWebQueryInfo info)
         {
+            Cookies = new WebParameterCollection(0);
+
             if(info == null)
             {
                 Headers = new WebHeaderCollection(0);
                 Parameters = new WebParameterCollection(0);
-                Cookies = new WebParameterCollection(0);
                 return;
             }
 

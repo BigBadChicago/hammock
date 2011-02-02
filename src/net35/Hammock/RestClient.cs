@@ -2249,6 +2249,8 @@ namespace Hammock
                         response.Headers.Add(key, result.WebResponse.Headers[key]);
                     }
 #endif
+
+#if !SILVERLIGHT
                     if(result.WebResponse is HttpWebResponse)
                     {
                         var cookies = (result.WebResponse as HttpWebResponse).Cookies;
@@ -2260,6 +2262,7 @@ namespace Hammock
                             }
                         }
                     }
+#endif
 
                     return response;
                 };

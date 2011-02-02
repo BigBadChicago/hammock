@@ -59,6 +59,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json.WindowsPhone">
+      <HintPath>..\..\..\lib\Newtonsoft.Json.WindowsPhone.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Servicemodel.Web" />
     <Reference Include="System.Windows" />

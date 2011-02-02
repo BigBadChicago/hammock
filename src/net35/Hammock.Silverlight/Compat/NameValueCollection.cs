@@ -17,11 +17,11 @@ namespace Hammock.Silverlight.Compat
         {
             get
             {
-                return this.Single(kv => kv.Key.Equals(name)).Value;
+                return this.SingleOrDefault(kv => kv.Key.Equals(name)).Value;
             }
         }
 
-        public NameValueCollection() : base()
+        public NameValueCollection()
         {
 
         }
