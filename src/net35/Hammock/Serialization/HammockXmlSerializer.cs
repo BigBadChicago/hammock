@@ -39,18 +39,15 @@ namespace Hammock.Serialization
             {
                 using (var writer = XmlWriter.Create(stream, _settings))
                 {
-                    if (writer != null)
-                    {
-                        var serializer = CacheOrGetSerializerFor(type);
+                    var serializer = CacheOrGetSerializerFor(type);
 
-                        if(_namespaces != null)
-                        {
-                            serializer.Serialize(writer, instance, _namespaces);
-                        }
-                        else
-                        {
-                            serializer.Serialize(writer, instance);
-                        }
+                    if (_namespaces != null)
+                    {
+                        serializer.Serialize(writer, instance, _namespaces);
+                    }
+                    else
+                    {
+                        serializer.Serialize(writer, instance);
                     }
                 }
 
@@ -72,22 +69,22 @@ namespace Hammock.Serialization
 
         #region IDeserializer Methods
 
-        public virtual object Deserialize(string content, Type type)
+        public virtual object Deserialize(RestResponse response, Type type)
         {
             object instance;
             var serializer = CacheOrGetSerializerFor(type);
-            using(var reader = new StringReader(content))
+            using(var reader = new StringReader(response.Content))
             {
                 instance = serializer.Deserialize(reader);    
             }
             return instance;
         }
 
-        public virtual T Deserialize<T>(string content)
+        public virtual T Deserialize<T>(RestResponse<T> response)
         {
             T instance;
             var serializer = CacheOrGetSerializerFor(typeof(T));
-            using (var reader = new StringReader(content))
+            using (var reader = new StringReader(response.Content))
             {
                 instance = (T) serializer.Deserialize(reader);
             }

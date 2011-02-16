@@ -872,7 +872,7 @@ namespace Hammock
             var deserializer = restRequest.Deserializer ?? Deserializer;
             if (deserializer != null && !restResponse.Content.IsNullOrBlank())
             {
-                restResponse.ContentEntity = deserializer.Deserialize<T>(restResponse.Content);
+                restResponse.ContentEntity = deserializer.Deserialize<T>(restResponse);
             }
 
             TraceResponseWithMock(restResponse);
@@ -936,7 +936,7 @@ namespace Hammock
             var deserializer = restRequest.Deserializer ?? Deserializer;
             if (deserializer != null && !restResponse.Content.IsNullOrBlank() && restRequest.ResponseEntityType != null)
             {
-                restResponse.ContentEntity = deserializer.Deserialize(restResponse.Content, restRequest.ResponseEntityType);
+                restResponse.ContentEntity = deserializer.Deserialize(restResponse, restRequest.ResponseEntityType);
             }
 
             TraceResponseWithMock(restResponse);
@@ -2290,7 +2290,7 @@ namespace Hammock
             var deserializer = request.Deserializer ?? Deserializer;
             if (deserializer != null && request.ResponseEntityType != null && response.ContentStream != null)
             {
-                response.ContentEntity = deserializer.Deserialize(response.Content, request.ResponseEntityType);
+                response.ContentEntity = deserializer.Deserialize(response, request.ResponseEntityType);
             }
         }
 
@@ -2299,7 +2299,7 @@ namespace Hammock
             var deserializer = request.Deserializer ?? Deserializer;
             if (deserializer != null && response.ContentStream != null)
             {
-                response.ContentEntity = deserializer.Deserialize<T>(response.Content);
+                response.ContentEntity = deserializer.Deserialize(response);
             }
         }
 

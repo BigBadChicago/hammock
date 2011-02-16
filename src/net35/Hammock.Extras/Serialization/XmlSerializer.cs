@@ -4,16 +4,18 @@ namespace Hammock.Extras.Serialization
 {
     public class XmlSerializer : SerializerBase
     {
-        public override T Deserialize<T>(string content)
+        public override T Deserialize<T>(RestResponse<T> response)
         {
-            return (T) Deserialize(content, typeof (T));
+            var root = typeof (T).Name.ToLowerInvariant();
+
+            return (T)DeserializeXmlWithRoot(response.Content, typeof(T), root);
         }
 
-        public override object Deserialize(string content, Type type)
+        public override object Deserialize(RestResponse response, Type type)
         {
             var root = type.Name.ToLowerInvariant();
-            
-            return DeserializeXmlWithRoot(content, type, root);
+
+            return DeserializeXmlWithRoot(response.Content, type, root);
         }
 
         public override string Serialize(object instance, Type type)

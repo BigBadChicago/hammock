@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Serialization;
@@ -20,11 +21,16 @@ namespace Hammock.Extras.Serialization
                 return x.ToString().CompareTo(y.ToString());
             }
         }
-        
-        protected override IList<JsonProperty> CreateProperties(JsonObjectContract contract)
-        {
-            var properties = base.CreateProperties(contract);
 
+        protected override IList<JsonProperty> CreateProperties(Type type, Newtonsoft.Json.MemberSerialization memberSerialization)
+        {
+            var properties = base.CreateProperties(type, memberSerialization);
+
+            return CreatePropertiesImpl(properties);
+        }
+
+        private static IList<JsonProperty> CreatePropertiesImpl(IList<JsonProperty> properties)
+        {
             foreach (var property in properties)
             {
                 property.PropertyName = PascalCaseToElement(property.PropertyName);

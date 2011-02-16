@@ -42,10 +42,10 @@ namespace Hammock.Extras.Serialization
             }
         }
 
-        public abstract T Deserialize<T>(string content);
+        public abstract T Deserialize<T>(RestResponse<T> response);
 
-        public abstract object Deserialize(string content, Type type);
-
+        public abstract object Deserialize(RestResponse response, Type type);
+        
         public virtual object DeserializeJson(string content, Type type)
         {
             using (var stringReader = new StringReader(content))
@@ -56,7 +56,7 @@ namespace Hammock.Extras.Serialization
                 }
             }
         }
-        
+
         public virtual T DeserializeJson<T>(string content)
         {
             using (var stringReader = new StringReader(content))
@@ -68,14 +68,14 @@ namespace Hammock.Extras.Serialization
             }
         }
 
-        public virtual T DeserializeXml<T>(string content)
+        public virtual T DeserializeXml<T>(RestResponse response)
         {
-            return (T)DeserializeXml(content, typeof(T));
+            return (T)DeserializeXml(response, typeof(T));
         }
 
-        public virtual object DeserializeXml(string content, Type type)
+        public virtual object DeserializeXml(RestResponse response, Type type)
         {
-            var element = LoadXmlElement(content);
+            var element = LoadXmlElement(response.Content);
 
             return DeserializeXmlImpl(element, type);
         }

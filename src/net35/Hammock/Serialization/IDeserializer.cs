@@ -4,7 +4,7 @@ namespace Hammock.Serialization
 {
     public interface IDeserializer
     {
-        object Deserialize(string content, Type type);
-        T Deserialize<T>(string content);
+        object Deserialize(RestResponse response, Type type);
+        T Deserialize<T>(RestResponse<T> response);
     }
 }

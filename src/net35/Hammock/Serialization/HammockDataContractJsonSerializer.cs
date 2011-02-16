@@ -38,10 +38,10 @@ namespace Hammock.Serialization
 
         #region IDeserializer Members
 
-        public virtual object Deserialize(string content, Type type)
+        public virtual object Deserialize(RestResponse response, Type type)
         {
             object instance;
-            using (var stream = new MemoryStream(ContentEncoding.GetBytes(content)))
+            using (var stream = new MemoryStream(ContentEncoding.GetBytes(response.Content)))
             {
                 var serializer = CacheOrGetSerializerFor(type);
                 instance = serializer.ReadObject(stream);
@@ -49,11 +49,11 @@ namespace Hammock.Serialization
             return instance;
         }
 
-        public virtual T Deserialize<T>(string content)
+        public virtual T Deserialize<T>(RestResponse<T> response)
         {
             var type = typeof (T);
             T instance;
-            using (var stream = new MemoryStream(ContentEncoding.GetBytes(content)))
+            using (var stream = new MemoryStream(ContentEncoding.GetBytes(response.Content)))
             {
                 var serializer = CacheOrGetSerializerFor(type);
                 instance = (T) serializer.ReadObject(stream);

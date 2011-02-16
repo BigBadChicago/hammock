@@ -15,14 +15,14 @@ namespace Hammock.Extras.Serialization
             
         }
 
-        public override T Deserialize<T>(string content)
+        public override T Deserialize<T>(RestResponse<T> response)
         {
-            return DeserializeJson<T>(content);
+            return DeserializeJson<T>(response.Content);
         }
 
-        public override object Deserialize(string content, Type type)
+        public override object Deserialize(RestResponse response, Type type)
         {
-            return DeserializeJson(content, type);
+            return DeserializeJson(response.Content, type);
         }
 
         public override string Serialize(object instance, Type type)

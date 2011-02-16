@@ -29,9 +29,9 @@ namespace Hammock.Serialization
 
         #region IDeserializer Members
 
-        public virtual object Deserialize(string content, Type type)
+        public virtual object Deserialize(RestResponse response, Type type)
         {
-            using (var stringReader = new StringReader(content))
+            using (var stringReader = new StringReader(response.Content))
             {
                 var xmlRoot = XElement.Load(stringReader);
                 var serializer = CacheOrGetSerializerFor(type);
@@ -43,9 +43,9 @@ namespace Hammock.Serialization
             }
         }
 
-        public virtual T Deserialize<T>(string content)
+        public virtual T Deserialize<T>(RestResponse<T> response)
         {
-            using (var stringReader = new StringReader(content))
+            using (var stringReader = new StringReader(response.Content))
             {
                 var xmlRoot = XElement.Load(stringReader);
                 var serializer = CacheOrGetSerializerFor(typeof (T));
@@ -69,13 +69,11 @@ namespace Hammock.Serialization
             {
                 using (var writer = XmlWriter.Create(stream, _settings))
                 {
-                    if (writer != null)
-                    {
-                        var serializer = CacheOrGetSerializerFor(type);
-                        writer.WriteStartDocument();
-                        serializer.WriteObject(writer, instance);
-                        writer.Flush();
-                    }
+
+                    var serializer = CacheOrGetSerializerFor(type);
+                    writer.WriteStartDocument();
+                    serializer.WriteObject(writer, instance);
+                    writer.Flush();
                 }
 
                 var data = stream.ToArray();
