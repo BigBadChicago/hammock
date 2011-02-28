@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+#if NET40
+using System.Dynamic;
+#endif
 
 namespace Hammock.Serialization
 {
@@ -90,6 +93,14 @@ namespace Hammock.Serialization
             }
             return instance;
         }
+
+#if NET40
+        public virtual dynamic DeserializeDynamic<T>(RestResponse<T> response) where T : DynamicObject
+        {
+            var result = Deserialize(response);
+            return result;
+        }
+#endif
 
         #endregion
 

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if NET40
+using System.Dynamic;
+#endif
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
@@ -56,6 +59,13 @@ namespace Hammock.Serialization
                 }
             }
         }
+
+#if NET40
+        public dynamic DeserializeDynamic<T>(RestResponse<T> response) where T : DynamicObject
+        {
+            throw new NotSupportedException();
+        }
+#endif
 
         #endregion
 

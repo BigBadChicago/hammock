@@ -1,4 +1,7 @@
 ﻿using System;
+#if NET40
+using System.Dynamic;
+#endif
 using System.IO;
 using System.Xml;
 using Hammock.Serialization;
@@ -45,6 +48,10 @@ namespace Hammock.Extras.Serialization
         public abstract T Deserialize<T>(RestResponse<T> response);
 
         public abstract object Deserialize(RestResponse response, Type type);
+
+#if NET40
+        public abstract dynamic DeserializeDynamic<T>(RestResponse<T> response) where T : DynamicObject;
+#endif
         
         public virtual object DeserializeJson(string content, Type type)
         {

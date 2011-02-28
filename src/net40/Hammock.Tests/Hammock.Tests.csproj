@@ -53,7 +53,8 @@
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
+    <Reference Include="Newtonsoft.Json, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b9a188c8922137c6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
@@ -79,30 +80,19 @@
     <Compile Include="..\..\net35\Hammock.Tests\OAuth\OAuthToolsTests.cs">
       <Link>OAuth\OAuthToolsTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\Postmark\Converters\NameValueCollectionConverter.cs">
-      <Link>Postmark\Converters\NameValueCollectionConverter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\Postmark\Converters\UnicodeJsonStringConverter.cs">
-      <Link>Postmark\Converters\UnicodeJsonStringConverter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkMessage.cs">
-      <Link>Postmark\PostmarkMessage.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkResponse.cs">
-      <Link>Postmark\PostmarkResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net35\Hammock.Tests\Postmark\PostmarkStatus.cs">
-      <Link>Postmark\PostmarkStatus.cs</Link>
-    </Compile>
     <Compile Include="..\..\net35\Hammock.Tests\RestClientTests.cs">
       <Link>RestClientTests.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Hammock\Hammock.csproj">
-      <Project>{CD569558-9092-466B-8670-EA1B151150E0}</Project>
-      <Name>Hammock %28.NET 4.0\Hammock%29</Name>
+    <ProjectReference Include="..\Hammock.ClientProfile\Hammock.ClientProfile.csproj">
+      <Project>{487B7E3C-9689-47BC-8785-73CCD92A3749}</Project>
+      <Name>Hammock.ClientProfile %28.NET 4.0\Hammock.ClientProfile%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hammock.Extras\Hammock.Extras.csproj">
+      <Project>{7465B7B5-3E20-4EA2-8785-BDE71CAFB59D}</Project>
+      <Name>Hammock.Extras %28.NET 4.0\Hammock.Extras%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

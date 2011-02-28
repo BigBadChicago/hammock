@@ -495,6 +495,7 @@ namespace Hammock.Web
                 }
 
                 NewStreamMessageEvent += WebQueryNewStreamMessageEvent;
+
                 _isStreaming = true;
 
                 var count = 0;
@@ -510,7 +511,6 @@ namespace Hammock.Web
                         int read;
                         while ((read = stream.Read(data, 0, data.Length)) > 0)
                         {
-
                             var readString = Encoding.UTF8.GetString(data, 0, read);
                             bufferString = ProcessBuffer(bufferString + readString);
                             if (!_isStreaming)
@@ -569,11 +569,9 @@ namespace Hammock.Web
                         EndStreaming(request);
                     }
                     // Stream dried up
-
                 }
                 EndStreaming(request);
             }
-
         }
 
         private void WebQueryNewStreamMessageEvent(Stream message)
@@ -582,6 +580,7 @@ namespace Hammock.Web
             OnQueryResponse(args);
         }
 
+        // TODO make part of StreamOptions
         private const char StreamResultDelimiter = '\r';
 
         private string ProcessBuffer(string bufferString)

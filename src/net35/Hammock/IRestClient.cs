@@ -4,6 +4,10 @@ namespace Hammock
 {
     public interface IRestClient
     {
+#if NET40
+        dynamic RequestDynamic(RestRequest request);
+#endif
+
 #if !Silverlight
         RestResponse Request(RestRequest request);
         RestResponse Request();

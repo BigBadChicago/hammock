@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NET40
+using System.Dynamic;
+#endif
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -34,6 +37,7 @@ namespace Hammock
         private const string MockStatusDescription = "mockStatusDescription";
         private const string MockContent = "mockContent";
         private const string MockHttpMethod = "mockHttpMethod";
+        private const string EndStreamingContent = "END STREAMING";
 
         public virtual string Authority { get; set; }
         
@@ -91,6 +95,17 @@ namespace Hammock
         private WebQuery _streamQuery;
 
         private readonly Dictionary<RestRequest, TimedTask> _tasks = new Dictionary<RestRequest, TimedTask>();
+
+#if NET40
+        public dynamic RequestDynamic(RestRequest request)
+        {
+            var query = RequestImpl(request);
+
+            var response = BuildResponseFromResultDynamic<DynamicObject>(request, query);
+
+            return response.ContentEntity;
+        }
+#endif
 
 #if !Silverlight
         public virtual RestResponse Request(RestRequest request)
@@ -1526,7 +1541,7 @@ namespace Hammock
                 return;
             }
 
-            var wasStreaming = response.Content.Equals("END STREAMING");
+            var wasStreaming = response.Content.Equals(EndStreamingContent);
 
             result.AsyncState = response;
             result.IsCompleted = true;
@@ -1555,7 +1570,7 @@ namespace Hammock
                 return;
             }
 
-            var wasStreaming = response.Content.Equals("END STREAMING");
+            var wasStreaming = response.Content.Equals(EndStreamingContent);
 
             result.AsyncState = response;
             result.IsCompleted = true;
@@ -1677,12 +1692,12 @@ namespace Hammock
         }
 #endif
         private WebQueryAsyncResult BeginRequestStreamFunction<T>(RestRequest request,
-                                                                         WebQuery query,
-                                                                         string url,
-                                                                         RestCallback<T> callback,
-                                                                         TimeSpan duration,
-                                                                         int resultsPerCallback,
-                                                                         object userState)
+                                                                  WebQuery query,
+                                                                  string url,
+                                                                  RestCallback<T> callback,
+                                                                  TimeSpan duration,
+                                                                  int resultsPerCallback,
+                                                                  object userState)
         {
             var result = GetStreamResult(request, query, url, duration, resultsPerCallback);
 
@@ -2204,6 +2219,7 @@ namespace Hammock
 
             return response;
         }
+
         private RestResponse<T> BuildResponseFromResult<T>(RestBase request, WebQuery query)
         {
             request = request ?? new RestRequest();
@@ -2215,6 +2231,20 @@ namespace Hammock
 
             return response;
         }
+
+#if NET40
+        private RestResponse<T> BuildResponseFromResultDynamic<T>(RestBase request, WebQuery query) where T : DynamicObject
+        {
+            request = request ?? new RestRequest();
+            var result = query.Result;
+            var response = BuildBaseResponse<T>(result);
+
+            DeserializeEntityBodyDynamic(request, response);
+            response.Tag = GetTag(request);
+
+            return response;
+        }
+#endif
 
         private static readonly Func<RestResponseBase, WebQueryResult, RestResponseBase> _baseSetter =
                 (response, result) =>
@@ -2302,6 +2332,18 @@ namespace Hammock
                 response.ContentEntity = deserializer.Deserialize(response);
             }
         }
+
+#if NET40
+        private void DeserializeEntityBodyDynamic<T>(RestBase request, RestResponse<T> response) where T : DynamicObject
+        {
+            var deserializer = request.Deserializer ?? Deserializer;
+            if (deserializer != null && response.ContentStream != null)
+            {
+                var entity = deserializer.DeserializeDynamic(response);
+                response.ContentEntity = entity;
+            }
+        }
+#endif
 
         private void SetQueryMeta(RestRequest request, WebQuery query)
         {

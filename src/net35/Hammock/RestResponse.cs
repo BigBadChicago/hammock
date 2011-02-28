@@ -277,6 +277,11 @@ namespace Hammock
             }
         }
 
+        public void SetContent(string content)
+        {
+            _content = content;
+        }
+
         public void Dispose()
         {
             if(ContentStream != null)

@@ -11,6 +11,15 @@ namespace Hammock.Extras.Serialization
             return (T)DeserializeXmlWithRoot(response.Content, typeof(T), root);
         }
 
+#if NET40
+        public override dynamic DeserializeDynamic<T>(RestResponse<T> response)
+        {
+            var root = typeof(T).Name.ToLowerInvariant();
+
+            return DeserializeXmlWithRoot(response.Content, typeof(T), root);
+        }
+#endif
+
         public override object Deserialize(RestResponse response, Type type)
         {
             var root = type.Name.ToLowerInvariant();
