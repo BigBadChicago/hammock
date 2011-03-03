@@ -219,6 +219,9 @@
     <Compile Include="..\..\net35\Hammock\Retries\Timeout.cs">
       <Link>Retries\Timeout.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\Serialization\DefaultJsonSerializer.cs">
+      <Link>Serialization\DefaultJsonSerializer.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\HammockDataContractJsonSerializer.cs">
       <Link>Serialization\HammockDataContractJsonSerializer.cs</Link>
     </Compile>
@@ -233,6 +236,9 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\ISerializer.cs">
       <Link>Serialization\ISerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Serialization\JsonParser.cs">
+      <Link>Serialization\JsonParser.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\Utf8Serializer.cs">
       <Link>Serialization\Utf8Serializer.cs</Link>

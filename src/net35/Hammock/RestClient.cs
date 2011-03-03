@@ -14,11 +14,11 @@ using Hammock.Authentication;
 using Hammock.Caching;
 using Hammock.Extensions;
 using Hammock.Retries;
-using Hammock.Web.Mocks;
 using Hammock.Serialization;
 using Hammock.Tasks;
 using Hammock.Web;
 using Hammock.Streaming;
+using Hammock.Web.Mocks;
 
 #if SILVERLIGHT
 using Hammock.Silverlight.Compat;
@@ -96,6 +96,8 @@ namespace Hammock
 
         private readonly Dictionary<RestRequest, TimedTask> _tasks = new Dictionary<RestRequest, TimedTask>();
 
+#if !Silverlight
+
 #if NET40
         public dynamic RequestDynamic(RestRequest request)
         {
@@ -107,7 +109,6 @@ namespace Hammock
         }
 #endif
 
-#if !Silverlight
         public virtual RestResponse Request(RestRequest request)
         {
             var query = RequestImpl(request);
@@ -607,6 +608,13 @@ namespace Hammock
             return BeginRequest(null /* request */, null /* callback */);
         }
 
+#if NET40
+        public IAsyncResult BeginRequestDynamic()
+        {
+            return BeginRequestDynamic(null /* request */, null /* callback */);
+        }
+#endif
+
         public virtual IAsyncResult BeginRequest(RestRequest request, RestCallback callback)
         {
             return BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
@@ -616,6 +624,18 @@ namespace Hammock
         {
             return BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
+        
+#if NET40
+        public virtual IAsyncResult BeginRequestDynamic(RestRequest request, RestCallback<DynamicObject> callback)
+        {
+            return BeginRequestImplDynamic(request, callback, null, null, false /* isInternal */, null);
+        }
+        
+        public virtual IAsyncResult BeginRequestDynamic(RestRequest request, RestCallback<DynamicObject> callback, object userState)
+        {
+            return BeginRequestImplDynamic(request, callback, null, null, false /* isInternal */, userState);
+        }
+#endif
 
         public virtual IAsyncResult BeginRequest(RestCallback callback)
         {
@@ -657,12 +677,12 @@ namespace Hammock
             BeginRequestImpl(request, callback, null, null, false /* isInternal */, null);
         }
 
-        public void BeginRequest()
+        public virtual void BeginRequest()
         {
             BeginRequest(null /* request */, null /* callback */);
         }
 
-        public void BeginRequest<T>()
+        public virtual void BeginRequest<T>()
         {
             BeginRequest(null /* request */, null /* callback */);
         }
@@ -734,6 +754,18 @@ namespace Hammock
 #endif
             return webResult.AsyncState as RestResponse<T>;
         }
+
+#if NET40
+        public virtual RestResponse<T> EndRequestDynamic<T>(IAsyncResult result) where T : DynamicObject
+        {
+#if !Mono
+            var webResult = EndRequestImplDynamic<T>(result);
+#else
+			var webResult = EndRequestImplDynamic<T>(result, null);
+#endif
+            return webResult.AsyncState as RestResponse<T>;
+        }
+#endif
 
         public virtual RestResponse<T> EndRequest<T>(IAsyncResult result, TimeSpan timeout)
         {
@@ -818,6 +850,57 @@ namespace Hammock
                 {
                     // [DC]: From cache
                     CompleteWithQuery(query, tag.First, tag.Second, webResult);
+                }
+                else
+                {
+                    // [DC]: From mocks
+                    webResult = CompleteWithMockWebResponse(result, webResult, tag);
+                }
+            }
+
+            if (!webResult.IsCompleted)
+            {
+                if(timeout.HasValue)
+                {
+                    webResult.AsyncWaitHandle.WaitOne(timeout.Value);
+                }
+                else
+                {
+                    webResult.AsyncWaitHandle.WaitOne();
+                }
+            }
+            return webResult;
+        }
+#endif
+
+#if NET40
+#if !Mono 
+        private WebQueryAsyncResult EndRequestImplDynamic<T>(IAsyncResult result, TimeSpan? timeout = null) where T : DynamicObject
+#else
+		private WebQueryAsyncResult EndRequestImplDynamic<T>(IAsyncResult result, TimeSpan? timeout) where T : DynamicObject
+#endif
+        {
+            var webResult = result as WebQueryAsyncResult;
+            if (webResult == null)
+            {
+                throw new InvalidOperationException("The IAsyncResult provided was not for this operation.");
+            }
+
+            var tag = (Triplet<RestRequest, RestCallback<T>, object>) webResult.Tag;
+
+            if (RequestExpectsMock(tag.First))
+            {
+                // [DC]: Mock results come via InnerResult
+                webResult = (WebQueryAsyncResult) webResult.InnerResult;
+            }
+
+            if (webResult.CompletedSynchronously)
+            {
+                var query = webResult.AsyncState as WebQuery;
+                if (query != null)
+                {
+                    // [DC]: From cache
+                    CompleteWithQueryDynamic(query, tag.First, tag.Second, webResult);
                 }
                 else
                 {
@@ -1104,12 +1187,128 @@ namespace Hammock
             }
             return asyncResult;
         }
+
+
+#if NET40
+        private IAsyncResult BeginRequestImplDynamic<T>(RestRequest request,
+                                                        RestCallback<T> callback,
+                                                        WebQuery query,
+                                                        string url,
+                                                        bool isInternal,
+                                                        object userState) where T : DynamicObject
+        {
+            request = request ?? new RestRequest();
+            if (!isInternal)
+            {
+                var uri = request.BuildEndpoint(this);
+                query = GetQueryFor(request, uri);
+                SetQueryMeta(request, query);
+                url = uri.ToString();
+            }
+
+            if (RequestExpectsMock(request))
+            {
+                url = BuildMockRequestUrl(request, query, url);
+            }
+
+            var retryPolicy = GetRetryPolicy(request);
+            bool inRetryScope = false;
+            if (!isInternal && retryPolicy != null)
+            {
+                _remainingRetries = retryPolicy.RetryCount;
+                inRetryScope = true;
+            }
+
+            Func<WebQueryAsyncResult> beginRequest;
+            WebQueryAsyncResult asyncResult;
+
+            var streamOptions = GetStreamOptions(request);
+            if (streamOptions != null)
+            {
+#if !SILVERLIGHT
+                query.KeepAlive = true;
+#endif
+
+                var duration = streamOptions.Duration.HasValue
+                                   ? streamOptions.Duration.Value
+                                   : TimeSpan.Zero;
+
+                var resultCount = streamOptions.ResultsPerCallback.HasValue
+                                      ? streamOptions.ResultsPerCallback.Value
+                                      : 10;
+
+                beginRequest = () => BeginRequestStreamFunction(
+                   request, query, url, callback, duration, resultCount, userState
+                   );
+
+                asyncResult = beginRequest.Invoke();
+            }
+            else
+            {
+                beginRequest = () => BeginRequestFunction(
+                   isInternal, request, query, url, callback, userState
+                   );
+
+                asyncResult = beginRequest.Invoke();
+            }
+            if (isInternal || (request.TaskOptions == null || request.TaskOptions.RepeatInterval.TotalMilliseconds == 0))
+            {
+                if (IsFirstIteration && request.IsFirstIteration)
+                {
+                    query.QueryResponse += (sender, args) =>
+                    {
+                        var current = query.Result;
+
+                        if (retryPolicy != null)
+                        {
+                            // [DC]: Query should already have exception applied
+                            var exception = query.Result.Exception;
+                            var retry = inRetryScope &&
+                                        _remainingRetries > 0 &&
+                                        ShouldRetry(retryPolicy, exception, current);
+
+                            if (retry)
+                            {
+                                UpdateRetryState(request);
+                                BeginRequestImpl(request, callback, query, url, true /* isInternal */, userState);
+                                Interlocked.Decrement(ref _remainingRetries);
+                                if (_remainingRetries > 0)
+                                {
+                                    OnBeforeRetry(new RetryEventArgs { Client = this, Request = request });
+                                }
+                            }
+                            else if (inRetryScope)
+                            {
+                                _remainingRetries = 0;
+                            }
+                            current.TimesTried = GetIterationCount(request);
+                        }
+                        else if (inRetryScope)
+                        {
+                            _remainingRetries = 0;
+                        }
+
+                        query.Result = current;
+
+                        // [DC]: Callback is for a final result, not a retry
+                        if (_remainingRetries == 0)
+                        {
+                            CompleteWithQueryDynamic(query, request, callback, asyncResult);
+                        }
+                    };
+                }
+                UpdateRepeatingRequestState(request);
+            }
+            return asyncResult;
+        }
+#endif
+
         private IAsyncResult BeginRequestImpl<T>(RestRequest request,
-                                             RestCallback<T> callback,
-                                             WebQuery query,
-                                             string url,
-                                             bool isInternal,
-                                             object userState)
+                                                 RestCallback<T> callback,
+                                                 WebQuery query,
+                                                 string url,
+                                                 bool isInternal,
+                                                 object userState)
         {
             request = request ?? new RestRequest();
             if (!isInternal)
@@ -1215,10 +1414,9 @@ namespace Hammock
             }
             return asyncResult;
         }
-
-        
 #else
         // TODO BeginRequest and BeginRequest<T> have too much duplication
+        
         private void BeginRequestImpl(RestRequest request,
                                       RestCallback callback,
                                       WebQuery query,
@@ -1364,8 +1562,7 @@ namespace Hammock
             UpdateRepeatingRequestState(request);
             UpdateRetryState(request);
         }
-
-
+        
         private void QueryResponseCallback(WebQuery query,
                                            RetryPolicy retryPolicy,
                                            RestRequest request,
@@ -1529,12 +1726,31 @@ namespace Hammock
         }
 
 #if !WindowsPhone
+
+#if NET40
+        private void CompleteWithQueryDynamic<T>(WebQuery query,
+                                                 RestRequest request,
+                                                 RestCallback<T> callback,
+                                                 WebQueryAsyncResult result) where T : DynamicObject
+        {
+            var response = BuildResponseFromResultDynamic<T>(request, query);
+
+            CompleteWithQuery(request, query, callback, response, result);
+        }
+#endif
+
         private void CompleteWithQuery<T>(WebQuery query,
                                           RestRequest request,
                                           RestCallback<T> callback,
                                           WebQueryAsyncResult result)
         {
             var response = BuildResponseFromResult<T>(request, query);
+
+            CompleteWithQuery(request, query, callback, response, result);
+        }
+
+        private void CompleteWithQuery<T>(RestRequest request, WebQuery query, RestCallback<T> callback, RestResponse<T> response, WebQueryAsyncResult result)
+        {
             if (query.IsStreaming && callback != null)
             {
                 callback.Invoke(request, response, query.UserState);
@@ -2318,30 +2534,32 @@ namespace Hammock
         private void DeserializeEntityBody(RestRequest request, RestResponse response)
         {
             var deserializer = request.Deserializer ?? Deserializer;
-            if (deserializer != null && request.ResponseEntityType != null && response.ContentStream != null)
+            if (deserializer == null || request.ResponseEntityType == null || response.ContentStream == null)
             {
-                response.ContentEntity = deserializer.Deserialize(response, request.ResponseEntityType);
+                return;
             }
+            response.ContentEntity = deserializer.Deserialize(response, request.ResponseEntityType);
         }
 
         private void DeserializeEntityBody<T>(RestBase request, RestResponse<T> response)
         {
             var deserializer = request.Deserializer ?? Deserializer;
-            if (deserializer != null && response.ContentStream != null)
+            if (deserializer == null || response.ContentStream == null)
             {
-                response.ContentEntity = deserializer.Deserialize(response);
+                return;
             }
+            response.ContentEntity = deserializer.Deserialize(response);
         }
 
 #if NET40
         private void DeserializeEntityBodyDynamic<T>(RestBase request, RestResponse<T> response) where T : DynamicObject
         {
-            var deserializer = request.Deserializer ?? Deserializer;
-            if (deserializer != null && response.ContentStream != null)
+            var deserializer = request.Deserializer ?? Deserializer ?? new DefaultJsonSerializer() ;
+            if (response.ContentStream == null)
             {
-                var entity = deserializer.DeserializeDynamic(response);
-                response.ContentEntity = entity;
+                return;
             }
+            response.ContentEntity = deserializer.DeserializeDynamic(response);
         }
 #endif
 

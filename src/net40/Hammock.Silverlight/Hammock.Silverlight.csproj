@@ -29,7 +29,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\..\bin\lib\SL4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SILVERLIGHT,Silverlight,SL,SL4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT,Silverlight,SL,SL4,NET40</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -39,7 +39,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\..\bin\lib\SL4\</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SL4</DefineConstants>
+    <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SL4,NET40</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -70,6 +70,7 @@
     <NoConfig>true</NoConfig>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="mscorlib" />
     <Reference Include="System.Json, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Runtime.Serialization" />
@@ -406,6 +407,8 @@
       <Link>Web\WebQueryResult.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\DefaultJsonSerializer.cs" />
+    <Compile Include="Serialization\JsonParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\net35\Hammock\Attributes\Specialized\_Specialized.cd">

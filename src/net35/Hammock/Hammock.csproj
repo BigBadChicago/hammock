@@ -100,6 +100,8 @@
     <Compile Include="Extensions\OAuthExtensions.cs" />
     <Compile Include="Mono\HttpUtility.cs" />
     <Compile Include="Mono\WebHeaderCollection.cs" />
+    <Compile Include="Serialization\DefaultJsonSerializer.cs" />
+    <Compile Include="Serialization\JsonParser.cs" />
     <Compile Include="Web\HttpCookieParameter.cs" />
     <Compile Include="Web\Mocks\IMockable.cs" />
     <Compile Include="Authentication\OAuth\OAuthToken.cs" />
