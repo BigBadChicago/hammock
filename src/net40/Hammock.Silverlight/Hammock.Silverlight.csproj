@@ -38,7 +38,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\lib\SL4\</OutputPath>
+    <OutputPath>..\..\..\bin\lib\sl4\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT,Silverlight,SL,SL4,NET40</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
