@@ -80,7 +80,6 @@
       <Link>Serialization\XmlSerializer.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serialization\JsonParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Hammock.ClientProfile\Hammock.ClientProfile.csproj">

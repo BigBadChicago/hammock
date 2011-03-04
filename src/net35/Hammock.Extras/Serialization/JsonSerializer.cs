@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Hammock.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Configuration;
 using System.Diagnostics;
-#if NET40
-using System.Dynamic;
-using Hammock.Authentication.Basic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-#endif
 using System.Net;
 using System.Text;
 using Hammock.Authentication.OAuth;
@@ -170,14 +164,10 @@ namespace Hammock.Tests
         [Test]
         public void Can_make_dynamic_request_for_collection()
         {
-            var serializer = new Extras.Serialization.JsonSerializer();
-
             var client = new RestClient
             {
                 Authority = "https://api.twitter.com",
-                UserAgent = "Hammock",
-                Serializer = serializer,
-                Deserializer = serializer
+                UserAgent = "Hammock"
             };
 
             var request = new RestRequest
@@ -211,14 +201,10 @@ namespace Hammock.Tests
         [Test]
         public void Can_make_dynamic_request_for_single()
         {
-            var serializer = new Extras.Serialization.JsonSerializer();
-
             var client = new RestClient
             {
                 Authority = "https://api.twitter.com",
-                UserAgent = "Hammock",
-                Serializer = serializer,
-                Deserializer = serializer
+                UserAgent = "Hammock"
             };
 
             var request = new RestRequest
@@ -232,6 +218,7 @@ namespace Hammock.Tests
             Assert.IsNotNull(response.ScreenName);
         }
 #endif
+
         public RestRequest PrepareEchoRequest()
         {
             var client = new RestClient

@@ -1,0 +1,102 @@
+{
+"id_str": "43346277580288000",
+"text": "@amymorby thats some good lookin hair you got there in that pic of yours",
+"truncated": false,
+"favorited": false,
+"source": "\u003Ca href=\"http:\/\/mobile.twitter.com\" rel=\"nofollow\"\u003ETwitter for Android\u003C\/a\u003E",
+"geo": {
+    "type": "Point",
+    "coordinates": [
+	40.54881944,
+	-111.88263889
+    ]
+},
+"in_reply_to_screen_name": null,
+"in_reply_to_status_id_str": null,
+"in_reply_to_user_id": null,
+"created_at": "Thu Mar 03 16:25:32 +0000 2011",
+"contributors": null,
+"place": {
+    "country_code": "US",
+    "bounding_box": {
+	"type": "Polygon",
+	"coordinates": [
+	    [
+		[
+		    -111.921621,
+		    40.527662
+		],
+		[
+		    -111.77682,
+		    40.527662
+		],
+		[
+		    -111.77682,
+		    40.616501
+		],
+		[
+		    -111.921621,
+		    40.616501
+		]
+	    ]
+	]
+    },
+    "url": "http:\/\/api.twitter.com\/1\/geo\/id\/fb9549afa6f81fa6.json",
+    "country": "United States",
+    "attributes": {
+	
+    },
+    "name": "Sandy",
+    "full_name": "Sandy, UT",
+    "id": "fb9549afa6f81fa6",
+    "place_type": "city"
+},
+"retweeted": false,
+"in_reply_to_status_id": null,
+"in_reply_to_user_id_str": null,
+"coordinates": {
+    "type": "Point",
+    "coordinates": [
+	-111.88263889,
+	40.54881944
+    ]
+},
+"retweet_count": 0,
+"user": {
+    "id_str": "41212455",
+    "is_translator": false,
+    "following": null,
+    "profile_background_tile": false,
+    "show_all_inline_media": false,
+    "geo_enabled": true,
+    "profile_image_url": "http:\/\/a1.twimg.com\/profile_images\/762778377\/kolby__normal.jpg",
+    "description": "im pretty sure you already know",
+    "profile_link_color": "0084B4",
+    "url": "http:\/\/salonoslc.com",
+    "follow_request_sent": null,
+    "profile_sidebar_border_color": "C0DEED",
+    "screen_name": "Kolbyfitz",
+    "contributors_enabled": false,
+    "statuses_count": 176,
+    "friends_count": 169,
+    "location": "the 801",
+    "profile_use_background_image": true,
+    "lang": "en",
+    "verified": false,
+    "notifications": null,
+    "favourites_count": 6,
+    "created_at": "Tue May 19 21:13:24 +0000 2009",
+    "profile_background_color": "C0DEED",
+    "followers_count": 36,
+    "listed_count": 0,
+    "profile_background_image_url": "http:\/\/a0.twimg.com\/profile_background_images\/146270337\/snake.jpg",
+    "protected": false,
+    "name": "Kolby Fitzgerald",
+    "time_zone": "Mountain Time (US & Canada)",
+    "profile_text_color": "333333",
+    "id": 41212455,
+    "utc_offset": -25200,
+    "profile_sidebar_fill_color": "DDEEF6"
+},
+"id": 43346277580288000
+}

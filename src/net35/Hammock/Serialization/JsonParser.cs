@@ -596,6 +596,7 @@ namespace Hammock.Serialization
                             case 'n':
                             case 'r':
                             case 't':
+                                break;
                             case 'u': // Unicode literals
                                 if (index < data.Count - 5)
                                 {
@@ -629,6 +630,7 @@ namespace Hammock.Serialization
         internal static object ParseValue(IList<char> data, ref int index)
         {
             var token = NextToken(data, ref index);
+            
             switch (token)
             {
                 // End Tokens
@@ -760,7 +762,7 @@ namespace Hammock.Serialization
                         throw new ArgumentOutOfRangeException();
                 }
 
-                index++;
+                //index++;
             }
 
             return result;
