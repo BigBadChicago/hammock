@@ -178,7 +178,7 @@ namespace Hammock.Tests
             
             var response = client.RequestDynamic(request);
             Assert.IsNotNull(response);
-            foreach (var tweet in response)
+            foreach (var tweet in response.ContentEntity)
             {
                 Assert.IsNotNull(tweet);
                 Assert.IsNotNullOrEmpty(tweet.Text);
@@ -213,7 +213,7 @@ namespace Hammock.Tests
                 Method = WebMethod.Get
             };
 
-            var response = client.RequestDynamic(request);
+            var response = client.RequestDynamic(request).ContentEntity;
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.ScreenName);
         }

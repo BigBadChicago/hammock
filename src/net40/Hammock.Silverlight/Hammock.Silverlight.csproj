@@ -247,6 +247,9 @@
     <Compile Include="..\..\net35\Hammock\Retries\RetryResultCondition.cs">
       <Link>Retries\RetryResultCondition.cs</Link>
     </Compile>
+    <Compile Include="..\..\net35\Hammock\Serialization\DefaultJsonSerializer.cs">
+      <Link>Serialization\DefaultJsonSerializer.cs</Link>
+    </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\HammockDataContractJsonSerializer.cs">
       <Link>Serialization\HammockDataContractJsonSerializer.cs</Link>
     </Compile>
@@ -258,6 +261,9 @@
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\ISerializer.cs">
       <Link>Serialization\ISerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net35\Hammock\Serialization\JsonParser.cs">
+      <Link>Serialization\JsonParser.cs</Link>
     </Compile>
     <Compile Include="..\..\net35\Hammock\Serialization\Utf8Serializer.cs">
       <Link>Serialization\Utf8Serializer.cs</Link>
@@ -407,8 +413,6 @@
       <Link>Web\WebQueryResult.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serialization\DefaultJsonSerializer.cs" />
-    <Compile Include="Serialization\JsonParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\net35\Hammock\Attributes\Specialized\_Specialized.cd">

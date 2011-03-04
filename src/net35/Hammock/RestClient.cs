@@ -99,13 +99,13 @@ namespace Hammock
 #if !Silverlight
 
 #if NET40
-        public dynamic RequestDynamic(RestRequest request)
+        public RestResponse<dynamic> RequestDynamic(RestRequest request)
         {
             var query = RequestImpl(request);
 
-            var response = BuildResponseFromResultDynamic<DynamicObject>(request, query);
+            dynamic response = BuildResponseFromResultDynamic<DynamicObject>(request, query);
 
-            return response.ContentEntity;
+            return response;
         }
 #endif
 

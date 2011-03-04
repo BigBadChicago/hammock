@@ -11,7 +11,7 @@ namespace Hammock
 #if !Silverlight
 
 #if NET40
-        dynamic RequestDynamic(RestRequest request);
+        RestResponse<dynamic> RequestDynamic(RestRequest request);
 #endif
         RestResponse Request(RestRequest request);
         RestResponse Request();
