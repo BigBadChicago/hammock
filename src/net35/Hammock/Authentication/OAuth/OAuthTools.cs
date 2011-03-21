@@ -94,7 +94,13 @@ namespace Hammock.Authentication.OAuth
         /// <seealso cref="http://oauth.net/core/1.0#encoding_parameters" />
         public static string UrlEncodeRelaxed(string value)
         {
-            return Uri.EscapeDataString(value);
+            var escaped = Uri.EscapeDataString(value);
+
+            // LinkedIn users have problems because it requires escaping brackets
+            escaped = escaped.Replace("(", "(".PercentEncode())
+                             .Replace(")", ")".PercentEncode());
+
+            return escaped;
         }
 
         /// <summary>
