@@ -264,14 +264,21 @@ namespace Hammock.Web
 
             SetMethod(method.ToString(), request);
 
-            request.ContentType = "application/x-www-form-urlencoded";
+            // It should be possible to override the content type in the case of AddPostContent
+            var hasContentType = Headers.AllKeys.Where(
+                key => key.Equals("Content-Type", StringComparison.InvariantCultureIgnoreCase)
+                ).Count() > 0;
+            
+            if(!hasContentType)
+            {
+                request.ContentType = "application/x-www-form-urlencoded";
+            }
 
             HandleRequestMeta(request);
 			
 #if !MonoTouch
             TraceRequest(request);
 #endif
-			
             content = BuildPostOrPutContent(request, post);
 
 #if !SILVERLIGHT
@@ -284,6 +291,7 @@ namespace Hammock.Web
         {
             var encoding = Encoding ?? Encoding.UTF8;
             var content = PostContent ?? encoding.GetBytes(post);
+
 #if TRACE
             Trace.WriteLine(String.Concat(
                 "\r\n", content)
