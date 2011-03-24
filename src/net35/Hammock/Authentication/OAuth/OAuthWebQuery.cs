@@ -264,7 +264,7 @@ namespace Hammock.Authentication.OAuth
             }
             else
             {
-                request.Headers[SilverlightAuthorizationHeader] = AuthorizationHeader;
+                request.Headers[SilverlightAuthorizationHeader ?? "X-Authorization"] = AuthorizationHeader;
             }
 #endif
         }

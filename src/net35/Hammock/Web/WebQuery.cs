@@ -386,7 +386,7 @@ namespace Hammock.Web
             else
             {
                 request.Method = "POST";
-                request.Headers[SilverlightMethodHeader] = httpMethod;
+                request.Headers[SilverlightMethodHeader ?? "X-Method"] = httpMethod;
             }
 #else
             request.Method = method.ToUpper();
@@ -413,7 +413,7 @@ namespace Hammock.Web
             {
 #if SILVERLIGHT && !WindowsPhone
                 // [DC] User-Agent is still restricted in elevated mode
-                request.Headers[SilverlightUserAgentHeader] = UserAgent;
+                request.Headers[SilverlightUserAgentHeader ?? "X-User-Agent"] = UserAgent;
 #else
                 if(request is HttpWebRequest)
                 {
