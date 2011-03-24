@@ -105,14 +105,22 @@ namespace Hammock
             Uri uri;
             Uri.TryCreate(sb.ToString(), UriKind.RelativeOrAbsolute, out uri);
 
-            // [DC]: If the path came in with parameters attached, we should scrub those
-            WebParameterCollection parameters;
-            uri = uri.UriMinusQuery(out parameters);
-            foreach (var parameter in parameters)
-            {
-                Parameters.Add(parameter);
-            }
+            var queryStringHandling = QueryHandling ?? client.QueryHandling ?? Hammock.QueryHandling.None;
 
+            switch (queryStringHandling)
+            {
+                case Hammock.QueryHandling.AppendToParameters:
+                    WebParameterCollection parameters;
+                    uri = uri.UriMinusQuery(out parameters);
+                    foreach (var parameter in parameters)
+                    {
+                        Parameters.Add(parameter);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            
             return uri;
         }
 

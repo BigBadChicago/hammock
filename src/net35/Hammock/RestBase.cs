@@ -24,6 +24,23 @@ namespace Hammock
 #if !SILVERLIGHT
     [Serializable]
 #endif
+    public enum QueryHandling
+    {
+        /// <summary>
+        /// Query strings present in paths are left alone.
+        /// </summary>
+        None,
+        /// <summary>
+        /// Query string pairs present in paths are added to the parameter collection,
+        /// where they are appended back in the case of GET, HEAD, DELETE, and OPTIONS, or added to the
+        /// request body in the case of POST, or PUT.
+        /// </summary>
+        AppendToParameters
+    }
+
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public abstract class RestBase : PropertyChangedBase
     {
         private byte[] _postContent;
@@ -86,6 +103,8 @@ namespace Hammock
         public virtual ServicePoint ServicePoint { get; set; }
         public virtual bool? FollowRedirects { get; set; }
 #endif
+
+        public virtual QueryHandling? QueryHandling { get; set; }
         public virtual string Proxy { get; set; }
         public virtual TimeSpan? Timeout { get; set; }
         public virtual string VersionPath { get; set; }
