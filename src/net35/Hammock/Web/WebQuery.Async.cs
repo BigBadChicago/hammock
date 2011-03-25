@@ -955,17 +955,14 @@ namespace Hammock.Web
             var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
             if (state == null)
             {
-                throw new ArgumentNullException("asyncResult",
-                                                "The asynchronous post failed to return its state");
+                throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return its state");
             }
 
             var request = state.First;
             if (request == null)
             {
-                throw new ArgumentNullException("asyncResult",
-                                                "The asynchronous post failed to return a request");
+                throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return a request");
             }
-
 
             try
             {

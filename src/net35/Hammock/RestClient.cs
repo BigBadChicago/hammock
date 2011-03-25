@@ -2590,16 +2590,11 @@ namespace Hammock
         // [DC]: Trump duplicates by request over client over info values
         private static void CoalesceWebPairsIntoCollection(WebPairCollection target, params IEnumerable<WebPair>[] values)
         {
-            foreach (var parameter in values.SelectMany(value => value))
+            var parameters = new WebPairCollection(values.SelectMany(value => value));
+
+            foreach (var parameter in parameters)
             {
-                if (target[parameter.Name] != null)
-                {
-                    target[parameter.Name].Value = parameter.Value;
-                }
-                else
-                {
-                    target.Add(parameter);
-                }
+                target.Add(parameter);
             }
         }
 

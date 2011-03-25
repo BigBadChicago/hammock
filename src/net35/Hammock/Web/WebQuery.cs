@@ -290,6 +290,7 @@ namespace Hammock.Web
         protected virtual byte[] BuildPostOrPutContent(WebRequest request, string post)
         {
             var encoding = Encoding ?? Encoding.UTF8;
+
             var content = PostContent ?? encoding.GetBytes(post);
 
 #if TRACE

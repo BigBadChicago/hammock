@@ -17,7 +17,23 @@ namespace Hammock.Web
 
         public virtual WebPair this[string name]
         {
-            get { return this.SingleOrDefault(p => p.Name.Equals(name)); }
+            get
+            {
+                var parameters = this.Where(p => p.Name.Equals(name));
+                
+                if(parameters.Count() == 0)
+                {
+                    return null;
+                }
+
+                if(parameters.Count() == 1)
+                {
+                    return parameters.Single();
+                }
+
+                var value = string.Join(",", parameters.Select(p => p.Value));
+                return new WebPair(name, value);
+            }
         }
 
         public virtual IEnumerable<string> Names
@@ -61,13 +77,12 @@ namespace Hammock.Web
 
         public void AddCollection(IDictionary<string, string> collection)
         {
-            foreach (var key in collection.Keys)
+            foreach (var parameter in collection.Keys.Select(key => new WebPair(key, collection[key])))
             {
-                var parameter = new WebPair(key, collection[key]);
                 _parameters.Add(parameter);
             }
         }
-        
+
         public WebPairCollection()
         {
             _parameters = new List<WebPair>(0);
@@ -80,9 +95,8 @@ namespace Hammock.Web
 
         private void AddCollection(IEnumerable<WebPair> collection)
         {
-            foreach (var parameter in collection)
+            foreach (var pair in collection.Select(parameter => new WebPair(parameter.Name, parameter.Value)))
             {
-                var pair = new WebPair(parameter.Name, parameter.Value);
                 _parameters.Add(pair);
             }
         }
@@ -106,13 +120,8 @@ namespace Hammock.Web
 
         public virtual bool RemoveAll(IEnumerable<WebPair> parameters)
         {
-            var success = true;
             var array = parameters.ToArray();
-            for (var p = 0; p < array.Length; p++)
-            {
-                var parameter = array[p];
-                success &= _parameters.Remove(parameter);
-            }
+            var success = array.Aggregate(true, (current, parameter) => current & _parameters.Remove(parameter));
             return success && array.Length > 0;
         }
 
@@ -136,6 +145,7 @@ namespace Hammock.Web
 
         public virtual void Add(WebPair parameter)
         {
+            
             _parameters.Add(parameter);
         }
 
