@@ -31,7 +31,7 @@ namespace Hammock.Web
                     return parameters.Single();
                 }
 
-                var value = string.Join(",", parameters.Select(p => p.Value));
+                var value = string.Join(",", parameters.Select(p => p.Value).ToArray());
                 return new WebPair(name, value);
             }
         }
