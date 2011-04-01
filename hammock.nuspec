@@ -9,7 +9,7 @@
 		<summary>REST, easy.</summary>
 		<language>en-US</language>
 		<projectUrl>http://hammockrest.com</projectUrl>
-		<licenseUrl>http://hammock.codeplex.com/license</licenseUrl>
+		<licenseUrl>https://github.com/danielcrenna/hammock/blob/master/LICENSE</licenseUrl>
 		<iconUrl>http://apitize.com.s3.amazonaws.com/logo_hammock.png</iconUrl>
 		<tags>web api client http rest services wrapper json xml</tags>   
 	</metadata>

@@ -952,16 +952,27 @@ namespace Hammock.Web
 
         protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
         {
-            var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
-            if (state == null)
+            WebRequest request;
+            Triplet<WebRequest, Triplet<ICache, object, string>, object> state;
+            try
             {
-                throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return its state");
-            }
+                state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
+                if (state == null)
+                {
+                    throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return its state");
+                }
 
-            var request = state.First;
-            if (request == null)
+                request = state.First;
+                if (request == null)
+                {
+                    throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return a request");
+                }
+            }
+            catch(Exception ex)
             {
-                throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return a request");
+                var args = new WebQueryResponseEventArgs(new MemoryStream(), ex);
+                OnQueryResponse(args);
+                return;
             }
 
             try

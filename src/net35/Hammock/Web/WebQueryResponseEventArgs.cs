@@ -11,13 +11,13 @@ namespace Hammock.Web
             Response = response;
         }
 
-        public WebQueryResponseEventArgs(Stream response, WebException exception)
+        public WebQueryResponseEventArgs(Stream response, Exception exception)
         {
             Response = response;
             Exception = exception;
         }
 
         public Stream Response { get; set; }
-        public WebException Exception { get; set; }
+        public Exception Exception { get; set; }
     }
 }
