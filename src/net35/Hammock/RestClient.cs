@@ -2592,9 +2592,12 @@ namespace Hammock
         {
             var parameters = new WebPairCollection(values.SelectMany(value => value));
 
-            foreach (var parameter in parameters)
+            foreach (var pair in parameters)
             {
-                target.Add(parameter);
+                if(target[pair.Name] == null)
+                {
+                    target.Add(pair);
+                }
             }
         }
 
