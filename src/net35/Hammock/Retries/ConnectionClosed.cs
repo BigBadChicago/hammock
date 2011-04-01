@@ -8,12 +8,15 @@ namespace Hammock.Retries
 #endif
     public class ConnectionClosed : RetryErrorCondition
     {
-        public override Predicate<WebException> RetryIf
+        public override Predicate<Exception> RetryIf
         {
             get
             {
-                return e => e.Status == WebExceptionStatus.ConnectionClosed ||
-                            e.Status == WebExceptionStatus.KeepAliveFailure;
+                return e =>
+                           {
+                               var we = e as WebException;
+                               return we != null && (we.Status == WebExceptionStatus.ConnectionClosed || we.Status == WebExceptionStatus.KeepAliveFailure);
+                           };
             }
         }
     }

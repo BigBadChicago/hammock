@@ -8,15 +8,20 @@ namespace Hammock.Retries
 #endif
     public class NetworkError : RetryErrorCondition
     {
-        public override Predicate<WebException> RetryIf
+        public override Predicate<Exception> RetryIf
         {
             get
             {
-                return e => e.Status != WebExceptionStatus.Success &&
+                return e =>
+                           {
+                               var we = (e as WebException);
+
+                               return we != null && (we.Status != WebExceptionStatus.Success &&
 #if !SILVERLIGHT
-                            e.Status != WebExceptionStatus.ProtocolError &&
+                                      we.Status != WebExceptionStatus.ProtocolError &&
 #endif
-                            e.Status != WebExceptionStatus.Pending;
+                                      we.Status != WebExceptionStatus.Pending);
+                           };
             }
         }
     }

@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Net;
 
 namespace Hammock.Retries
 {
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public abstract class RetryErrorCondition : IRetryCondition<WebException>
+    public abstract class RetryErrorCondition : IRetryCondition<Exception>
     {
-        public virtual Predicate<WebException> RetryIf
+        public virtual Predicate<Exception> RetryIf
         {
             get { return e => false; }
         }

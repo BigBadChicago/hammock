@@ -57,7 +57,7 @@ namespace Hammock
 
         public virtual Stream ContentStream { get; set; }
         public virtual WebResponse InnerResponse { get; set; }
-        public virtual WebException InnerException { get; set; }
+        public virtual Exception InnerException { get; set; }
         public virtual DateTime? RequestDate { get; set; }
         public virtual DateTime? ResponseDate { get; set; }
         public virtual string RequestMethod { get; set; }

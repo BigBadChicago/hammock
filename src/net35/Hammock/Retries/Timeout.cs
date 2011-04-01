@@ -8,12 +8,15 @@ namespace Hammock.Retries
 #endif
     public class Timeout : RetryErrorCondition
     {
-        public override Predicate<WebException> RetryIf
+        public override Predicate<Exception> RetryIf
         {
             get
             {
-                return e => e.Status == WebExceptionStatus.RequestCanceled ||
-                            e.Status == WebExceptionStatus.Timeout;
+                return e =>
+                           {
+                               var we = (e as WebException);
+                               return we != null && (we.Status == WebExceptionStatus.RequestCanceled || we.Status == WebExceptionStatus.Timeout);
+                           };
             }
         }
     }

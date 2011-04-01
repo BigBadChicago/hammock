@@ -29,7 +29,7 @@ namespace Hammock.Web
 
         // Set by RestClient
         public virtual int TimesTried { get; set; }
-        public virtual WebException Exception { get; set; }
+        public virtual Exception Exception { get; set; }
         public virtual bool WasRateLimited { get; set; }
     }
 }

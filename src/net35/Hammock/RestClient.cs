@@ -296,7 +296,7 @@ namespace Hammock
         }
 
         private static bool ShouldRetry(RetryPolicy retryPolicy,
-                                        WebException exception,
+                                        Exception exception,
                                         WebQueryResult current)
         {
             var retry = false;
